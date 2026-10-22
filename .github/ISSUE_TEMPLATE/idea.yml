@@ -1,0 +1,17 @@
+name: Idea
+description: Something Staygreen should do.
+body:
+  - type: markdown
+    attributes:
+      value: "Issues are public. Never paste a heartbeat URL, an API token, a header value, or anything else your monitors keep secret."
+  - type: textarea
+    id: job
+    attributes:
+      label: What you're trying to do
+      description: The job, and what you do today instead.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help

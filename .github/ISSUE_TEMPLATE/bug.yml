@@ -1,0 +1,23 @@
+name: Bug
+description: Something in Staygreen doesn't work the way it should.
+body:
+  - type: markdown
+    attributes:
+      value: "Issues are public. Never paste a heartbeat URL, an API token, a header value, or anything else your monitors keep secret."
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The screen or page, and the monitor type if it's about a monitor (HTTP, SSL, DNS, TCP, heartbeat).
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: Browser, phone or desktop, a screenshot with secrets cropped out.

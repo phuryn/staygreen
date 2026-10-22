@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security problem privately
+    url: https://github.com/phuryn/staygreen/security/advisories/new
+    about: Don't open a public issue for a vulnerability.
