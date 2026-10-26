@@ -17,8 +17,8 @@ Requires Node 22 or later:
 npx -y staygreen mcp
 ```
 
-The package is prepared for publication; until the owner publishes it, build this
-source and use `node /absolute/path/to/dist/cli.js mcp` in place of `npx`.
+To run a checkout of this source instead, build it (below) and use
+`node /absolute/path/to/dist/cli.js mcp` in place of `npx`.
 
 Create a workspace API token at [Agents and API](https://staygreen.io/app/agents)
 and provide it as `STAYGREEN_API_TOKEN` in the server process's environment.
