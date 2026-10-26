@@ -7,7 +7,8 @@ import { cliEnv } from "./env";
 const idSchema = z.union([z.string().max(200), z.number().finite()]);
 const rpc = z.object({ jsonrpc: z.literal("2.0"), id: idSchema.optional(), method: z.string().max(100), params: z.record(z.string(), z.unknown()).optional() }).strict();
 const initialize = z.object({ protocolVersion: z.string(), capabilities: z.object({}).passthrough(), clientInfo: z.object({ name: z.string().max(160), version: z.string().max(80) }) });
-const toolCall = z.object({ name: z.string().max(80), arguments: z.record(z.string(), z.unknown()).optional() }).strict();
+// params._meta is MCP's own (a progressToken; ChatGPT puts its user, session and location there): accepted, never read or sent on.
+const toolCall = z.object({ name: z.string().max(80), arguments: z.record(z.string(), z.unknown()).optional(), _meta: z.record(z.string(), z.unknown()).optional() }).strict();
 const toolError = (body: ErrorBody) => ({ content: [{ type: "text", text: JSON.stringify(body) }], isError: true });
 
 export type McpOptions = {

@@ -28,6 +28,12 @@ describe("stdio MCP", () => {
     expect(replies[1].result).toEqual({}); expect(replies[2].result.tools).toEqual(MCP_TOOLS);
     expect(fetcher).not.toHaveBeenCalled();
   });
+  it("accepts a tools/call carrying params._meta and still refuses any other extra key", async () => {
+    const _meta = { progressToken: 7, "openai/subject": "v1/abc", "openai/userLocation": { country: "PL" } };
+    const { replies } = await exchange([request("tools/call", { name: "get_status", arguments: {}, _meta }), request("tools/call", { name: "get_status", arguments: {}, cursor: "x" }, 2)]);
+    expect(error(replies[0])).toMatchObject({ code: "missing_token" });
+    expect(replies[1].error).toMatchObject({ code: -32602 });
+  });
   it.each([...MCP_VERSIONS, "unknown", "2024-11-05"])("negotiates protocol %s", async version => {
     const { replies } = await exchange([init(version)]);
     expect(replies[0].result.protocolVersion).toBe(MCP_VERSIONS.includes(version) ? version : MCP_VERSIONS[0]);
