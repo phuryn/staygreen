@@ -2,7 +2,7 @@
 
 Uptime and incident monitoring for apps built with coding agents: checks from more than one location, incidents with the evidence attached, and a public status page for each app. Free plan at [staygreen.io](https://staygreen.io).
 
-This repository is Staygreen's public issue tracker and the home of its MCP server's listing. Staygreen's code opens here under the FSL-1.1-MIT license in November 2026.
+This repository is Staygreen's public issue tracker, the home of its MCP server's listing, and the source of the `staygreen` command-line package and local MCP server ([CLI.md](CLI.md)), under the FSL-1.1-MIT license. The rest of Staygreen's code opens here in November 2026.
 
 ## Connect an agent (MCP)
 
