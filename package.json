@@ -1,6 +1,6 @@
 {
   "name": "staygreen",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "mcpName": "io.github.phuryn/staygreen",
   "description": "Staygreen MCP server and CLI: scan apps and manage monitoring through the Staygreen API.",
   "type": "module",

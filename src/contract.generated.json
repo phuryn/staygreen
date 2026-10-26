@@ -451,7 +451,7 @@
     {
       "name": "list_monitors",
       "title": "List monitors",
-      "description": "List monitors in your workspace, optionally filtered by app, type or state. Returns monitor and app ids, current state and last_check with its precision: an exact outcome, the start of its latest five-minute check window, or no data. Never credentials or heartbeat URLs. Call again with cursor set to next_cursor until null.",
+      "description": "List monitors in your workspace with their app ids, current state and last check, ordered by id. The app, type and status filters combine, each narrowing the same list; with none you get every monitor, automatic SSL checks included. last_check_precision says whether last_check is an exact outcome, the start of its latest five-minute check window, or no data. Never returns credentials or heartbeat URLs. Use get_status instead for each app's overall state and open incidents, get_uptime for history. Call again with cursor set to next_cursor until null.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -590,7 +590,7 @@
     {
       "name": "get_status",
       "title": "Get status",
-      "description": "Read the current status of one app or every app, including private monitors, page components and open incidents with their latest published note. Use its app and incident ids in the other tools. No draft notes are returned.",
+      "description": "Read the current status of one app or every app: its overall state, monitors (private ones included), status page components and open incidents with their latest published note. Omit app or pass * for the whole workspace; an app id outside your workspace returns not_found. Start here: its app, monitor and incident ids feed the other tools. Use get_uptime or get_incidents for history. No draft notes are returned.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -829,7 +829,7 @@
     {
       "name": "get_uptime",
       "title": "Get uptime",
-      "description": "Read measured uptime, downtime minutes, incident counts and daily history for one or every monitor. Unmeasured time is no data, not 100% uptime. History is capped by your workspace's plan. Follow next_cursor to read every monitor.",
+      "description": "Read measured uptime, downtime minutes, incident counts and daily history. With monitor omitted or *, every monitor is returned a page at a time (follow next_cursor); a monitor id returns that monitor alone, so pass no cursor with it. window is capped at 30d unless your plan includes a year of history, and the result's window says which one applied. Unmeasured time is no data, not 100% uptime. Use get_response_times instead for latency, and get_incidents for what failed and why.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1283,7 +1283,7 @@
     {
       "name": "get_ssl_and_domain_expiry",
       "title": "Get ssl and domain expiry",
-      "description": "Read certificate and domain expiry dates and days remaining for monitored hosts. Missing measurements are null, never a guessed expiry. Follow next_cursor to read every host.",
+      "description": "Read certificate and domain expiry dates, with days remaining, for the hosts your SSL monitors check. Omit app for every SSL monitor in the workspace, or pass an app id for that app's hosts only. A null date means Staygreen has no date to show for that host; it never guesses one. Use this for renewal deadlines; use get_status instead for whether a site is up now. Follow next_cursor to read every host.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1383,7 +1383,7 @@
     {
       "name": "provision_app",
       "title": "Provision app",
-      "description": "Set up an app's website check, automatic SSL/domain check, status page and supplied cron heartbeats in one transaction. A normalized app URL is idempotent; an existing app is returned without changing it. Optional service checks need valid read-only credentials. Reports skipped options explicitly; a plan_limit error creates nothing and lists what was not created. New heartbeat credentials are returned only to the creating request and its retries. Supply a request_id UUID for safe retries. Needs write access.",
+      "description": "Set up a new app in one transaction: its website check, an automatic SSL/domain check when url is https on port 443 with a hostname that has no SSL monitor yet, a status page, and one heartbeat per crons_from entry. Optional checks come in pairs, supabase_url with supabase_key and stripe_key with stripe_endpoints: half a pair is reported in skipped, and a full pair that fails verification refuses the whole call. mcp_url and status_domain are reported in skipped when supplied. A new app's explicit name must be free; without one, the hostname is made unique. Every option is validated and checked first; then, if url matches an existing app, that app comes back with its monitors as they were (add checks with create_monitor), plus a status page if it had none. A plan_limit error creates nothing and lists what was not created. Heartbeat URLs are returned only to this request and its retries with the same request_id. Needs write access.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1603,7 +1603,7 @@
     {
       "name": "create_monitor",
       "title": "Create monitor",
-      "description": "Create one monitor in an app returned by provision_app or list_monitors. Uses the same type validation, public-address checks and plan quotas as the dashboard. Returns a first test result; heartbeat URLs are available only in the dashboard or when provision_app creates cron heartbeats. Supply request_id for safe retries. Needs write access.",
+      "description": "Create one monitor in an existing app; for a new app use provision_app instead. type decides what target is and which config keys apply: http takes a URL with method, expect, keyword, slowMs, assertions and headers; tcp a hostname or public IP with port, tls and slowMs; ssl a hostname and no config; dns a record name with record and expected; heartbeat ignores target and takes schedule, tz, graceMin, maxRunMin and assertions, so give it a name; supabase a project URL with key and databaseRead; stripe https://api.stripe.com with key, endpoints, critical, failureThreshold, windowMin and pendingMin. A key belonging to another type is refused. Validation, public-address checks and plan quotas match the dashboard, and Stripe and Supabase checks must verify before saving. Returns a first test result but never a heartbeat's URL, which the dashboard shows. Supply request_id for safe retries. Needs write access.",
       "inputSchema": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1633,14 +1633,14 @@
             "description": "Monitor type. MCP server monitors are not available yet."
           },
           "name": {
-            "description": "Monitor name; defaults to a name derived from the target.",
+            "description": "Monitor name. Without one, Staygreen picks a default (a heartbeat's is \"Scheduled job\"), which this tool does not return; list_monitors shows it.",
             "type": "string",
             "maxLength": 80
           },
           "target": {
             "type": "string",
             "maxLength": 2048,
-            "description": "HTTP or Supabase URL, SSL/TCP hostname, DNS record name, or job name for a heartbeat. HTTP(S) URL hostnames may be at most 80 characters. Stripe uses https://api.stripe.com."
+            "description": "HTTP or Supabase URL, SSL hostname, TCP hostname or public IP, or DNS record name. HTTP(S) URL hostnames may be at most 80 characters. Stripe uses https://api.stripe.com; a heartbeat ignores it."
           },
           "config": {
             "default": {},
