@@ -1,8 +1,9 @@
 import { parseArgs } from "node:util";
 import { randomUUID } from "node:crypto";
+import { realpathSync } from "node:fs";
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { inputs, outputs } from "./contract";
 import { serveMcp } from "./mcp";
@@ -50,5 +51,9 @@ export async function main(args = process.argv.slice(2), env: Record<string, str
   await writeFile(output, JSON.stringify(result, null, 2) + "\n", { mode: 0o600 });
   console.log("Monitoring provisioned. Private setup and heartbeat URLs saved to the output file.");
 }
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)
+// npm starts the command through a link to this file (a symlink on macOS and Linux), so compare
+// real paths: comparing the link's own path never matched there, and the command did nothing.
+const real = (path: string) => { try { return realpathSync(path); } catch { return null; } };
+const invoked = process.argv[1] ? real(resolve(process.argv[1])) : null;
+if (invoked && invoked === real(fileURLToPath(import.meta.url)))
   main().catch(() => { console.error("Staygreen command failed. Check --help, inputs, credentials and plan limits. Retry provisioning with the same output file and unchanged inputs."); process.exitCode = 1; });

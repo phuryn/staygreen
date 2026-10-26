@@ -1,6 +1,6 @@
 import { build } from "esbuild";
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,9 +22,9 @@ beforeAll(async () => {
 afterAll(async () => {
   if (directory && resolve(directory).startsWith(resolve(tmpdir(), "staygreen-cli-"))) await rm(directory, { recursive: true, force: true });
 });
-function run(args: string[], stdin = "", token = "") {
+function run(args: string[], stdin = "", token = "", entry = "cli.mjs") {
   return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve, reject) => {
-    const child = spawn(process.execPath, [join(directory, "cli.mjs"), ...args], { env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, NODE_ENV: "test", STAYGREEN_API_TOKEN: token }, windowsHide: true });
+    const child = spawn(process.execPath, [join(directory, entry), ...args], { env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, NODE_ENV: "test", STAYGREEN_API_TOKEN: token }, windowsHide: true });
     let stdout = "", stderr = "";
     const timer = setTimeout(() => { child.kill(); reject(Error("CLI did not exit")); }, 5000);
     child.stdout.on("data", chunk => { stdout += chunk; }); child.stderr.on("data", chunk => { stderr += chunk; });
@@ -36,6 +36,13 @@ it("the built executable discovers tools over stdout with no banner, token or ap
   const result = await run(["mcp"], '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n');
   expect(result.code).toBe(0); expect(result.stderr).toBe("");
   const message = JSON.parse(result.stdout); expect(message.jsonrpc).toBe("2.0"); expect(message.result.tools).toHaveLength(11);
+});
+it("runs when started through a link to the file, as npm installs the command on macOS and Linux", async (context) => {
+  try { await symlink(join(directory, "cli.mjs"), join(directory, "staygreen")); }
+  catch (error) { if ((error as NodeJS.ErrnoException).code === "EPERM") return context.skip(); throw error; }
+  const result = await run(["mcp"], '{"jsonrpc":"2.0","id":1,"method":"tools/list"}\n', "", "staygreen");
+  expect(result.code).toBe(0);
+  expect(JSON.parse(result.stdout).result.tools).toHaveLength(11);
 });
 it("lists all three commands in help", async () => {
   const result = await run(["--help"]); expect(result.code).toBe(0);
