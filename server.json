@@ -1,0 +1,24 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.phuryn/staygreen",
+  "title": "Staygreen",
+  "description": "Monitor apps built with coding agents: status, uptime, incidents and one-call monitoring setup.",
+  "version": "1.0.0",
+  "websiteUrl": "https://staygreen.io",
+  "repository": {
+    "url": "https://github.com/phuryn/staygreen",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://staygreen.io/icon.svg",
+      "mimeType": "image/svg+xml"
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://staygreen.io/mcp"
+    }
+  ]
+}
