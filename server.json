@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.phuryn/staygreen",
   "title": "Staygreen",
-  "description": "Monitor apps built with coding agents: status, uptime, incidents and one-call monitoring setup.",
-  "version": "1.0.0",
+  "description": "Uptime monitoring and status pages for apps built with coding agents: status, incidents, setup.",
+  "version": "1.1.1",
   "websiteUrl": "https://staygreen.io",
   "repository": {
     "url": "https://github.com/phuryn/staygreen",
@@ -19,6 +19,31 @@
     {
       "type": "streamable-http",
       "url": "https://staygreen.io/mcp"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "staygreen",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "STAYGREEN_API_TOKEN",
+          "description": "Staygreen workspace API token (dashboard: Agents and API), read-only or read-and-write. Without it only scan_app works.",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
     }
   ]
 }

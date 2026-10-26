@@ -31,6 +31,16 @@ claude mcp add --transport http staygreen https://staygreen.io/mcp \
   --header "Authorization: Bearer $STAYGREEN_API_TOKEN"
 ```
 
+### Local server (npm)
+
+The [`staygreen`](https://www.npmjs.com/package/staygreen) package runs the same tools as a local stdio server and calls the REST API with a workspace API token. Node 22 or later.
+
+```sh
+claude mcp add staygreen -e STAYGREEN_API_TOKEN=… -- npx -y staygreen mcp
+```
+
+Without a token only `scan_app` works. Configuration for Claude Desktop, Cursor and VS Code, and the package's `scan` and `provision` commands, are in [CLI.md](CLI.md).
+
 ### Tools
 
 | Tool | What it does |
