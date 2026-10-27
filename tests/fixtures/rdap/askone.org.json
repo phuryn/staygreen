@@ -1,0 +1,170 @@
+{
+  "rdapConformance": [
+    "rdap_level_0",
+    "icann_rdap_response_profile_1",
+    "icann_rdap_technical_implementation_guide_1",
+    "redacted"
+  ],
+  "notices": [
+    {
+      "title": "Terms of Service",
+      "description": [
+        "(trimmed)"
+      ]
+    }
+  ],
+  "ldhName": "askone.org",
+  "unicodeName": "askone.org",
+  "nameservers": [
+    {
+      "ldhName": "dns1.p01.nsone.net",
+      "unicodeName": "dns1.p01.nsone.net",
+      "objectClassName": "nameserver",
+      "handle": "71465c01305b4602b385c7ecb81ce6c2-LROR",
+      "status": [
+        "associated"
+      ]
+    },
+    {
+      "ldhName": "dns2.p01.nsone.net",
+      "unicodeName": "dns2.p01.nsone.net",
+      "objectClassName": "nameserver",
+      "handle": "309f693eaac24e4bafc7d02664da3a26-LROR",
+      "status": [
+        "associated"
+      ]
+    },
+    {
+      "ldhName": "dns3.p01.nsone.net",
+      "unicodeName": "dns3.p01.nsone.net",
+      "objectClassName": "nameserver",
+      "handle": "f7080ab3738142cb97ed2cdec6f59b56-LROR",
+      "status": [
+        "associated"
+      ]
+    },
+    {
+      "ldhName": "dns4.p01.nsone.net",
+      "unicodeName": "dns4.p01.nsone.net",
+      "objectClassName": "nameserver",
+      "handle": "8d84e6522aec440cbb3c8d92d4346e5e-LROR",
+      "status": [
+        "associated"
+      ]
+    }
+  ],
+  "secureDNS": {
+    "delegationSigned": false,
+    "maxSigLife": 1
+  },
+  "objectClassName": "domain",
+  "status": [
+    "client delete prohibited",
+    "client renew prohibited",
+    "client transfer prohibited",
+    "client update prohibited"
+  ],
+  "events": [
+    {
+      "eventAction": "expiration",
+      "eventDate": "2027-08-30T12:25:15.206Z"
+    },
+    {
+      "eventAction": "registration",
+      "eventDate": "2026-08-30T12:25:15.206Z"
+    },
+    {
+      "eventAction": "last changed",
+      "eventDate": "2026-09-04T17:16:06.001Z"
+    },
+    {
+      "eventAction": "last update of RDAP database",
+      "eventDate": "2026-10-22T19:22:15.052Z"
+    }
+  ],
+  "entities": [
+    {
+      "vcardArray": [
+        "vcard",
+        [
+          [
+            "version",
+            {},
+            "text",
+            "4.0"
+          ],
+          [
+            "fn",
+            {},
+            "text",
+            "GoDaddy.com, LLC"
+          ]
+        ]
+      ],
+      "roles": [
+        "registrar"
+      ],
+      "publicIds": [
+        {
+          "type": "IANA Registrar ID",
+          "identifier": "146"
+        }
+      ],
+      "objectClassName": "entity",
+      "handle": "146",
+      "entities": [
+        {
+          "vcardArray": [
+            "vcard",
+            [
+              [
+                "version",
+                {},
+                "text",
+                "4.0"
+              ],
+              [
+                "fn",
+                {},
+                "text",
+                ""
+              ]
+            ]
+          ],
+          "roles": [
+            "abuse"
+          ],
+          "objectClassName": "entity"
+        }
+      ],
+      "links": [
+        {
+          "value": "https://rdap.publicinterestregistry.org/rdap/entity/146",
+          "rel": "self",
+          "href": "https://rdap.publicinterestregistry.org/rdap/entity/146",
+          "type": "application/rdap+json"
+        },
+        {
+          "value": "https://rdap.godaddy.com/v1",
+          "rel": "about",
+          "href": "https://rdap.godaddy.com/v1",
+          "type": "application/rdap+json"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "value": "https://rdap.publicinterestregistry.org/rdap/domain/askone.org",
+      "rel": "related",
+      "href": "https://rdap.godaddy.com/v1/domain/askone.org",
+      "type": "application/rdap+json"
+    },
+    {
+      "value": "https://rdap.publicinterestregistry.org/rdap/domain/askone.org",
+      "rel": "self",
+      "href": "https://rdap.publicinterestregistry.org/rdap/domain/askone.org",
+      "type": "application/rdap+json"
+    }
+  ]
+}

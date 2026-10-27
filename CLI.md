@@ -186,15 +186,11 @@ executable adds no runtime dependencies. Third-party licensing is in
 no MCP SDK is required. GitHub Actions runs build, typecheck and tests on Node 22
 and 24, without credentials or live API calls. This workflow never publishes.
 
-Maintainers regenerate `src/contract.generated.json` in the product checkout with
-`npm run cli:contract`; a product unit test refuses drift from the hosted contract.
-The public tree needs neither that checkout nor the generator to build or test.
-`npm run cli:export -- <directory>` in the product checkout exports only this package.
-An existing issue-tracker `README.md` is preserved; `CLI.md` always contains this
-guide. Symbolic links/junctions in destination paths are refused.
+Maintainers regenerate the package's contract file,
+`packages/staygreen/src/contract.generated.json` in `github.com/phuryn/staygreen`,
+from the hosted contract with `npm run cli:contract` at that repository's root; a
+unit test there refuses drift. This package needs neither the rest of that repository nor the
+generator to build or test.
 
-The owner publishes to npm and pushes the exported package source to
-`github.com/phuryn/staygreen`. Confirm ownership of the unscoped `staygreen` npm
-name, authentication/2FA, the intended version and package contents first. Neither
-the export nor the build publishes anything. Directory and registry submissions
-remain separate owner tasks.
+Releases to npm are made by the maintainer. Neither the build nor the tests publish
+anything.

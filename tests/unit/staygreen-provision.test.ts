@@ -1,0 +1,22 @@
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { resolve, join } from "node:path";
+import { afterEach, expect, it, vi } from "vitest";
+const transport = vi.hoisted(() => vi.fn());
+vi.mock("../../packages/staygreen/src/client", () => ({ call: transport }));
+import { main } from "../../packages/staygreen/src/cli";
+const token = "sg_" + "a".repeat(24) + "." + "b".repeat(43);
+afterEach(() => vi.restoreAllMocks());
+it("preserves the creating request across a lost answer, keeps heartbeat secrets out of logs, and never overwrites credentials with an existing-app response", async () => {
+  await mkdir("Temp", { recursive: true }); const dir = await mkdtemp(resolve("Temp/cli-provision-"));
+  await writeFile(join(dir, "vercel.json"), '{"crons":[{"path":"/api/cleanup","schedule":"0 0 * * *"}]}');
+  const out = join(dir, "private.json"); const args = ["provision", "https://example.com", "--repo", dir, "--output", out];
+  const log = vi.spyOn(console, "log").mockImplementation(() => {});
+  transport.mockRejectedValueOnce(Error("lost reply")); await expect(main(args, { STAYGREEN_API_TOKEN: token })).rejects.toThrow();
+  const requestId = await readFile(`${out}.request-id`, "utf8"); expect(requestId).toMatch(/^[a-f0-9-]{36}$/);
+  const result = { app: "app", created: true, monitors: [], heartbeats: [{ monitor: "mon", name: "/api/cleanup", url: "https://in.staygreen.io/private-heartbeat" }], status_page_url: "https://staygreen.io/s/test", cname: null, skipped: [] };
+  transport.mockResolvedValueOnce(result); await main(args, { STAYGREEN_API_TOKEN: token });
+  expect(transport).toHaveBeenLastCalledWith("https://staygreen.io", "provision_app", expect.objectContaining({ request_id: requestId, crons_from: [{ name: "/api/cleanup", schedule: "0 0 * * *", tz: "UTC" }] }), token);
+  const stored = await readFile(out, "utf8"); expect(stored).toContain("private-heartbeat"); expect(JSON.stringify(log.mock.calls)).not.toMatch(/private-heartbeat|sg_/);
+  transport.mockResolvedValueOnce({ ...result, created: false, heartbeats: [] }); await main(args, { STAYGREEN_API_TOKEN: token });
+  expect(await readFile(out, "utf8")).toBe(stored);
+});

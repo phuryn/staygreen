@@ -2,7 +2,9 @@
 
 Uptime and incident monitoring for apps built with coding agents: checks from more than one location, incidents with the evidence attached, and a public status page for each app. Free plan at [staygreen.io](https://staygreen.io).
 
-This repository is Staygreen's public issue tracker, the home of its MCP server's listing, and the source of the `staygreen` command-line package and local MCP server ([CLI.md](CLI.md)), under the FSL-1.1-MIT license. The rest of Staygreen's code opens here in November 2026.
+This repository holds Staygreen's source under the [Functional Source License, Version 1.1, MIT Future License (FSL-1.1-MIT)](LICENSE): the dashboard, the probes, the status edge, the Workers, the widget and the agent API, with the `staygreen` command-line package in `packages/staygreen/`. You may use, change and redistribute it for any purpose except offering a competing commercial product or service, and each version becomes MIT two years after it is published. It is also Staygreen's public issue tracker.
+
+It is a reviewed, one-way copy of the private working repository, refreshed after each release. Staygreen is not accepting pull requests or outside contributions at the moment; issues are welcome through the templates, and security problems go to [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new).
 
 ## Connect an agent (MCP)
 
@@ -67,4 +69,16 @@ Issues are public. **Never paste a secret, service-role or restricted key, a tok
 
 For a security problem, don't open an issue: use [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new) instead. For anything else private, see [staygreen.io/support](https://staygreen.io/support).
 
-Pull requests aren't accepted until the code opens.
+## Run and deploy
+
+This is a multi-service system, not a one-click app. Start with [deploying](docs/deploying.md), the [environment reference](docs/environment.md), and the [architecture](docs/architecture.md). The product is at the repository root; the standalone npm package is in `packages/staygreen/`. Root `server.json` and `glama.json` retain the hosted MCP and npm listing identities.
+
+## Development
+
+Use Node 22 or later. From the root run `npm ci`, `npm run typecheck`, and `npm run test:unit`. The unit tests use fakes and require neither database access nor credentials. Run `npm ci`, `npm run typecheck`, `npm run build`, and `npm test` inside `packages/staygreen/` for the standalone CLI.
+
+The export check skips integration tests (Postgres and Supabase credentials), browser tests (a configured app, Playwright browsers, and Clerk development accounts), live network tests, and go-live acceptance. Private operator/export tests do not ship; their omitted paths are recorded in [deploying](docs/deploying.md). A passing offline check does not verify a deployment or sign-in.
+
+For the app, create your own local `.env` from `.env.example`, fill the required app variables, then run `npm run dev`. `npm run build` also validates configuration; the offline export check runs TypeScript and unit tests, not an unconfigured Next production build. Review the legal pages, branding, service URLs and plan copy before serving your own deployment.
+
+The opt-in `tests/unit/rdap-live.test.ts` network cases are skipped in offline unit runs. The package symlink test can also skip on Windows when symlink creation is unavailable.

@@ -1,0 +1,8 @@
+[
+  { "provider": "Clerk", "page": "https://askone.org/", "html": "<script defer data-clerk-publishable-key='CLERK_KEY' src='https://clerk.askone.org/npm/@clerk/clerk-js@6/dist/clerk.browser.js'></script>", "host": "clerk.askone.org", "path": "/npm/@clerk/clerk-js@6/dist/clerk.browser.js", "keyword": "Clerk" },
+  { "provider": "Firebase Auth", "page": "https://app.example.com/", "html": "<script>const firebaseConfig = { apiKey: 'public-config', authDomain: 'sample.firebaseapp.com', projectId: 'sample' }; initializeApp(firebaseConfig);</script>", "host": "sample.firebaseapp.com", "path": "/__/auth/iframe", "keyword": "iframe.js" },
+  { "provider": "Auth0", "page": "https://app.example.com/", "html": "<script>const auth0 = await createAuth0Client({ domain: 'auth.example.com', clientId: 'public-client-id' });</script>", "host": "auth.example.com", "path": "/.well-known/openid-configuration", "keyword": "\"authorization_endpoint\"" },
+  { "provider": "Auth.js", "page": "https://app.example.com/", "html": "<a href='/api/auth/signin'>Sign in</a>", "host": "app.example.com", "path": "/api/auth/providers", "keyword": "\"signinUrl\"" },
+  { "provider": "Supabase Auth", "page": "https://app.example.com/", "html": "<script>createClient('https://abcdefghij0123456789.supabase.co', 'sb_publishable_pppppppppppppppppppppppp');</script>", "host": "abcdefghij0123456789.supabase.co", "path": "/auth/v1/health", "keyword": "GoTrue" },
+  { "provider": "First-party dependency", "page": "https://app.example.co.uk/", "html": "<script src='https://accounts.example.co.uk/login.js'></script><script>fetch('https://api.example.co.uk/health')</script>", "host": "accounts.example.co.uk", "path": "/login.js", "keyword": "" }
+]

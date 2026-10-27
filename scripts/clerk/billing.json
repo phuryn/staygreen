@@ -1,0 +1,254 @@
+{
+  "billing": {
+    "organization_enabled": true,
+    "user_enabled": false,
+    "features": {
+      "alert_rules": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "alert_rules",
+        "publicly_visible": false
+      },
+      "history_1y": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "history_1y",
+        "publicly_visible": false
+      },
+      "notify_teammates": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "notify_teammates",
+        "publicly_visible": false
+      },
+      "private_pages": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "private_pages",
+        "publicly_visible": false
+      },
+      "scale_builder": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "scale_builder",
+        "publicly_visible": false
+      },
+      "show_builder_everything": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Everything in the free plan",
+        "publicly_visible": true
+      },
+      "show_builder_history": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "1 year of history",
+        "publicly_visible": true
+      },
+      "show_builder_interval": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "1-minute HTTP checks from 3 locations, one in Europe",
+        "publicly_visible": true
+      },
+      "show_builder_mark": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "No Staygreen mark on your status pages",
+        "publicly_visible": true
+      },
+      "show_builder_private": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Members-only status pages",
+        "publicly_visible": true
+      },
+      "show_builder_routing": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Alert routing by severity",
+        "publicly_visible": true
+      },
+      "show_builder_scale": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "10 apps, 100 monitors and 50 heartbeats",
+        "publicly_visible": true
+      },
+      "show_builder_teammates": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Teammates alerted without an account",
+        "publicly_visible": true
+      },
+      "show_free_alerts": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Email, Telegram, Slack, Discord and webhook alerts",
+        "publicly_visible": true
+      },
+      "show_free_apps": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "1 app, 50 monitors and 5 heartbeats",
+        "publicly_visible": true
+      },
+      "show_free_assertions": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Checks that read what your app returns",
+        "publicly_visible": true
+      },
+      "show_free_commercial": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Commercial use allowed",
+        "publicly_visible": true
+      },
+      "show_free_interval": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "HTTP checks every 3 minutes from 2 locations",
+        "publicly_visible": true
+      },
+      "show_free_mcp": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "MCP server for your AI agents",
+        "publicly_visible": true
+      },
+      "show_free_monitors": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Uptime, SSL, DNS, TCP and heartbeat monitors",
+        "publicly_visible": true
+      },
+      "show_free_page": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "A status page on your own domain",
+        "publicly_visible": true
+      },
+      "show_free_services": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": false,
+        "jwt_value": "",
+        "name": "Stripe webhook and Supabase project checks",
+        "publicly_visible": true
+      },
+      "subscribers": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "subscribers",
+        "publicly_visible": false
+      },
+      "white_label": {
+        "avatar_url": "",
+        "description": "",
+        "include_in_jwt": true,
+        "jwt_value": "",
+        "name": "white_label",
+        "publicly_visible": false
+      }
+    },
+    "plans": {
+      "builder": {
+        "amount": 900,
+        "annual_monthly_amount": 750,
+        "currency": "usd",
+        "description": "",
+        "features": [
+          "show_builder_everything",
+          "show_builder_scale",
+          "show_builder_interval",
+          "show_builder_mark",
+          "show_builder_private",
+          "show_builder_routing",
+          "show_builder_teammates",
+          "show_builder_history",
+          "alert_rules",
+          "history_1y",
+          "notify_teammates",
+          "private_pages",
+          "scale_builder",
+          "subscribers",
+          "white_label"
+        ],
+        "free_trial_days": null,
+        "free_trial_enabled": false,
+        "is_recurring": true,
+        "name": "Builder",
+        "payer_type": "org",
+        "publicly_visible": true
+      },
+      "free_org": {
+        "amount": 0,
+        "annual_monthly_amount": 0,
+        "currency": "",
+        "description": "",
+        "features": [
+          "show_free_monitors",
+          "show_free_assertions",
+          "show_free_services",
+          "show_free_alerts",
+          "show_free_page",
+          "show_free_mcp",
+          "show_free_apps",
+          "show_free_interval",
+          "show_free_commercial"
+        ],
+        "free_trial_days": null,
+        "free_trial_enabled": false,
+        "is_recurring": true,
+        "name": "Free",
+        "payer_type": "org",
+        "publicly_visible": true
+      }
+    }
+  }
+}

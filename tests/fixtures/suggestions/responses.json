@@ -1,0 +1,7 @@
+{
+  "slackHealth": { "status": 200, "headers": { "content-type": "application/json" }, "body": "{\"ok\":false,\"error\":\"unknown_method\"}" },
+  "frontHealth": { "status": 200, "headers": { "content-type": "application/json" }, "body": "{\"error\":\"not_found\"}" },
+  "awsWall": { "status": 202, "headers": { "x-amzn-waf-action": "challenge" }, "body": "" },
+  "impervaWall": { "status": 200, "headers": { "content-type": "text/html" }, "body": "<html><iframe src=\"/_Incapsula_Resource?incident_id=fixture\"></iframe></html>" },
+  "gateway": { "status": 401, "headers": { "content-type": "application/json" }, "body": "{\"error\":\"unauthorized\"}" }
+}

@@ -1,0 +1,317 @@
+/* tokens.css: the only file where a raw value may appear (design/README.md).
+   Light is the bare set. Dark redefines tokens only, three ways: the visitor's OS when
+   no theme is chosen, an explicit data-theme on <html>, and the scoped classes public
+   pages use to follow their builder's setting instead of the dashboard's cookie. */
+
+:root,
+.theme-light,
+.theme-visitor {
+  /* A near-white page, black type. Panels are told apart by a hairline and a faint resting
+     shadow (--rest) in the app, and by a tone step on the site. The page is a hair off white,
+     1.03:1 against a white panel and under the threshold of reading as a tint, so a white panel
+     has somewhere to rise to. Dark keeps its own ground. */
+  --ground: #fcfcfd;
+  --surface: #ffffff;
+  --sunk: #f3f4f6;
+  --raised: #f8f9fb;
+  --ink: #0b0c0e;
+  --ink-2: #3f4550;
+  --ink-3: #5d6470;
+  --edge: #8a919d;
+  --line: #e4e6eb;
+  --line-strong: #d3d7de;
+  --on-ink: #ffffff;
+  /* Where you are in the rail: a neutral step past hover's --sunk, never the accent. Where you are
+     is wayfinding, not a choice made in the content (design/README.md, principle 1). */
+  --current: #eaecf0;
+
+  /* Cobalt is the brand: every primary action, link, selection and focus ring. Never a state.
+     Its tints keep its own hue (OKLCH about 268°), so a wash reads blue, not lavender. */
+  --accent: #1f2de6;
+  --accent-hover: #1823c4;
+  --accent-text: #1f2de6;
+  --on-accent: #ffffff;
+  --accent-wash: #eaf0ff;
+
+  /* Status colours mean one thing each and appear nowhere else. */
+  --up: #12a150;
+  --warn: #c27a00;
+  --down: #cc1f1f;
+  --paused: #8a919d;
+
+  --wash-up: #e7f6ec;
+  /* A healthy day on an uptime bar: a tint, so the days that weren't healthy are what you see. */
+  --bar-up: #8fd4ab;
+  --wash-warn: #fdf3e1;
+  --wash-down: #fdecec;
+  --wash-info: #eaf0ff;
+
+  --chart-p50: #1f2de6;
+  --chart-p95: #a3a9b4;
+  --chart-grid: #eceef1;
+  --chart-band: #fdecec;
+
+  /* Whole-section fields on the site. */
+  --field-dark: #0b0c0e;
+  --field-dark-surface: #1a1c21;
+  --field-dark-ink: #ffffff;
+  --field-dark-ink-2: #b4bac4;
+  --field-dark-line: #2c2f36;
+  --field-accent: #1f2de6;
+  --field-accent-ink: #ffffff;
+  --field-accent-ink-2: #d5d8fc;
+  --field-tone: #f3f4f6;
+
+  --scrim: rgba(11, 12, 14, 0.5);
+  --lift: 0 12px 40px rgba(11, 12, 14, 0.14);
+  /* A panel at rest: one faint step of depth under its hairline, light only. Dark already
+     separates a panel by tone, the surface on the ground. */
+  --rest: 0 1px 2px rgba(11, 12, 14, 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]),
+  .theme-visitor {
+    --ground: #0b0c0e;
+    --surface: #121418;
+    --sunk: #1a1d22;
+    --raised: #16191d;
+    --ink: #f2f3f5;
+    --ink-2: #c4c8d0;
+    --ink-3: #9aa1ad;
+    --edge: #6b7280;
+    --line: #262a31;
+    --line-strong: #353a43;
+    --on-ink: #0b0c0e;
+    --current: #20242b;
+
+    --accent: #3d5cff;
+    --accent-hover: #2f4ce0;
+    --accent-text: #8fa6ff;
+    --on-accent: #ffffff;
+    --accent-wash: #15204a;
+
+    --up: #34c46e;
+    --warn: #f0a92e;
+    --down: #f2665f;
+    --paused: #7d8590;
+
+    --wash-up: #0f2a1b;
+
+    --bar-up: #1f6a42;
+    --wash-warn: #2e2410;
+    --wash-down: #3a1716;
+    --wash-info: #15204a;
+
+    --chart-p50: #8fa6ff;
+    --chart-p95: #5d6470;
+    --chart-grid: #1f2228;
+    --chart-band: #3a1716;
+
+    --field-dark: #000000;
+    --field-dark-surface: #16181c;
+    --field-dark-line: #2a2d33;
+    --field-accent: #2733d9;
+    --field-tone: #121418;
+
+    --scrim: rgba(0, 0, 0, 0.6);
+    --lift: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --rest: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"],
+.theme-dark {
+  --ground: #0b0c0e;
+  --surface: #121418;
+  --sunk: #1a1d22;
+  --raised: #16191d;
+  --ink: #f2f3f5;
+  --ink-2: #c4c8d0;
+  --ink-3: #9aa1ad;
+  --edge: #6b7280;
+  --line: #262a31;
+  --line-strong: #353a43;
+  --on-ink: #0b0c0e;
+  --current: #20242b;
+
+  --accent: #3d5cff;
+  --accent-hover: #2f4ce0;
+  --accent-text: #8fa6ff;
+  --on-accent: #ffffff;
+  --accent-wash: #15204a;
+
+  --up: #34c46e;
+  --warn: #f0a92e;
+  --down: #f2665f;
+  --paused: #7d8590;
+
+  --wash-up: #0f2a1b;
+
+  --bar-up: #1f6a42;
+  --wash-warn: #2e2410;
+  --wash-down: #3a1716;
+  --wash-info: #15204a;
+
+  --chart-p50: #8fa6ff;
+  --chart-p95: #5d6470;
+  --chart-grid: #1f2228;
+  --chart-band: #3a1716;
+
+  --field-dark: #000000;
+  --field-dark-surface: #16181c;
+  --field-dark-line: #2a2d33;
+  --field-accent: #2733d9;
+  --field-tone: #121418;
+
+  --scrim: rgba(0, 0, 0, 0.6);
+  --lift: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --rest: none;
+  color-scheme: dark;
+}
+
+/* Public pages (status page, sample host app) wear the builder's neutrals and accent, not
+   Staygreen's cobalt. Status colours stay: they mean the same thing everywhere.
+   The accent tokens are the builder's colour, shaded per theme to read on these grounds
+   (`src/lib/accents.ts`). The page sets the `--page-*` values on its own element; without them,
+   as on a page with no builder, the controls wear the page's ink. */
+.public-neutral {
+  --ground: #ffffff;
+  --surface: #ffffff;
+  --sunk: #f4f4f5;
+  --raised: #fafafa;
+  --ink: #111113;
+  --ink-2: #46464d;
+  --ink-3: #5f5f68;
+  --edge: #8b8b94;
+  --line: #e6e6ea;
+  --on-ink: #ffffff;
+
+  --accent: var(--page-accent-light, var(--ink));
+  --accent-hover: var(--page-accent-hover-light, var(--ink-2));
+  --accent-text: var(--page-accent-text-light, var(--ink));
+  --on-accent: var(--page-on-accent-light, var(--on-ink));
+}
+
+.public-neutral.theme-dark {
+  --ground: #0f0f11;
+  --surface: #17171a;
+  --sunk: #1f1f23;
+  --raised: #1b1b1f;
+  --ink: #f1f1f3;
+  --ink-2: #c3c3ca;
+  --ink-3: #9b9ba5;
+  --edge: #6c6c76;
+  --line: #2a2a30;
+  --on-ink: #0f0f11;
+
+  --accent: var(--page-accent-dark, var(--ink));
+  --accent-hover: var(--page-accent-hover-dark, var(--ink-2));
+  --accent-text: var(--page-accent-text-dark, var(--ink));
+  --on-accent: var(--page-on-accent-dark, var(--on-ink));
+}
+
+@media (prefers-color-scheme: dark) {
+  .public-neutral.theme-visitor {
+    --ground: #0f0f11;
+    --surface: #17171a;
+    --sunk: #1f1f23;
+    --raised: #1b1b1f;
+    --ink: #f1f1f3;
+    --ink-2: #c3c3ca;
+    --ink-3: #9b9ba5;
+    --edge: #6c6c76;
+    --line: #2a2a30;
+    --on-ink: #0f0f11;
+
+    --accent: var(--page-accent-dark, var(--ink));
+    --accent-hover: var(--page-accent-hover-dark, var(--ink-2));
+    --accent-text: var(--page-accent-text-dark, var(--ink));
+    --on-accent: var(--page-on-accent-dark, var(--on-ink));
+  }
+}
+
+:root {
+  --f-sans: var(--font-switzer), "Switzer", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* App and site share the first four. The site adds two display sizes. */
+  --t-1: 13px;
+  --t-2: 15px;
+  --t-3: 18px;
+  --t-4: 28px;
+  --t-h2: clamp(36px, 4.4vw, 64px);
+  --t-5: clamp(52px, 7.6vw, 120px);
+
+  --lh-tight: 0.95;
+  --lh-h2: 1;
+  --lh-head: 1.2;
+  --lh-body: 1.5;
+
+  --track-display: -0.045em;
+  --track-h2: -0.035em;
+  --track-title: -0.02em;
+
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-bold: 600;
+  --w-black: 700;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+  --s-9: 112px;
+  --s-10: 168px;
+
+  --r-1: 6px;
+  --r-2: 10px;
+  --r-3: 16px;
+  --r-pill: 999px;
+  /* A button's and a segmented control's corner inside the app (`.shell`); the site, status
+     pages and tags keep pills (the owner, 2026-10-22). */
+  --r-control: 8px;
+
+  --hair: 1px;
+  --rule: 2px;
+
+  --target: 44px;
+  --control: 40px;
+  --control-sm: 32px;
+
+  --w-read: 68ch;
+  --w-site: 1280px;
+  --w-app: 1200px;
+  --w-rail: 240px;
+  --w-app-picker: 240px;
+
+  --d-1: 120ms;
+  --d-2: 220ms;
+  --d-3: 480ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  --z-sticky: 10;
+  --z-drawer: 40;
+  --z-toast: 60;
+}
+
+/* AskOne's brand, worn by the sample host app at /demo/askone (status.css maps it onto the tokens). */
+.host-askone {
+  --askone-bg: #0b0b0d;
+  --askone-sunk: #060607;
+  --askone-surface: #151518;
+  --askone-raised: #1c1c21;
+  --askone-line: #29292f;
+  --askone-edge: #5d5a56;
+  --askone-text: #f3f1ec;
+  --askone-text-2: #b5b1aa;
+  --askone-text-3: #95918a;
+  --askone-amber: #f5a524;
+  --askone-on-amber: #1a1206;
+}

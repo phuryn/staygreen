@@ -1,0 +1,6 @@
+/* The status edge has no hydration or cookies. Native titles keep daily bars readable. */
+@font-face { font-family: Switzer; src: url('/_edge/Switzer-Variable.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+:root { --font-switzer: Switzer; }
+.edge-freshness { color: var(--ink-2); font-size: var(--t-2); }
+.edge-freshness:empty { display: none; }
+@media (max-width: 559px) { .sp .bars { gap: 1px; } }

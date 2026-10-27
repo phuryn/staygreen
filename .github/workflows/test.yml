@@ -1,10 +1,13 @@
 name: Package
-on: [push, pull_request]
+on: [push, workflow_dispatch]
 permissions:
   contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/staygreen
     strategy:
       matrix:
         node: [22, 24]
@@ -14,6 +17,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+          cache-dependency-path: packages/staygreen/package-lock.json
       - run: npm ci
       - run: npm run typecheck
       - run: npm run build

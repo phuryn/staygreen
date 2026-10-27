@@ -1,0 +1,342 @@
+/* app.css: the dashboard's layout. Tokens only. */
+
+.logo { display: inline-flex; align-items: center; gap: var(--s-2); text-decoration: none; }
+.logo-word { font-weight: var(--w-bold); font-size: var(--t-3); letter-spacing: var(--track-title); color: var(--ink); }
+
+.skip { position: absolute; left: var(--s-3); top: -60px; z-index: var(--z-toast); background: var(--ink); color: var(--on-ink); padding: var(--s-2) var(--s-3); border-radius: var(--r-1); }
+.skip:focus { top: var(--s-3); }
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: var(--w-rail) minmax(0, 1fr); min-height: 100dvh; }
+.rail { position: sticky; top: 0; height: 100dvh; overflow-y: auto; background: var(--raised); border-right: var(--hair) solid var(--line); }
+.rail-inner { display: flex; flex-direction: column; gap: var(--s-5); padding: var(--s-5) var(--s-3) var(--s-4); min-height: 100%; }
+.rail-top { display: flex; flex-direction: column; gap: var(--s-2); padding: 0 var(--s-2); }
+.rail-brand { text-decoration: none; display: inline-flex; }
+.rail-sum { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-1); font-weight: var(--w-medium); color: var(--ink-2); }
+/* The app row under the logo: the app's name, or the switcher with two or more, then its state
+   and what is wrong in the other apps. */
+.rail-app { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.rail-app-one { display: flex; align-items: center; gap: var(--s-2); padding: 0 var(--s-2); min-width: 0; }
+.rail-app-name { font-weight: var(--w-bold); overflow-wrap: anywhere; min-width: 0; }
+.rail-app-status { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-1); padding: 0 var(--s-2); }
+.rail-group ul { display: flex; flex-direction: column; gap: 1px; }
+.rail-link { display: flex; align-items: center; gap: var(--s-2); min-height: 36px; padding: 0 var(--s-2); border-radius: var(--r-1); text-decoration: none; color: var(--ink-2); font-weight: var(--w-medium); }
+.rail-link:hover { background: var(--sunk); color: var(--ink); }
+.rail-switcher { min-width: 0; }
+.rail-switch { width: 100%; text-align: left; justify-content: space-between; white-space: normal; }
+.rail-switch .grow, .rail-app-option .grow { min-width: 0; overflow-wrap: anywhere; }
+[popover].rail-app-menu { position: fixed; inset: auto; margin: 0; padding: var(--s-1); overflow-y: auto; }
+.rail-app-option { display: flex; align-items: center; gap: var(--s-2); width: 100%; min-height: var(--control); padding: var(--s-2); border: 0; border-radius: var(--r-1); background: none; color: var(--ink); text-align: left; text-decoration: none; font-weight: var(--w-medium); }
+.rail-app-option:hover { background: var(--sunk); }
+.rail-app-option svg { flex: none; width: var(--s-4); height: var(--s-4); }
+.rail-app-add { border-top: var(--hair) solid var(--line); border-radius: 0; margin-top: var(--s-1); }
+/* Five places to ping from are wider than a phone; wrapped, none hides past the edge. */
+.hb-places .tabs { flex-wrap: wrap; }
+.rail-link svg { width: 18px; height: 18px; flex: none; }
+/* Where you are is wayfinding, not a choice, so it is neutral: a grey step past hover, never the
+   accent, which stays for what you can press and what you chose in the content (principle 1). In
+   forced colours the background is dropped, so the current section keeps a Highlight outline; a
+   focused link shows its focus ring instead. */
+.rail-link[aria-current="page"] { background: var(--current); color: var(--ink); }
+@media (forced-colors: active) {
+  .rail-link[aria-current="page"]:not(:focus-visible) { outline: var(--hair) solid Highlight; outline-offset: calc(-1 * var(--hair)); }
+}
+.rail-count { font-size: var(--t-1); color: var(--on-accent); background: var(--down); font-weight: var(--w-bold); border-radius: var(--r-pill); padding: 1px 8px; }
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: var(--s-3); }
+.plan-box { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-3); border-radius: var(--r-2); background: var(--surface); border: var(--hair) solid var(--line); box-shadow: var(--rest); text-decoration: none; }
+.rail-org { flex: 1; min-width: 0; }
+.rail-org .cl-rootBox, .rail-org .cl-organizationSwitcherTrigger { max-width: 100%; }
+.rail-user { display: flex; align-items: center; gap: var(--s-2); padding: 0 var(--s-2); min-height: var(--control); }
+
+.topbar { display: none; }
+.drawer { border: 0; padding: 0; margin: 0 auto 0 0; height: 100dvh; max-height: 100dvh; width: min(300px, 86vw); overflow: visible; background: var(--surface); color: var(--ink); }
+.drawer-scroll { height: 100%; overflow-y: auto; }
+.drawer::backdrop { background: var(--scrim); }
+.drawer-x { position: absolute; right: var(--s-2); top: var(--s-3); }
+
+.main { padding: var(--s-6) max(var(--s-6), env(safe-area-inset-right, 0px)) var(--s-9) var(--s-6); min-width: 0; width: 100%; max-width: calc(var(--w-app) + 2 * var(--s-6)); }
+.loading { padding: var(--s-7) 0; }
+/* A click on a dashboard link, until its screen is there (`usePendingPath`, `Shell.tsx`): after a
+   beat the screen being left fades back, so a slow answer is seen to be coming and a quick one
+   never flickers. Only on the way out: the new screen arrives at full strength at once. Under
+   reduced motion the fade becomes a step after the same beat (`design/kit.css`). */
+.main[aria-busy="true"] { opacity: 0.6; transition: opacity var(--d-2) var(--ease) var(--d-1); }
+
+@media (max-width: 900px) {
+  .rail-switch, .rail-app-option { min-height: var(--target); }
+  /* Rows sized to their content: on a page shorter than the screen the grid's spare height would
+     otherwise be shared out, and the top bar grew to a quarter of the phone. */
+  .shell { grid-template-columns: minmax(0, 1fr); align-content: start; }
+  .rail { display: none; }
+  .topbar { display: flex; align-items: center; gap: var(--s-3); position: sticky; top: env(safe-area-inset-top, 0px); z-index: var(--z-sticky); background: var(--surface); border-bottom: var(--hair) solid var(--line); padding: var(--s-2) max(16px, env(safe-area-inset-right, 0px)) var(--s-2) max(16px, env(safe-area-inset-left, 0px)); }
+  .topbar > a { text-decoration: none; }
+  /* A long app name wraps rather than losing its tail; the bar grows a line. */
+  .topbar-app { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  .topbar-app-name { font-size: var(--t-1); font-weight: var(--w-bold); overflow-wrap: anywhere; }
+  .topbar-app .rail-app-status { padding: 0; gap: 0; }
+  .topbar .btn-icon { margin-left: auto; }
+  .main { padding: var(--s-5) max(16px, env(safe-area-inset-right, 0px)) var(--s-9) max(16px, env(safe-area-inset-left, 0px)); }
+}
+
+/* ---------- page head ---------- */
+.page-head { display: flex; flex-direction: column; gap: var(--s-2); margin-bottom: var(--s-5); }
+.page-head-row { align-items: flex-end; }
+/* A page title led by a 24px mark (the overview's state), held to its first line when it wraps. */
+.head-mark { display: flex; align-items: flex-start; gap: var(--s-3); }
+.head-mark > svg { flex: none; margin-top: calc((1lh - 24px) / 2); }
+.back { font-size: var(--t-1); color: var(--ink-2); text-decoration: none; display: inline-flex; align-items: center; gap: var(--s-1); width: fit-content; }
+.back::before { content: "‹"; font-size: 1.2em; line-height: 1; }
+.back:hover { color: var(--ink); text-decoration: underline; }
+
+.section { display: flex; flex-direction: column; gap: var(--s-3); }
+.section + .section { margin-top: var(--s-6); }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; }
+
+/* ---------- overview ---------- */
+/* Every panel-like surface in the app sits on the resting shadow (`--rest`, light only) under its
+   hairline, so all of them read as one material. */
+.app-block { background: var(--surface); border: var(--hair) solid var(--line); border-radius: var(--r-2); overflow: hidden; box-shadow: var(--rest); }
+.app-block-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s-3) var(--s-5); padding: var(--s-4) var(--s-5); }
+.app-block-head h2 { font-size: var(--t-3); display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.app-block-bars { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--s-4); }
+@media (max-width: 640px) { .app-block-head { grid-template-columns: minmax(0, 1fr); } .app-block-bars { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); } }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); margin-bottom: var(--s-5); }
+.kpi { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-4) var(--s-5); border-radius: var(--r-2); border: var(--hair) solid var(--line); background: var(--surface); box-shadow: var(--rest); text-decoration: none; color: var(--ink); min-width: 0; }
+a.kpi:hover { border-color: var(--line-strong); }
+.kpi-n { font-size: 40px; line-height: 1; font-weight: var(--w-bold); letter-spacing: var(--track-title); font-variant-numeric: tabular-nums; }
+.kpi-l { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: var(--w-medium); color: var(--ink-2); }
+.kpi.degraded { background: var(--wash-warn); border-color: transparent; }
+.kpi.down { background: var(--wash-down); border-color: transparent; }
+/* A zero is quiet: its number and its shape go grey, so a healthy day shows no amber or red. */
+.kpi.zero .kpi-n { color: var(--ink-3); }
+.kpi.zero .state-icon { color: var(--edge); }
+/* On a phone the four counts are one strip of four split by hairlines, one short row instead of
+   a two-by-two block of 40px numbers: each cell's shape beside its number, its word under them. */
+@media (max-width: 760px) {
+  .kpis { gap: 0; border: var(--hair) solid var(--line); border-radius: var(--r-2); overflow: hidden; background: var(--surface); box-shadow: var(--rest); }
+  .kpi { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: start; gap: 2px var(--s-2); border: 0; border-radius: 0; padding: var(--s-3) var(--s-2); box-shadow: none; }
+  .kpi + .kpi { border-left: var(--hair) solid var(--line); }
+  .kpi-n { font-size: 24px; }
+  .kpi-l { display: contents; font-size: var(--t-1); }
+  .kpi-word { grid-column: 1 / -1; line-height: 1.3; }
+  a.kpi:hover .kpi-word { color: var(--ink); text-decoration: underline; }
+}
+.app-block .table td:first-child, .app-block .table th:first-child { padding-left: var(--s-5); }
+.app-block .table td:last-child, .app-block .table th:last-child { padding-right: var(--s-5); }
+/* The severity bar is a straight strip clipped by the corners, not an inset shadow, which follows
+   the radius and bends at both ends. */
+.alarm { position: relative; overflow: hidden; display: flex; gap: var(--s-4); align-items: flex-start; padding: var(--s-4) var(--s-5); border-radius: var(--r-2); background: var(--wash-down); flex-wrap: wrap; }
+.alarm::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--down); }
+.alarm.warn { background: var(--wash-warn); }
+.alarm.warn::before { background: var(--warn); }
+.alarm-body > strong { font-size: var(--t-3); line-height: var(--lh-head); }
+.alarm-body { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+
+/* ---------- monitor rows ---------- */
+.mon-name { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.mon-name > svg { color: var(--ink-3); flex: none; }
+.mon-name a { font-weight: var(--w-bold); text-decoration: none; color: var(--ink); }
+.mon-name a:hover { text-decoration: underline; }
+.mon-target { display: block; color: var(--ink-3); max-width: 340px; font-size: var(--t-1); }
+/* On a phone the table keeps the name, the state and the day's uptime: the address gives way
+   first, cut to whatever width the name leaves it, so a state like Not checked yet stays on one
+   line. */
+@media (max-width: 640px) { .mon-target { width: 0; min-width: 100%; max-width: none; } }
+.filters { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
+.filters > .select { width: auto; min-width: 140px; }
+.filters .app-picker, .page-head .app-picker { width: min(var(--w-app-picker), 100%); }
+.filters .input { width: min(260px, 100%); }
+
+/* ---------- monitor detail ---------- */
+.hero-state { display: flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; font-size: var(--t-3); }
+.hero-state .state { font-weight: var(--w-bold); }
+/* A monitor's numbers: one panel split by hairlines, not a tile each. The cells flow onto as many
+   rows as the width allows and every row fills, so a fifth number never sits alone beside an
+   empty slot; the panel's line colour shows through the 1px gaps as the hairlines between. */
+.stat-strip { display: flex; flex-wrap: wrap; gap: var(--hair); background: var(--line); border: var(--hair) solid var(--line); border-radius: var(--r-2); overflow: hidden; box-shadow: var(--rest); }
+.stat-strip > .stat { flex: 1 1 150px; background: var(--surface); padding: var(--s-4) var(--s-5); }
+@media (max-width: 640px) { .stat-strip > .stat { padding: var(--s-3) var(--s-4); } }
+/* Where checks come from: one panel, a row per location split by hairlines. The city leads with
+   its flag; the state, or the Builder tag, sits at the row's far end, away from the flags' red. */
+.locs { background: var(--surface); border: var(--hair) solid var(--line); border-radius: var(--r-2); box-shadow: var(--rest); }
+.loc { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s-3); padding: var(--s-3) var(--s-4); min-width: 0; }
+.loc + .loc { border-top: var(--hair) solid var(--line); }
+.loc-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.loc.off .loc-place strong { color: var(--ink-2); }
+/* A location's flag (`Flag`): 16 by 12, no larger than a state icon, before its city. The hairline
+   keeps the white of the Canadian and US flags from dissolving into the panel. */
+.loc-place { display: inline-flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.flag { flex: none; width: 16px; height: 12px; border-radius: 2px; outline: var(--hair) solid var(--line-strong); outline-offset: calc(-1 * var(--hair)); }
+.assert-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; padding: var(--s-3) 0; border-top: var(--hair) solid var(--line); }
+.assert-row:first-child { border-top: 0; }
+.events { display: flex; flex-direction: column; }
+.event { display: grid; grid-template-columns: 92px 18px minmax(0, 1fr); gap: var(--s-3); padding: var(--s-3) 0; border-top: var(--hair) solid var(--line); align-items: start; }
+.event:first-child { border-top: 0; }
+.event > time { font-size: var(--t-1); color: var(--ink-3); padding-top: 2px; }
+.event-dot { width: 10px; height: 10px; border-radius: var(--r-pill); margin-top: 6px; background: var(--edge); }
+.event-dot.fail, .event-dot.down { background: var(--down); border-radius: 2px; }
+.event-dot.degraded { background: var(--warn); }
+.event-dot.recovered, .event-dot.pass, .event-dot.ping { background: var(--up); }
+.event-dot.paused { background: var(--paused); }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: var(--s-4); align-items: start; }
+@media (max-width: 1080px) { .detail-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- charts ---------- */
+.chart { margin: 0; display: flex; flex-direction: column; gap: var(--s-3); }
+.chart-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+.legend { display: flex; flex-wrap: wrap; gap: var(--s-4); font-size: var(--t-1); color: var(--ink-2); }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 14px; height: 3px; border-radius: var(--r-pill); display: inline-block; }
+.swatch-band { height: 10px; width: 10px; border-radius: 2px; background: var(--chart-band); box-shadow: inset 2px 0 0 var(--down); }
+.chart-plot { position: relative; width: 100%; }
+.chart-plot svg { overflow: visible; }
+.axis { font-size: 11px; fill: var(--ink-3); font-family: var(--f-sans); }
+.chart-table { max-height: 320px; overflow-y: auto; }
+.tip { position: absolute; transform: translateX(-50%); background: var(--ink); color: var(--on-ink); border-radius: var(--r-1); padding: var(--s-2) var(--s-3); font-size: var(--t-1); display: flex; flex-direction: column; gap: 1px; pointer-events: none; white-space: nowrap; z-index: 2; }
+.tip .t-down { color: var(--on-ink); font-weight: var(--w-bold); }
+.tip .t-meta { color: var(--on-ink); opacity: 0.8; }
+
+.bars-wrap { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.bars { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; align-items: stretch; }
+.bar { border-radius: 2px; background: var(--bar-up); min-width: 1px; }
+.bar.dip { background: var(--warn); }
+.bar.down { background: var(--down); }
+.bar.none { background: var(--sunk); }
+.bar:hover, .bar:focus-visible { opacity: 0.7; outline-offset: 1px; }
+.tip-bar { top: calc(100% + 6px); }
+.bars-foot { display: flex; justify-content: space-between; gap: var(--s-3); }
+.spark { flex: none; }
+
+/* ---------- add monitor ---------- */
+.type-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--s-4); }
+.type-group legend { font-size: var(--t-1); color: var(--ink-2); font-weight: var(--w-bold); margin-bottom: var(--s-2); }
+.type-list { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: var(--hair) solid var(--line); border-radius: var(--r-2); box-shadow: var(--rest); padding: var(--s-1); }
+/* One of eight is a radio (`AddMonitorScreen`): the chosen card wears a full cobalt border and a
+   filled radio, never a left bar, which means "you are here" or "how bad" and bent at the corners.
+   The radio sits last; a Coming soon tag sits before it. */
+.type-opt { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; width: 100%; padding: var(--s-3); border: var(--hair) solid transparent; border-radius: var(--r-1); background: transparent; color: var(--ink); min-height: var(--target); cursor: pointer; }
+.type-opt:hover { background: var(--sunk); }
+.type-opt:has(input:checked) { background: var(--accent-wash); border-color: var(--accent); box-shadow: inset 0 0 0 var(--hair) var(--accent); }
+.type-opt input { grid-column: -2; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.type-opt input:focus-visible { outline: 0; }
+.type-opt:has(input:focus-visible) { outline: var(--rule) solid var(--accent); outline-offset: var(--rule); }
+.type-opt-text { min-width: 0; }
+/* A Coming soon tag sits beside the name, wrapping under it in a narrow column, never squeezing the hint. */
+.type-opt-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-2); }
+.type-opt small { display: block; color: var(--ink-3); font-size: var(--t-1); }
+/* Forced colours drop the wash and the shadow: the chosen card keeps a Highlight border and the
+   system's filled radio; the others' transparent borders would otherwise show. */
+@media (forced-colors: active) {
+  .type-opt { border-color: Canvas; }
+  .type-opt:has(input:checked) { border: var(--rule) solid Highlight; padding: calc(var(--s-3) - var(--hair)); }
+}
+/* An icon in a small bordered square, as the type picker shows its types. */
+.icon-tile { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border: var(--hair) solid var(--line); border-radius: var(--r-1); background: var(--surface); color: var(--ink-2); }
+.icon-tile svg { width: 18px; height: 18px; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--s-4); }
+.form-grid .span-all { grid-column: 1 / -1; }
+.assert-edit { display: grid; grid-template-columns: minmax(0, 1.4fr) 110px minmax(0, 1fr) auto auto; gap: var(--s-2); align-items: center; }
+@media (max-width: 640px) { .assert-edit { grid-template-columns: 1fr 1fr; } .assert-edit > :first-child { grid-column: 1 / -1; } }
+.live-check { display: flex; flex-direction: column; gap: var(--s-2); }
+.live-line { display: flex; gap: var(--s-2); align-items: center; font-size: var(--t-2); }
+.live-line > svg { flex: none; }
+.add-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 360px); gap: var(--s-5); align-items: start; }
+@media (max-width: 1080px) { .add-layout { grid-template-columns: minmax(0, 1fr); } }
+.sticky-side { position: sticky; top: var(--s-5); }
+
+/* ---------- incidents ---------- */
+/* An empty list that reassures: the up mark, or before any check the hollow ring, then one quiet
+   line of evidence. Healthy is quiet, so nothing in it is bold. */
+.calm { display: flex; gap: var(--s-3); align-items: flex-start; padding: var(--s-4) var(--s-5); border: var(--hair) solid var(--line); border-radius: var(--r-2); background: var(--surface); box-shadow: var(--rest); min-width: 0; }
+.calm > svg { flex: none; margin-top: 1px; }
+.calm strong { display: block; font-weight: var(--w-medium); }
+.calm p > span { font-size: var(--t-1); color: var(--ink-3); }
+.timeline { display: flex; flex-direction: column; }
+.timeline li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: var(--s-3); padding: var(--s-2) 0; border-top: var(--hair) solid var(--line); }
+.timeline li:first-child { border-top: 0; }
+.note { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-4); border-radius: var(--r-2); background: var(--sunk); }
+.note.draft { background: transparent; border: var(--hair) dashed var(--edge); }
+.note-head { display: flex; gap: var(--s-2); align-items: center; flex-wrap: wrap; font-size: var(--t-1); color: var(--ink-2); }
+.note-head strong { color: var(--ink); text-transform: none; }
+
+/* ---------- alerts ---------- */
+.channel-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; padding: var(--s-4) var(--s-5); border-top: var(--hair) solid var(--line); }
+.channel-row:first-child { border-top: 0; }
+.channel-icon { width: 36px; height: 36px; border-radius: var(--r-2); background: var(--sunk); display: grid; place-items: center; }
+.channel-icon svg { width: 18px; height: 18px; }
+.preview-phone { background: var(--sunk); border-radius: var(--r-2); padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-3); }
+.msg { background: var(--surface); border-radius: var(--r-2); padding: var(--s-3) var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); max-width: 440px; font-size: var(--t-2); }
+.msg-from { font-size: var(--t-1); font-weight: var(--w-bold); }
+.msg-buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-1); }
+.msg-buttons .btn { min-height: var(--control-sm); font-size: var(--t-1); padding: 0 var(--s-2); }
+
+/* ---------- status page editor ---------- */
+.editor { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 1080px) { .editor { grid-template-columns: minmax(0, 1fr); } }
+.preview-frame { background: var(--sunk); border-radius: var(--r-2); padding: var(--s-4); position: sticky; top: var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); }
+.preview-viewport { border-radius: var(--r-2); overflow: hidden; background: var(--ground); margin: 0 auto; width: 100%; max-height: 72vh; overflow-y: auto; }
+.preview-viewport.phone { width: 375px; max-width: 100%; }
+.preview-url { font-size: var(--t-1); color: var(--ink-2); display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
+.steps { display: flex; flex-direction: column; gap: var(--s-3); counter-reset: step; }
+.step { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: var(--s-3); align-items: start; }
+.step-n { width: 26px; height: 26px; border-radius: var(--r-pill); display: grid; place-items: center; font-size: var(--t-1); font-weight: var(--w-bold); background: var(--sunk); color: var(--ink-2); }
+.step.done .step-n { background: var(--up); color: var(--on-ink); }
+.step.now .step-n { background: var(--accent); color: var(--on-accent); }
+.comp-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; padding: var(--s-3) 0; border-top: var(--hair) solid var(--line); }
+.comp-row:first-child { border-top: 0; }
+.swatches { display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: center; }
+.swatch-btn { width: 32px; height: 32px; border-radius: var(--r-pill); border: var(--rule) solid transparent; cursor: pointer; padding: 0; }
+.swatch-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--surface); }
+
+/* ---------- widget ---------- */
+.host-frame { border-radius: var(--r-2); overflow: hidden; }
+
+/* ---------- agents ---------- */
+.terminal { background: var(--field-dark); color: var(--field-dark-ink-2); border-radius: var(--r-2); padding: var(--s-4) var(--s-5); font-family: var(--f-mono); font-size: var(--t-1); line-height: 1.7; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.terminal .you { color: var(--field-dark-ink); font-weight: var(--w-bold); }
+.terminal .tool { color: var(--field-dark-ink-2); opacity: 0.8; }
+.terminal .ok { color: var(--up); }
+
+/* ---------- toasts ---------- */
+.toast-x { background: none; border: 0; color: inherit; opacity: 0.8; padding: 2px; display: grid; place-items: center; min-width: 28px; min-height: 28px; }
+.toast-link { color: inherit; font-weight: var(--w-bold); font-size: var(--t-1); }
+
+/* Adding an app: name, optional address, one button. */
+.add-app { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto; gap: var(--s-3); align-items: end; }
+.add-app .span-all { grid-column: 1 / -1; }
+@media (max-width: 640px) { .add-app { grid-template-columns: minmax(0, 1fr); } }
+.add-app-block { margin-top: var(--s-5); }
+
+/* An app's logo beside its name (`AppLogo`): its image, or its first letter on a neutral square.
+   Never a state colour and never the accent. */
+.app-logo { flex: none; border-radius: var(--r-1); object-fit: contain; }
+.app-logo-none { display: inline-grid; place-items: center; background: var(--sunk); color: var(--ink-2); font-weight: var(--w-bold); line-height: 1; }
+
+/* Settings: an app's row, and its editor and suggested checks under it. */
+.app-row { border-top: var(--hair) solid var(--line); }
+.app-row:first-child { border-top: 0; }
+.app-row > .channel-row { border-top: 0; }
+.app-edit { padding: 0 var(--s-5) var(--s-5) calc(var(--s-5) + 36px + var(--s-3)); }
+/* On a phone an app's row follows the settings rows: its words keep the width, its Edit and Delete
+   drop under them. */
+@media (max-width: 640px) {
+  .app-row > .channel-row { grid-template-columns: 36px minmax(0, 1fr); padding: var(--s-4); }
+  .app-row-actions { grid-column: 2; }
+  .app-edit { padding: 0 var(--s-4) var(--s-4); }
+}
+
+/* Suggested checks (`SuggestedChecks`): each a tick, what it checks, and what it got. */
+.sg { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+.sg-list { border: 0; margin: 0; padding: 0; min-width: 0; display: flex; flex-direction: column; }
+.sg-row { align-items: flex-start; padding: var(--s-3) 0; border-top: var(--hair) solid var(--line); min-width: 0; }
+.sg-row:first-of-type { border-top: 0; padding-top: 0; }
+.sg-row input { margin-top: 2px; flex: none; }
+.sg-row:has(input:disabled) { cursor: default; }
+.sg-body { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; }
+.sg-name { font-weight: var(--w-medium); display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); min-width: 0; }
+.sg-name .code { white-space: normal; }
+.sg-result { display: flex; align-items: flex-start; gap: var(--s-2); color: var(--ink-2); min-width: 0; }
+.sg-result .state-icon { flex: none; margin-top: 3px; }
+.sg-found { display: flex; align-items: baseline; gap: var(--s-2); min-width: 0; }
+.sg-swatch { flex: none; width: 12px; height: 12px; border-radius: var(--r-pill); box-shadow: inset 0 0 0 var(--hair) var(--line); align-self: center; }

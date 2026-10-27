@@ -1,0 +1,178 @@
+/* status.css: public surfaces. The status page, the widget pieces and the sample host app.
+   Tokens only. The sample host app wears AskOne's own palette (its raw values sit in tokens.css),
+   because the person looking at it is AskOne's user, not the builder. */
+
+/* ---------- AskOne, the sample host app (pair with .theme-dark for the status colours) ---------- */
+.host-askone {
+  --ground: var(--askone-bg);
+  --surface: var(--askone-surface);
+  --sunk: var(--askone-sunk);
+  --raised: var(--askone-raised);
+  --ink: var(--askone-text);
+  --ink-2: var(--askone-text-2);
+  --ink-3: var(--askone-text-3);
+  --edge: var(--askone-edge);
+  --line: var(--askone-line);
+  --on-ink: var(--askone-bg);
+  --brand: var(--askone-amber);
+  --on-brand: var(--askone-on-amber);
+  background: var(--ground);
+  color: var(--ink);
+}
+
+/* ---------- status page ---------- */
+.sp {
+  min-height: 100dvh;
+  background: var(--ground);
+  color: var(--ink);
+  container-type: inline-size;
+  overflow-x: clip;
+}
+.sp-embedded { min-height: 0; }
+.sp-inner {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--s-6) max(var(--s-5), env(safe-area-inset-right, 0px)) var(--s-7) max(var(--s-5), env(safe-area-inset-left, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+}
+.sp-plain { padding-top: var(--s-8); max-width: 560px; }
+
+.sp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4); flex-wrap: wrap; }
+.sp-brand { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--target); font-size: var(--t-3); font-weight: var(--w-black); letter-spacing: var(--track-title); color: var(--ink); text-decoration: none; }
+.sp-mark { flex: none; }
+/* The page's own links wear the builder's accent, shaded to read on this theme (`tokens.css`). */
+.sp-home { display: inline-flex; align-items: center; gap: 0.35em; min-height: var(--target); color: var(--accent-text); text-decoration: underline; min-width: 0; }
+.sp-home:hover { text-decoration-thickness: var(--rule); }
+
+.sp-overall { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-5) var(--s-6); border-radius: var(--r-3); background: var(--surface); }
+.sp-overall.up { background: var(--wash-up); }
+.sp-overall.degraded { background: var(--wash-warn); }
+.sp-overall.down { background: var(--wash-down); }
+.sp-overall.unchecked, .sp-overall.paused { background: var(--sunk); }
+.sp-overall > svg { flex: none; }
+.sp-overall-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sp-overall-text h1, .sp-overall-text h2 { font-size: var(--t-4); line-height: 1.15; letter-spacing: var(--track-title); }
+.sp-overall-text p { color: var(--ink-2); }
+
+.sp-active { background: var(--surface); border-radius: var(--r-2); padding: var(--s-4) var(--s-5); display: flex; flex-direction: column; gap: var(--s-3); }
+.sp-active-title { font-size: var(--t-3); }
+
+.sp-section { display: flex; flex-direction: column; gap: var(--s-3); }
+.sp-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-1) var(--s-3); flex-wrap: wrap; }
+.sp-section-head h2, .sp-sub h2 { font-size: var(--t-3); }
+
+.sp-comps { background: var(--surface); border-radius: var(--r-2); }
+.sp-comp { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-4) var(--s-5); border-top: var(--hair) solid var(--line); min-width: 0; }
+.sp-comp:first-child { border-top: 0; }
+.sp-comp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-1) var(--s-3); flex-wrap: wrap; }
+.sp-comp-name { font-weight: var(--w-bold); min-width: 0; }
+
+.sp-notes { display: flex; flex-direction: column; gap: var(--s-3); }
+.sp-notes > li { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 2px var(--s-4); }
+.sp-notes > li > strong { grid-row: span 2; }
+.sp-notes > li > p, .sp-notes > li > time { grid-column: 2; }
+
+.sp-history { display: flex; flex-direction: column; }
+.sp-incident { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4) 0; border-top: var(--hair) solid var(--line); }
+.sp-incident:first-child { border-top: 0; padding-top: 0; }
+.sp-incident-head { display: flex; flex-direction: column; gap: 2px; }
+.sp-incident h3 { font-size: var(--t-2); }
+
+.sp-sub { background: var(--surface); border-radius: var(--r-2); padding: var(--s-4) var(--s-5); }
+.sp-sub-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.sp-sub-row .input { flex: 1 1 220px; width: auto; }
+.sp .input, .sp .btn { min-height: var(--target); }
+
+.sp-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4); flex-wrap: wrap; padding-top: var(--s-3); border-top: var(--hair) solid var(--line); }
+.sp-foot-link { display: inline-flex; align-items: center; min-height: var(--target); color: var(--ink-2); font-size: var(--t-1); text-decoration-color: var(--edge); }
+.sp-foot-link:hover { color: var(--ink); }
+
+@container (max-width: 560px) {
+  .sp-inner { padding: var(--s-4) max(16px, env(safe-area-inset-right, 0px)) var(--s-6) max(16px, env(safe-area-inset-left, 0px)); gap: var(--s-5); }
+  .sp-plain { padding-top: var(--s-7); }
+  .sp-overall, .sp-active, .sp-comp, .sp-sub { padding-left: var(--s-4); padding-right: var(--s-4); }
+  .sp-overall-text h1, .sp-overall-text h2 { font-size: var(--t-3); }
+  .sp-notes > li { grid-template-columns: minmax(0, 1fr); }
+  .sp-notes > li > strong { grid-row: auto; }
+  .sp-notes > li > p, .sp-notes > li > time { grid-column: 1; }
+  .sp-sub-row .btn { flex: 1 1 100%; }
+}
+
+/* ---------- widget pieces ---------- */
+.sg-pill { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--target); padding: 0 var(--s-4); border-radius: var(--r-pill); border: var(--hair) solid var(--line); background: var(--surface); color: var(--ink); font-size: var(--t-1); font-weight: var(--w-medium); text-decoration: none; white-space: nowrap; }
+.sg-pill:hover { border-color: var(--edge); }
+
+.sg-banner { display: flex; align-items: flex-start; gap: var(--s-3); padding: var(--s-3) max(var(--s-4), env(safe-area-inset-right, 0px)) var(--s-3) max(var(--s-4), env(safe-area-inset-left, 0px)); background: var(--wash-warn); color: var(--ink); }
+.sg-banner.down { background: var(--wash-down); }
+.sg-banner > svg { flex: none; margin-top: 3px; }
+.sg-banner-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sg-banner-body p { overflow-wrap: anywhere; }
+.sg-banner-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--s-4); }
+.sg-banner-link { display: inline-flex; align-items: center; min-height: var(--target); margin-block: -10px; color: var(--ink); font-size: var(--t-1); font-weight: var(--w-bold); }
+.sg-banner-x { flex: none; display: grid; place-items: center; width: var(--target); height: var(--target); margin: -10px -10px -10px 0; border: 0; border-radius: var(--r-1); background: transparent; color: var(--ink-2); }
+.sg-banner-x:hover { color: var(--ink); background: var(--surface); }
+.sg-banner-x svg { width: 18px; height: 18px; }
+
+
+/* The README badge is an image with its own fixed colours (`src/lib/badge.ts`); a long name shrinks it rather than widening the page. */
+.sg-badge { display: block; flex: none; max-width: 100%; height: auto; }
+
+/* ---------- the sample host app ---------- */
+.ha { min-height: 100dvh; display: flex; flex-direction: column; }
+
+/* The frame strip is Staygreen's, not AskOne's: it uses the dashboard's tokens on purpose. */
+.ha-strip { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--s-4); padding: var(--s-1) max(16px, env(safe-area-inset-right, 0px)) var(--s-1) max(16px, env(safe-area-inset-left, 0px)); background: var(--surface); color: var(--ink); border-bottom: var(--rule) solid var(--ink); font-size: var(--t-1); }
+.ha-strip-label { display: inline-flex; align-items: center; gap: var(--s-2); font-weight: var(--w-bold); min-height: var(--target); }
+.ha-strip-label svg { width: 16px; height: 16px; flex: none; }
+.ha-strip-hint { color: var(--ink-2); flex: 1 1 280px; min-width: 0; padding-block: var(--s-1); }
+.ha-strip a { display: inline-flex; align-items: center; min-height: var(--target); }
+
+.ha-app { flex: 1 0 auto; display: flex; flex-direction: column; }
+.ha-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); padding: var(--s-2) max(var(--s-5), env(safe-area-inset-right, 0px)) var(--s-2) max(var(--s-5), env(safe-area-inset-left, 0px)); border-bottom: var(--hair) solid var(--line); min-height: 64px; }
+.ha-logo { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-3); font-weight: var(--w-black); letter-spacing: var(--track-title); }
+.ha-live { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 var(--s-3); border-radius: var(--r-pill); border: var(--hair) solid var(--brand); color: var(--brand); font-size: var(--t-1); font-weight: var(--w-bold); }
+.ha-head-right { display: flex; align-items: center; gap: var(--s-3); color: var(--ink-2); font-size: var(--t-1); }
+
+.ha-main { width: 100%; max-width: 760px; margin: 0 auto; padding: var(--s-5) max(var(--s-5), env(safe-area-inset-right, 0px)) var(--s-7) max(var(--s-5), env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: var(--s-5); flex: 1 0 auto; }
+.ha-room { display: flex; flex-direction: column; gap: var(--s-2); }
+.ha-room h1 { font-size: var(--t-4); line-height: var(--lh-head); }
+.ha-room-meta { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-4); color: var(--ink-2); font-size: var(--t-1); }
+
+.ha-ask { display: flex; flex-direction: column; gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-2); background: var(--surface); }
+.ha-ask .textarea { min-height: 84px; background: var(--sunk); border-color: var(--line); }
+.ha-ask-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; color: var(--ink-3); font-size: var(--t-1); }
+.ha-send { min-height: var(--target); background: var(--brand); border-color: var(--brand); color: var(--on-brand); font-weight: var(--w-bold); }
+.ha-send:hover { background: var(--brand); }
+
+.ha-sort { display: flex; gap: var(--s-1); border-bottom: var(--hair) solid var(--line); }
+.ha-sort button { min-height: var(--target); padding: 0 var(--s-3); border: 0; border-bottom: var(--rule) solid transparent; margin-bottom: -1px; background: none; color: var(--ink-2); font-weight: var(--w-medium); }
+.ha-sort button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--brand); }
+
+.ha-qs { display: flex; flex-direction: column; gap: var(--s-2); }
+.ha-q { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: var(--s-3); align-items: start; padding: var(--s-3) var(--s-4) var(--s-3) var(--s-3); border-radius: var(--r-2); background: var(--surface); }
+.ha-vote { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 52px; min-height: 52px; border-radius: var(--r-2); border: var(--hair) solid var(--line); background: var(--sunk); color: var(--ink); font-weight: var(--w-bold); font-size: var(--t-1); line-height: 1.1; }
+.ha-vote svg { width: 18px; height: 18px; }
+.ha-vote:hover { border-color: var(--edge); }
+.ha-vote[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); }
+.ha-q-body { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; padding-top: 2px; }
+.ha-q-text { font-size: var(--t-2); overflow-wrap: anywhere; }
+.ha-q-meta { display: flex; flex-wrap: wrap; gap: 0 var(--s-3); color: var(--ink-3); font-size: var(--t-1); }
+.ha-answered { color: var(--brand); font-weight: var(--w-bold); }
+
+.ha-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; padding: var(--s-3) max(var(--s-5), env(safe-area-inset-right, 0px)) calc(var(--s-3) + env(safe-area-inset-bottom, 0px)) max(var(--s-5), env(safe-area-inset-left, 0px)); border-top: var(--hair) solid var(--line); color: var(--ink-3); font-size: var(--t-1); }
+
+@media (max-width: 640px) {
+  .ha-head, .ha-main, .ha-foot { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .ha-room h1 { font-size: var(--t-3); }
+  .ha-hide-sm { display: none; }
+}
+.sp-uploaded-logo {
+  display: block;
+  width: auto;
+  height: var(--s-6);
+  max-width: min(40vw, var(--s-10));
+  object-fit: contain;
+}

@@ -1,0 +1,25 @@
+# Netlify build settings, in the repo rather than in the dashboard, so a
+# redeploy from a fresh site cannot come up unconfigured.
+#
+# Without a build command Netlify publishes the base directory as static files,
+# and a repository root has no `index.html` — which is a 404 on every page.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  # Next 16 wants Node 20.9+; 22 is what the toolchain is happiest on.
+  NODE_VERSION = "22"
+
+# The Next.js adapter — it turns the build into functions and edge functions,
+# including the edge chain any rate-limit declarations in netlify/edge-functions/
+# hang in. Unpinned, Netlify updates it on every build, so a control you did not
+# touch can change behaviour between two builds of the same source; pinning it
+# is a release decision recorded in docs/BACKLOG.md (docs/RELEASE.md § 4).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Rate-limit rules that must match POST only are edge functions with inline
+# config, because `method`, `excludedPath` and `onError` exist only there —
+# docs/integrations.md § Netlify has the pattern and the plan budget.

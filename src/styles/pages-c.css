@@ -1,0 +1,89 @@
+/* Monitors: add, detail. Incidents. Landing and pricing. */
+
+.spin { animation: sg-spin 0.9s linear infinite; }
+@keyframes sg-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+
+.t-section-lg { font-size: var(--t-4); font-weight: var(--w-bold); letter-spacing: var(--track-title); line-height: var(--lh-head); text-wrap: balance; }
+
+/* Add and edit monitor: the test before saving (`src/components/TestResult.tsx`). */
+.tr { display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; }
+.tr-verdict { display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; font-size: var(--t-3); }
+.tr-h { font-size: var(--t-2); font-weight: var(--w-bold); letter-spacing: 0; }
+.tr-mark { gap: var(--s-2); align-items: flex-start; }
+.tr-mark > svg { margin-top: 3px; }
+.tr-body { max-height: 320px; overflow: auto; }
+.tr-list { display: flex; flex-direction: column; }
+.tr-row { display: flex; gap: var(--s-3); align-items: flex-start; padding: var(--s-3) 0; border-top: var(--hair) solid var(--line); min-width: 0; }
+.tr-row:first-child { border-top: 0; }
+.tr-row > svg { margin-top: 3px; flex: none; }
+
+/* A JSON body as a tree: keys in ink, each value a button that adds its assertion. */
+.jt { font-family: var(--f-mono); font-size: var(--t-1); line-height: 1.6; font-variant-ligatures: none; background: var(--sunk); border-radius: var(--r-2); padding: var(--s-3); max-height: 480px; overflow: auto; min-width: 0; }
+.jt ul { display: flex; flex-direction: column; }
+.jt ul ul { padding-left: var(--s-4); margin-left: var(--s-1); border-left: var(--hair) solid var(--line-strong); }
+.jt li { min-width: 0; }
+.jt summary { cursor: pointer; border-radius: 4px; overflow-wrap: anywhere; }
+.jt summary:hover { background: var(--surface); }
+.jt-leaf { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s-2); }
+.jt-key { color: var(--ink-2); overflow-wrap: anywhere; }
+.jt-key::after { content: ":"; }
+.jt-val { font: inherit; text-align: left; color: var(--accent-text); background: none; border: 0; padding: 0 var(--s-1); margin-left: calc(-1 * var(--s-1)); border-radius: 4px; min-height: 24px; min-width: 0; overflow-wrap: anywhere; cursor: pointer; }
+.jt-val:hover { background: var(--accent-wash); }
+.jt-val[aria-pressed="true"] { background: var(--accent-wash); font-weight: var(--w-bold); }
+.jt-val:disabled { color: var(--ink-3); cursor: not-allowed; background: none; }
+.jt-fixed, .jt-fixed:hover { color: var(--ink); cursor: default; background: none; }
+/* A summary keeps `display: list-item`, which is what draws its disclosure marker. */
+@media (pointer: coarse) { .jt-val { min-height: var(--target); display: inline-flex; align-items: center; } .jt summary { min-height: var(--target); } }
+
+/* Plans. */
+.plans-teaser { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--s-4); max-width: 980px; }
+.plan-card { display: flex; flex-direction: column; gap: var(--s-4); padding: clamp(24px, 3vw, 40px); border-radius: var(--r-3); background: var(--surface); color: var(--ink); border: var(--hair) solid var(--line); }
+.plan-card.dark { background: var(--ground); }
+.plan-name { font-size: var(--t-4); letter-spacing: var(--track-title); }
+.plan-card .btn { margin-top: auto; }
+.plan-price { font-size: var(--t-3); color: var(--ink-2); }
+.plan-price .num { font-size: clamp(48px, 5vw, 72px); line-height: 1; font-weight: var(--w-bold); color: var(--ink); letter-spacing: var(--track-display); }
+.ticks { display: flex; flex-direction: column; gap: var(--s-2); }
+.ticks li { position: relative; padding-left: var(--s-5); }
+.ticks li::before { content: ""; position: absolute; left: 2px; top: 0.55em; width: 9px; height: 5px; border-left: var(--rule) solid var(--ink-2); border-bottom: var(--rule) solid var(--ink-2); transform: rotate(-45deg); }
+
+.faq { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--s-5) var(--s-6); max-width: 980px; }
+.faq dt { font-weight: var(--w-bold); margin-bottom: var(--s-1); }
+.faq dd { color: var(--ink-2); }
+
+/* Admin screens: the rail's later entries, billing, settings, alerts, widget, agents. */
+.rail-soon { flex: none; font-size: var(--t-1); font-weight: var(--w-medium); color: var(--ink-3); }
+a.plan-box { color: var(--ink); }
+a.plan-box:hover { border-color: var(--line-strong); }
+
+/* Development-only controls: dashed, so nobody mistakes one for the product. */
+.dev-only { border: var(--hair) dashed var(--edge); background: transparent; box-shadow: none; margin-bottom: var(--s-4); }
+
+/* Alerts: channels that aren't connectable yet. A list, not rows with controls, on purpose. */
+.al-planned { display: flex; flex-direction: column; gap: var(--s-3); }
+.al-planned li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--s-3); align-items: start; }
+.al-msg { gap: 2px; overflow-wrap: anywhere; }
+
+/* Widget: the page picker beside the preview's heading. */
+.wd-pick { min-width: min(100%, 220px); }
+.soon-panel { margin-bottom: var(--s-6); }
+.wd-privacy { margin-top: var(--s-6); }
+.st-seg { align-self: flex-start; max-width: 100%; }
+/* Agents: the tools as a list on a phone, where the table would scroll sideways. */
+.ag-tools-list { display: none; }
+@media (max-width: 640px) {
+  .ag-tools-list { display: flex; flex-direction: column; }
+  .ag-tools-list li { display: flex; flex-direction: column; gap: var(--s-1); padding: var(--s-3) var(--s-4); border-top: var(--hair) solid var(--line); min-width: 0; }
+  .ag-tools-list li:first-child { border-top: 0; }
+}
+.pe-asset-preview {
+  display: block;
+  width: var(--s-7);
+  height: var(--s-7);
+  object-fit: contain;
+  border: var(--hair) solid var(--line);
+  border-radius: var(--r-1);
+  padding: var(--s-1);
+  background: var(--sunk);
+}

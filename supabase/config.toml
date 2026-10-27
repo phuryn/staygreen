@@ -1,0 +1,12 @@
+# Minimal on purpose. Schema changes ship ONLY as files under
+# supabase/migrations/ — ordered, idempotent, never edited after they are
+# applied. They are applied by the CLI with the target spelled out:
+#   npx supabase migration list --project-ref <ref>
+#   npx supabase db push --linked --project-ref <ref>
+# then listed again; the second listing is the receipt. A deploy does not apply
+# them, the MCP is for looking, and the dashboard is read-only (AGENTS.md § 1.4,
+# docs/environments.md).
+#
+# Edge Functions / Storage buckets: none unless declared here.
+
+project_id = "staygreen"

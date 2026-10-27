@@ -1,0 +1,36 @@
+/* site.css: the signed-out site (landing, pricing, scan, sign-in, connect). Tokens only. */
+
+/* Clerk names its own internal variable --accent, so handing it var(--accent) is a cycle and the
+   primary button paints transparent. It gets the kit's accent under a name of its own. */
+:root { --clerk-primary: var(--accent); }
+
+.site { min-height: 100dvh; display: flex; flex-direction: column; }
+.site > main { flex: 1 0 auto; }
+.wrap { width: 100%; max-width: calc(var(--w-site) + 2 * var(--s-6)); margin: 0 auto; padding-left: max(var(--s-5), env(safe-area-inset-left, 0px)); padding-right: max(var(--s-5), env(safe-area-inset-right, 0px)); }
+@media (max-width: 640px) { .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+
+.site-head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: var(--z-sticky); background: var(--ground); border-bottom: var(--hair) solid var(--line); }
+.site-head-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); min-height: 68px; }
+.site-brand { text-decoration: none; }
+.site-nav { display: flex; align-items: center; gap: var(--s-5); font-weight: var(--w-medium); }
+.site-nav > a:not(.btn) { text-decoration: none; color: var(--ink); }
+.site-nav > a:not(.btn):hover { color: var(--accent-text); }
+@media (max-width: 860px) { .hide-md { display: none; } .site-nav { gap: var(--s-4); } }
+
+/* The footer closes on the name, set as wide as the page. */
+.site-foot { padding: var(--s-6) 0 var(--s-6); background: var(--ground); border-top: var(--hair) solid var(--line); overflow: hidden; }
+.site-foot-row { display: flex; justify-content: space-between; gap: var(--s-3) var(--s-5); flex-wrap: wrap; align-items: center; }
+.site-foot-line { color: var(--ink-2); max-width: 46ch; }
+.site-foot-nav { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); }
+.site-foot-nav a { color: var(--ink); text-decoration: none; min-height: var(--control-sm); display: inline-flex; align-items: center; }
+.site-foot-nav a:hover { color: var(--accent-text); }
+.site-word { display: block; margin-top: clamp(40px, 6vw, 96px); font-size: min(21vw, 300px); line-height: 0.78; letter-spacing: -0.065em; font-weight: var(--w-bold); color: var(--ink); white-space: nowrap; margin-left: -0.05em; padding-bottom: 0.2em; user-select: none; }
+.proto-note { margin-top: var(--s-5); }
+
+/* A page section on the site. */
+.band { padding-block: var(--s-8); }
+.band-tight { padding-block: var(--s-6); }
+.band-head { display: flex; flex-direction: column; gap: var(--s-3); max-width: 720px; margin-bottom: var(--s-6); }
+.band-head h2 { font-size: var(--t-4); letter-spacing: var(--track-title); }
+.band-head p { font-size: var(--t-3); color: var(--ink-2); }
+.narrow { max-width: 560px; margin: 0 auto; }

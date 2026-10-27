@@ -1,0 +1,139 @@
+{
+  "objectClassName": "domain",
+  "handle": "10966907_DOMAIN_COM-VRSN",
+  "ldhName": "VERCEL.COM",
+  "links": [
+    {
+      "value": "https://rdap.verisign.com/com/v1/domain/vercel.com",
+      "rel": "self",
+      "href": "https://rdap.verisign.com/com/v1/domain/vercel.com",
+      "type": "application/rdap+json"
+    },
+    {
+      "value": "https://rdap.verisign.com/com/v1/domain/vercel.com",
+      "rel": "related",
+      "href": "https://rdap.registrar.amazon.com/rdap/domain/VERCEL.COM",
+      "type": "application/rdap+json"
+    }
+  ],
+  "status": [
+    "client transfer prohibited"
+  ],
+  "entities": [
+    {
+      "objectClassName": "entity",
+      "handle": "468",
+      "roles": [
+        "registrar"
+      ],
+      "links": [
+        {
+          "href": "http://registrar.amazon.com",
+          "type": "text/html",
+          "value": "https://rdap.registrar.amazon.com/rdap/",
+          "rel": "about"
+        }
+      ],
+      "publicIds": [
+        {
+          "type": "IANA Registrar ID",
+          "identifier": "468"
+        }
+      ],
+      "vcardArray": [
+        "vcard",
+        [
+          [
+            "version",
+            {},
+            "text",
+            "4.0"
+          ],
+          [
+            "fn",
+            {},
+            "text",
+            "Amazon Registrar, Inc."
+          ]
+        ]
+      ],
+      "entities": [
+        {
+          "objectClassName": "entity",
+          "roles": [
+            "abuse"
+          ],
+          "vcardArray": [
+            "vcard",
+            [
+              [
+                "version",
+                {},
+                "text",
+                "4.0"
+              ],
+              [
+                "fn",
+                {},
+                "text",
+                ""
+              ]
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "eventAction": "registration",
+      "eventDate": "1999-10-04T19:30:47Z"
+    },
+    {
+      "eventAction": "expiration",
+      "eventDate": "2029-10-04T19:30:47Z"
+    },
+    {
+      "eventAction": "last changed",
+      "eventDate": "2026-05-16T15:54:35Z"
+    },
+    {
+      "eventAction": "last update of RDAP database",
+      "eventDate": "2026-10-22T19:22:05Z"
+    }
+  ],
+  "secureDNS": {
+    "delegationSigned": false
+  },
+  "nameservers": [
+    {
+      "objectClassName": "nameserver",
+      "ldhName": "A.ZEIT-WORLD.CO.UK"
+    },
+    {
+      "objectClassName": "nameserver",
+      "ldhName": "B.ZEIT-WORLD.ORG"
+    },
+    {
+      "objectClassName": "nameserver",
+      "ldhName": "E.ZEIT-WORLD.COM"
+    },
+    {
+      "objectClassName": "nameserver",
+      "ldhName": "F.ZEIT-WORLD.NET"
+    }
+  ],
+  "rdapConformance": [
+    "rdap_level_0",
+    "icann_rdap_technical_implementation_guide_1",
+    "icann_rdap_response_profile_1"
+  ],
+  "notices": [
+    {
+      "title": "Terms of Service",
+      "description": [
+        "(trimmed)"
+      ]
+    }
+  ]
+}
