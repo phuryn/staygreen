@@ -3,7 +3,7 @@ description: Something Staygreen should do.
 body:
   - type: markdown
     attributes:
-      value: "Issues are public. Never paste a heartbeat URL, an API token, a header value, or anything else your monitors keep secret."
+      value: "Issues are public. Never paste a secret, service-role or restricted key, a token, a webhook or heartbeat URL, a signing secret or a header value, whether Staygreen issued it or another service did. For a security problem, report it privately instead: https://github.com/phuryn/staygreen/security/advisories/new"
   - type: textarea
     id: job
     attributes:
