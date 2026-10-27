@@ -63,8 +63,8 @@ Writes take a `request_id` UUID: repeat it with the same inputs to retry safely.
 
 Open an [issue](https://github.com/phuryn/staygreen/issues/new/choose). Say what you did, what you expected, and what happened instead; the monitor type and the screen help.
 
-Issues are public. **Never paste a heartbeat URL, an API token, a header value, or anything else your monitors keep secret.** A heartbeat URL is the only credential for that heartbeat: anyone holding it can ping it. If you posted one by mistake, rotate it from the heartbeat's page.
+Issues are public. **Never paste a secret, service-role or restricted key, a token, a webhook or heartbeat URL, a signing secret or a header value, whether Staygreen issued it or another service did.** If you posted one, treat it as leaked: make sure the old value stops working wherever it is accepted, because issuing a new one doesn't always retire it; see [staygreen.io/support](https://staygreen.io/support) if you're not sure how.
 
-For a security problem, don't open an issue: use [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new) instead.
+For a security problem, don't open an issue: use [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new) instead. For anything else private, see [staygreen.io/support](https://staygreen.io/support).
 
 Pull requests aren't accepted until the code opens.
