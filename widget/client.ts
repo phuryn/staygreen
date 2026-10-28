@@ -21,6 +21,9 @@ export function installWidget(doc: Document, win: Window) {
         try { if (!el.shadowRoot) hosts.push({ root: el.attachShadow({ mode: "open" }), banner: el.dataset.staygreen === "banner" }); } catch { /* A host may not support a shadow root. */ }
       }
       if (!hosts.length) return;
+      // The body cap bounds every field: a field cap below what a page can store hid a long update or
+      // headline (review rel-a).
+      const cap = 65536;
       const text = (v: unknown, max: number): v is string => typeof v === "string" && v.length <= max;
       const element = (tag: string, label = "") => { const el = doc.createElement(tag); el.textContent = label; return el; };
       const link = (label: string) => { const el = element("a", label) as HTMLAnchorElement; el.href = page; el.target = "_blank"; el.rel = "noopener noreferrer"; return el; };
@@ -33,16 +36,16 @@ export function installWidget(doc: Document, win: Window) {
           const response = await win.fetch(`${page}/summary.json`, { credentials: "omit", referrerPolicy: "no-referrer", signal: controller.signal });
           if (!response.ok || !response.body) throw Error();
           const reader = response.body.getReader(); let size = 0; let body = ""; const decoder = new TextDecoder();
-          try { for (;;) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > 65536) { await reader.cancel(); throw Error(); } body += decoder.decode(value, { stream: true }); } }
+          try { for (;;) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > cap) { await reader.cancel(); throw Error(); } body += decoder.decode(value, { stream: true }); } }
           finally { reader.releaseLock(); }
           const data = JSON.parse(body + decoder.decode());
-          if (data.page !== slug || !text(data.headline, 4000) || !Array.isArray(data.components) || data.components.length > 100 || !data.branding || typeof data.branding.mark !== "boolean") throw Error();
+          if (data.page !== slug || !text(data.headline, cap) || !Array.isArray(data.components) || data.components.length > 100 || !data.branding || typeof data.branding.mark !== "boolean") throw Error();
           const states = ["operational", "degraded", "down", "paused", "unchecked"];
           if (!states.includes(data.status)) throw Error();
           const colour = (value: unknown, fallback: string) => (typeof value === "string" && /^#[a-f0-9]{6}$/i.test(value) ? value : fallback).toLowerCase();
           const affected = data.components.some((c: { in_app?: boolean; status?: string }) => c?.in_app === true && ["down", "degraded"].includes(c.status ?? ""));
           const note = data.incident;
-          const show = affected && note && text(note.note, 2000) && text(note.update_id, 200) && note.update_id && note.update_id !== dismissed;
+          const show = affected && note && text(note.note, cap) && text(note.update_id, 200) && note.update_id && note.update_id !== dismissed;
           // Copies of the kit's light/dark ink and surface; no host selector or global CSS.
           const css = ':host{font:14px/1.5 system-ui,sans-serif;color:#0B0C0E}section{display:flex;gap:12px;align-items:center;padding:12px 16px;background:#FFFFFF;border:1px solid #D3D7DE;border-radius:8px}p{margin:0;flex:1;overflow-wrap:anywhere}a{color:inherit;text-decoration:underline;text-underline-offset:3px}button{font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:8px;min-width:32px;min-height:32px;cursor:pointer}a:focus-visible,button:focus-visible{outline:2px solid currentColor;outline-offset:3px}small{display:block}@media(prefers-color-scheme:dark){:host{color:#F2F3F5}section{background:#121418;border-color:#353A43}}' +
             `a{color:${colour(data.branding.link_light, "#0B0C0E")}}@media(prefers-color-scheme:dark){a{color:${colour(data.branding.link_dark, "#F2F3F5")}}}`;

@@ -3,6 +3,7 @@
 import { PricingTable, useOrganization } from "@clerk/nextjs";
 import { soonList } from "@/components/landing/plan-copy";
 import { soonAreas } from "@/lib/launch";
+import { useSelfHostedPlan } from "./SelfHostedPlan";
 
 /** Clerk owns prices, the period selector and checkout. Its mounted table defaults
  * to annual (there is no period prop in this SDK); the browser suite pins that
@@ -16,6 +17,13 @@ import { soonAreas } from "@/lib/launch";
 const appearance = { elements: { pricingTableCardBody: { display: "flex", flexDirection: "column" } } } as const;
 
 export function OrganizationPlans() {
+  const selfHosted = useSelfHostedPlan();
+  // Also used on public pricing: that copy is operator-owned, but a disabled Clerk
+  // Billing instance must never mount a checkout component there either.
+  return selfHosted ? null : <ClerkOrganizationPlans />;
+}
+
+function ClerkOrganizationPlans() {
   const { isLoaded, organization } = useOrganization();
   // Wait for Clerk to identify the payer before mounting its checkout controls.
   // Signed-out visitors have no active organization; Clerk handles their signup.

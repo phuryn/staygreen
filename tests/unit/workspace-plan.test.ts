@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getMember } from "@/lib/workspace";
+import { agentQuery } from "../support/agent-db";
 
 /* The plan the probes route Builder monitors by (migration 20261024090000): the dashboard writes
    the verified session's plan onto the workspace row when the row disagrees, and never a simulated
@@ -11,7 +12,12 @@ vi.mock("@/lib/session", () => ({
   currentEntitlements: fake.entitlements,
   devPlanSimulation: fake.simulation,
 }));
-vi.mock("@/lib/db", () => ({ db: () => ({ rpc: fake.rpc, from: (table: string) => ({ update: (v: unknown) => (fake.update(table, v), { eq: fake.eq }) }) }) }));
+vi.mock("@/lib/db", () => ({ db: () => ({ rpc: fake.rpc, from: (table: string) => {
+  const q = agentQuery(null);
+  q.update = (value: unknown) => { fake.update(table, value); return q; };
+  q.eq = (key: string, value: unknown) => { fake.eq(key, value); return q; };
+  return q;
+} }) }));
 
 const row = (plan: string) => ({ data: { id: "ws_a", clerk_org_id: "org_A", plan }, error: null });
 
@@ -30,7 +36,7 @@ describe("the workspace's stored plan", () => {
       fake.entitlements.mockResolvedValue({ plan: verified });
       const member = await getMember();
       expect(member?.entitlements).toEqual({ plan: verified });
-      expect(fake.update).toHaveBeenCalledExactlyOnceWith("workspaces", { plan: verified });
+      expect(fake.update.mock.calls.filter(([table]) => table === "workspaces")).toEqual([["workspaces", { plan: verified }]]);
       expect(fake.eq).toHaveBeenCalledWith("id", "ws_a");
     }
   });

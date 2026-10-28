@@ -129,6 +129,12 @@ it("requires an affected in-app component and a published update; takes the publ
   const f = fixture(); f.fetch.mockImplementation(async () => Response.json({ ...summary(), headline: "No problems found", status: "unchecked", components: [{ status: "operational", in_app: true }, { status: "paused", in_app: true }], incident: null }));
   await vi.advanceTimersByTimeAsync(5001); expect(text(f.banner)).toBe(""); expect(text(f.pill)).toContain("No problems found"); expect(text(f.pill)).not.toContain("All systems operational");
 });
+it("shows the longest update a builder can publish and the longest headline a page can hold", async () => {
+  // An update runs to 5,000 characters; a page holds 50 components named up to 80, so "Degraded: " and all fifty.
+  const note = "u".repeat(5000), headline = `Degraded: ${Array.from({ length: 50 }, () => "n".repeat(80)).join(", ")}`;
+  const f = fixture(); f.fetch.mockImplementation(async () => Response.json({ ...summary(), headline, incident: { ...summary().incident, note } }));
+  await vi.advanceTimersByTimeAsync(5001); expect(text(f.banner)).toContain(note); expect(text(f.pill)).toContain(headline);
+});
 it("rejects a wrong page and an oversized JSON body, without surfacing errors to the host", async () => {
   const f = fixture(); f.fetch.mockImplementation(async () => Response.json({ ...summary(), page: "someone-else" })); await vi.advanceTimersByTimeAsync(5001); expect(text(f.banner)).toBe("");
   f.fetch.mockImplementation(async () => new Response("x".repeat(65537))); await vi.advanceTimersByTimeAsync(5000); expect(text(f.pill)).toBe("");

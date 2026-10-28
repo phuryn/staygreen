@@ -16,6 +16,7 @@ import { currentCaller, currentEntitlements, devPlanSimulation } from "./session
 import { monitorDefaults } from "./monitor-defaults";
 import { sslOf } from "./expiry";
 import { dnsRecordName } from "./page-domain";
+import { syncWorkspacePlan } from "./workspace-plan";
 
 /* The member side of the three functions (`AGENTS.md § 1.1`), and what a
    dashboard page renders from.
@@ -65,11 +66,11 @@ const lookupMember = cache(async (): Promise<Member | "signed-out" | "no-access"
   }
   const entitlements = await currentEntitlements();
   // The probes check Builder monitors from Builder's third location by the plan stored here
-  // (migration 20261024090000), which nothing else reads. It follows the verified session, never a
+  // (migration 20261024090000), which nothing else reads. It follows Clerk or the self-hosted plan, never a
   // simulated plan, nor one Clerk didn't answer (`unread`: Free for this request only); a write
-  // that fails costs only that location until the next visit.
+  // that fails leaves intervals or that location to retry on the next visit.
   if (!entitlements.unread && data.plan !== entitlements.plan && !(await devPlanSimulation())) {
-    await db().from("workspaces").update({ plan: entitlements.plan }).eq("id", data.id);
+    await syncWorkspacePlan(data.id, data.plan, entitlements.plan);
   }
   return { caller, workspace, entitlements };
 });

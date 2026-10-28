@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { agentQuery } from "../support/agent-db";
 import { demoSlug, FREE, entitlementsFrom } from "@/lib/plans";
 import { agentHash, matchesApiToken, newApiToken, parseApiToken } from "@/lib/api-token-crypto";
@@ -16,7 +16,45 @@ const workspace = { id: "ws_" + "a".repeat(24), clerk_org_id: "org_a" };
 const identity = { userId: "user_a", orgId: "org_a", clientId: "client_a", scopes: ["user:org:read"] };
 const request = (token = "jwt") => new Request("https://staygreen.test/mcp", { headers: { authorization: `Bearer ${token}` } });
 const deps = () => ({ verify: vi.fn().mockResolvedValue(identity), membershipRole: vi.fn().mockResolvedValue("org:admin"), clientName: vi.fn().mockResolvedValue("Verified client"), budget: vi.fn().mockResolvedValue(undefined), entitlements: vi.fn().mockResolvedValue(FREE) });
-beforeEach(() => { vi.clearAllMocks(); mocks.rpc.mockResolvedValue({ data: workspace, error: null }); });
+beforeEach(() => { vi.clearAllMocks(); vi.stubEnv("SELF_HOSTED_PLAN", undefined); mocks.rpc.mockResolvedValue({ data: workspace, error: null }); });
+afterEach(() => vi.unstubAllEnvs());
+
+describe("self-hosted machine workspaces", () => {
+  it.each(["oauth", "api_token"])("stores Builder for %s without a dashboard visit, scoped to the credential's workspace", async mode => {
+    vi.stubEnv("SELF_HOSTED_PLAN", "builder");
+    const token = newApiToken(workspace.id, "p".repeat(43));
+    const d = deps();
+    d.entitlements.mockResolvedValue(entitlementsFrom(slug => slug !== demoSlug));
+    const owner = agentQuery({ ...workspace, plan: "free" });
+    const monitors = agentQuery(null);
+    mocks.rpc.mockResolvedValue({ data: { ...workspace, plan: "free" }, error: null });
+    mocks.from.mockImplementation(table => table === "workspaces" ? owner : table === "monitors" ? monitors : agentQuery({
+      id: "tok_a", workspace_id: workspace.id, hash: token.hash, scope: "read", name: "CI", revoked_at: null,
+    }));
+    const principal = await requireAgent(request(mode === "oauth" ? "jwt" : token.plaintext), mode === "oauth", undefined, d);
+    expect(principal.entitlements.plan).toBe("builder");
+    expect(owner.update).toHaveBeenCalledExactlyOnceWith({ plan: "builder" });
+    expect(owner.eq).toHaveBeenCalledWith("id", workspace.id);
+    expect(owner.eq).toHaveBeenCalledWith("plan", "free");
+    expect(monitors.update).toHaveBeenCalledTimes(1); // HTTP, TCP and Supabase together; Stripe and MCP stay (`workspace-plan.ts`)
+    expect(monitors.eq).toHaveBeenCalledWith("workspace_id", workspace.id);
+    expect(d.budget).toHaveBeenLastCalledWith(agentHash("workspace", workspace.id, "p".repeat(43)), 120);
+  });
+
+  it("does not write a plan or grant allowances to an unauthenticated caller", async () => {
+    vi.stubEnv("SELF_HOSTED_PLAN", "builder");
+    const d = deps();
+    await expect(requireAgent(new Request("https://staygreen.test/mcp"), true, undefined, d)).rejects.toMatchObject({ status: 401 });
+    expect(d.entitlements).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("leaves hosted plan synchronization to the existing member path", async () => {
+    await requireAgent(request(), true, undefined, deps());
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+});
 
 describe("workspace credentials", () => {
   it("attributes OAuth writes to the registered name matched by client id, never a submitted name", async () => {

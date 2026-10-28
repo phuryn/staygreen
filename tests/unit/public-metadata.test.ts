@@ -74,7 +74,7 @@ it("keeps share-card fields only at the root, without title/image overrides or a
   const layout = readFileSync(join(app, "layout.tsx"), "utf8");
   expect(layout).not.toMatch(/canonical\s*:/);
   expect(layout).toMatch(/robots:\s*\{\s*index:\s*false,\s*follow:\s*false\s*\}/);
-});
+}, 30_000); // Parses every app source: past 5 s beside the gate's database suites (2026-10-28).
 
 it("opts in only the six named pages, with a canonical matching each page's own route", () => {
   const optedIn: string[] = [];

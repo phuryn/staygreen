@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const member = await requireMember("/app/billing");
-  // Null unless `next dev` runs with DEV_PLAN_OVERRIDE=on, so production never renders the switch.
+  // Null in self-hosted mode or unless `next dev` runs with DEV_PLAN_OVERRIDE=on.
   const [snapshot, simulation] = await Promise.all([loadSnapshot(member), devPlanSimulation()]);
   return (
     <WorkspaceSnapshot snapshot={snapshot}>

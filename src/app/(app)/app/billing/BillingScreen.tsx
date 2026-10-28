@@ -6,6 +6,7 @@ import { useClerk } from "@clerk/nextjs";
 import { Loading, PageHead } from "@/components/Shell";
 import { PlanTable } from "@/components/PlanTable";
 import { OrganizationPlans } from "@/components/OrganizationPlans";
+import { useSelfHostedPlan } from "@/components/SelfHostedPlan";
 import { builderOnlyLocations, builderRegion } from "@/components/landing/plan-copy";
 import { SoonTag } from "@/components/Tags";
 import { isBuilt, isLive } from "@/lib/launch";
@@ -192,5 +193,7 @@ function DevPlanSwitch({ on }: { on: boolean }) {
 
 export function BillingScreen({ simulation }: { simulation: Simulation }) {
   const s = useWorkspace();
+  const selfHosted = useSelfHostedPlan();
+  if (selfHosted) return <PageHead title="Plan" sub="This installation includes every Builder feature." />;
   return s ? <Billing s={s} simulation={simulation} /> : <Loading />;
 }

@@ -65,6 +65,9 @@ export const serverEnvSchema = publicEnvSchema
     /** Absolute base URL. Used for links that leave the request, like a heartbeat URL. */
     APP_URL: required(z.url().refine((v) => /^https?:\/\//.test(v), "must start with https:// (or http:// for localhost)")),
 
+    /** Private installations can grant Builder without enabling Clerk Billing. */
+    SELF_HOSTED_PLAN: optional(z.literal("builder")),
+
     SUPABASE_URL: required(z.url().refine((v) => /^https:\/\/[a-z0-9]{20}\.supabase\.co\/?$/.test(v) || /^http:\/\/(127\.0\.0\.1|localhost):\d+\/?$/.test(v), "is not a Supabase project URL (https://<ref>.supabase.co)")),
     /** The secret key. The browser never holds a Supabase key (`AGENTS.md § 1.4`). */
     SUPABASE_SECRET_KEY: required(z.string().refine((v) => SUPABASE_SECRET.test(v), "is not a Supabase secret key (sb_secret_…)")),
@@ -124,6 +127,12 @@ export const serverEnvSchema = publicEnvSchema
     DEV_PLAN_OVERRIDE: optional(z.string().refine((v) => v === "on" || v === "off", "is on or off (development only)")),
   })
   .superRefine((value, context) => {
+    if (value.SELF_HOSTED_PLAN === "builder") {
+      // URL canonicalizes case and escaped labels; a final DNS dot names the same host.
+      const host = URL.canParse(value.APP_URL) ? new URL(value.APP_URL).hostname.replace(/\.$/, "") : "";
+      if (host === "staygreen.io" || host.endsWith(".staygreen.io"))
+        context.addIssue({ code: "custom", path: ["SELF_HOSTED_PLAN"], message: "cannot grant Builder without billing on staygreen.io or its subdomains; this mode is only for self-hosted installations" });
+    }
     if (value.STATUS_EDGE_ENABLED === "on" && !value.EDGE_CONTROL_SECRET)
       context.addIssue({ code: "custom", path: ["EDGE_CONTROL_SECRET"], message: "is required when STATUS_EDGE_ENABLED is on" });
     const email = [value.POSTMARK_SERVER_TOKEN, value.EMAIL_FROM, value.ALERT_LINK_SECRET];

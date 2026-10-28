@@ -15,6 +15,7 @@ import { AppLine, AppRow } from "./AppSwitcher";
 import { SoonTag } from "./Tags";
 import { Toasts } from "./Toasts";
 import { DocTitle } from "@/components/DocTitle";
+import { useSelfHostedPlan } from "./SelfHostedPlan";
 
 // Every screen of the dashboard, in the order a builder meets the jobs. A screen whose area
 // isn't built yet (`launch.ts`) is still listed, so the whole product is in view, and says
@@ -67,6 +68,7 @@ function usePendingPath(path: string): string | null {
 }
 
 function Rail({ s, at, onNavigate }: { s: Workspace | null; at: string; onNavigate?: () => void }) {
+  const selfHosted = useSelfHostedPlan();
   const isOn = (href: string) => (href === "/app" ? at === "/app" : at.startsWith(href));
   const L = s ? limitsOf(s) : null;
   const used = s?.monitors.filter((m) => !m.auto).length ?? 0;
@@ -74,6 +76,17 @@ function Rail({ s, at, onNavigate }: { s: Workspace | null; at: string; onNaviga
   // Every app's, like the other-apps line under the switcher: an app chosen there can't hide an
   // outage in another.
   const open = s ? openIncidents(s).length : 0;
+  const planLabel = s && L ? `${s.plan === "builder" ? "Builder" : "Free"} plan: ${used} of ${L.monitors} monitors, ${hb} of ${L.heartbeats} heartbeats` : "";
+  const planUsage = s && L && <>
+    <span className="spread">
+      <strong>{s.plan === "builder" ? "Builder" : "Free"}</strong>
+      <span className="t-meta num">{used} of {L.monitors} monitors</span>
+    </span>
+    <span className={`meter ${used / L.monitors > 0.9 ? "full" : ""}`}>
+      <span style={{ width: `${Math.min(100, (used / L.monitors) * 100)}%` }} />
+    </span>
+    <span className="t-meta"><span className="num">{hb} of {L.heartbeats}</span> heartbeats, {L.httpIntervalMin}-minute checks</span>
+  </>;
   return (
     <div className="rail-inner">
       <div className="rail-top">
@@ -100,21 +113,12 @@ function Rail({ s, at, onNavigate }: { s: Workspace | null; at: string; onNaviga
       </nav>
 
       <div className="rail-foot">
-        {s && L && (
-          <Link href="/app/billing" className="plan-box" onClick={onNavigate} aria-label={`${s.plan === "builder" ? "Builder" : "Free"} plan: ${used} of ${L.monitors} monitors, ${hb} of ${L.heartbeats} heartbeats. Plan and billing`}>
-            <span className="spread">
-              <strong>{s.plan === "builder" ? "Builder" : "Free"}</strong>
-              <span className="t-meta num">{used} of {L.monitors} monitors</span>
-            </span>
-            <span className={`meter ${used / L.monitors > 0.9 ? "full" : ""}`}>
-              <span style={{ width: `${Math.min(100, (used / L.monitors) * 100)}%` }} />
-            </span>
-            <span className="t-meta"><span className="num">{hb} of {L.heartbeats}</span> heartbeats, {L.httpIntervalMin}-minute checks</span>
-          </Link>
-        )}
+        {planUsage && (selfHosted
+          ? <div className="plan-box" role="group" aria-label={planLabel}>{planUsage}</div>
+          : <Link href="/app/billing" className="plan-box" onClick={onNavigate} aria-label={`${planLabel}. Plan and billing`}>{planUsage}</Link>)}
         <nav aria-label="Workspace settings" className="rail-group">
           <ul>
-            {foot.map((n) => (
+            {foot.filter((n) => !selfHosted || n.href !== "/app/billing").map((n) => (
               <li key={n.href}>
                 <Link href={n.href} className="rail-link" aria-current={isOn(n.href) ? "page" : undefined} onClick={onNavigate}>
                   <n.icon aria-hidden="true" strokeWidth={1.75} />

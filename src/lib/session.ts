@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 import type { Caller } from "./authz";
 import { demoSlug, entitlementsFrom, FREE, UNREAD, type Entitlements } from "./plans";
+import { SELF_HOSTED_ENTITLEMENTS, selfHostedPlanEnabled } from "./self-hosted-plan";
 
 /* The one seam between us and Clerk (`AGENTS.md § 1.5`): verify, never decode.
    `auth()` verifies the session server-side on every request; nothing else in
@@ -10,9 +11,9 @@ import { demoSlug, entitlementsFrom, FREE, UNREAD, type Entitlements } from "./p
 
    It carries two things, because Clerk answers both from the same verified
    session: *who* the caller is (`current`), and *what their plan allows*
-   (`entitlements`, through `has({ feature })`, `§ 1.1`). Keeping them on one
-   seam lets a test put a caller and a plan on the request together without a
-   Clerk key or a checkout. */
+   (`entitlements`, through `has({ feature })`, `§ 1.1`, unless the installation
+   includes Builder). Keeping them on one seam lets a test put a caller and a plan
+   on the request together without a Clerk key or a checkout. */
 
 export type SessionVerifier = {
   current(): Promise<Caller | null>;
@@ -28,6 +29,11 @@ const clerkVerifier: SessionVerifier = {
   },
 
   async entitlements() {
+    if (selfHostedPlanEnabled()) {
+      // Identity still has to verify. A verification error aborts the request rather than
+      // returning an unread plan that could be mistaken for this installation's allowance.
+      return (await auth()).userId ? SELF_HOSTED_ENTITLEMENTS : FREE;
+    }
     try {
       const { userId, has } = await auth();
       if (!userId || !has) return FREE;
@@ -56,7 +62,7 @@ const clerkVerifier: SessionVerifier = {
 export const DEV_PLAN_COOKIE = "sg-dev-plan";
 
 export function devPlanOverrideEnabled(): boolean {
-  return process.env.NODE_ENV === "development" && process.env.DEV_PLAN_OVERRIDE === "on";
+  return !selfHostedPlanEnabled() && process.env.NODE_ENV === "development" && process.env.DEV_PLAN_OVERRIDE === "on";
 }
 
 /** The simulated plan, or null to ask Clerk. "builder" holds every Builder feature, not the

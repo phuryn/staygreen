@@ -20,7 +20,7 @@ Keep secrets in each service's secret store. NEXT_PUBLIC_ values are embedded in
 | `CLERK_WEBHOOK_SECRET` | app, configuration sample | app: optional / defaulted | Reserved signing secret; no Clerk deletion webhook handler is implemented yet. | Leave unset until a handler is implemented |
 | `CREDENTIALS_KEY` | app, probe, sender Worker, configuration sample | app: required; probe: required; sender Worker: required | AES-256-GCM key for customer credentials; 32 random base64url bytes shared with probes and sender. Back up securely. | Your secret generator |
 | `DATABASE_URL` | probe, configuration sample | probe: required | Probe Postgres connection using a dedicated login with only the probe role. | Your database administrator |
-| `DEV_PLAN_OVERRIDE` | app, app / build, configuration sample | app: optional / defaulted | Enables the development-only plan simulation when set to on; ignored in production. | Local development preference |
+| `DEV_PLAN_OVERRIDE` | app, app / build, configuration sample | app: optional / defaulted | Enables the development-only plan simulation when set to on; ignored in production and when SELF_HOSTED_PLAN=builder. | Local development preference |
 | `E2E_PORT` | tests | Optional / tool-managed | Local browser-test server port. | Test runner; default 3101 |
 | `EDGE_CONTROL_SECRET` | app, edge, configuration sample | app: optional / defaulted; edge: required | 32 random base64url bytes authenticating app-to-edge control requests. | Your secret generator; same value on app and edge |
 | `EDGE_DATABASE_URL` | edge, configuration sample | edge: required | Postgres connection for the edge's restricted login. | Your database administrator |
@@ -55,6 +55,7 @@ Keep secrets in each service's secret store. NEXT_PUBLIC_ values are embedded in
 | `PROBE_URL` | probe, configuration sample | probe: required | Reachable peer HTTP(S) origin, without credentials, query or path. | Your private fleet network |
 | `PROBE_WORKSPACES` | probe, configuration sample | probe: optional / defaulted | Optional comma-separated workspace-id filter for isolated development probes; empty checks all eligible workspaces. | Your development data setup |
 | `RDAP_LIVE` | tests | Optional / tool-managed | Opt-in network-backed RDAP tests; leave unset for the offline unit run. | Local test invocation |
+| `SELF_HOSTED_PLAN` | app, app / build, configuration sample | app: optional / defaulted | Optional builder grants all workspaces every Builder feature at Builder limits without Clerk Billing or Stripe. Empty uses Clerk Billing; refused when APP_URL names staygreen.io or a subdomain. Overrides the development simulation. | Your installation preference, on the app only |
 | `SENTRY_DSN` | app, configuration sample | app: optional / defaulted | Reserved configuration; error reporting is not wired by setting it. | Leave unset until implemented |
 | `SLACK_CLIENT_ID` | app, configuration sample | app: optional / defaulted | Optional Slack OAuth app identifier; set together with its secret. | Your Slack app settings |
 | `SLACK_CLIENT_SECRET` | app, configuration sample | app: optional / defaulted | Optional Slack OAuth app secret. | Your Slack app settings |

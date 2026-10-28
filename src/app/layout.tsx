@@ -4,6 +4,8 @@ import localFont from "next/font/local";
 import { ClerkProvider } from "@clerk/nextjs";
 import { THEME_COOKIE } from "@/lib/theme-cookie";
 import { metadataBase } from "@/lib/public-metadata";
+import { selfHostedPlanEnabled } from "@/lib/self-hosted-plan";
+import { SelfHostedPlanProvider } from "@/components/SelfHostedPlan";
 import "@fontsource-variable/jetbrains-mono";
 import "../../design/tokens.css";
 import "../../design/kit.css";
@@ -91,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       afterSignOutUrl="/"
     >
       <html lang="en" data-theme={dataTheme} className={switzer.variable}>
-        <body>{children}</body>
+        <body><SelfHostedPlanProvider enabled={selfHostedPlanEnabled()}>{children}</SelfHostedPlanProvider></body>
       </html>
     </ClerkProvider>
   );

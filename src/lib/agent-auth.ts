@@ -10,6 +10,8 @@ import { db } from "./db";
 import { env } from "./env";
 import { mcpOAuthConfig } from "./mcp-oauth-metadata";
 import { mask } from "@/checks/mask";
+import { selfHostedPlanEnabled } from "./self-hosted-plan";
+import { syncWorkspacePlan } from "./workspace-plan";
 
 export const clientLabel = (v: string) => mask(v).replace(/[\p{Cc}\p{Cf}]/gu, " ").trim().slice(0, 160) || "Agent";
 export type OAuthIdentity = { userId: string; clientId: string; orgId: string | null; scopes: string[]; issuedAt?: number; expiresAt?: number };
@@ -85,6 +87,7 @@ export async function requireAgent(request: Request, oauth: boolean, seen?: Seen
   const header = request.headers.get("authorization");
   const pepper = env().API_TOKEN_PEPPER;
   let principal: Omit<AgentPrincipal, "entitlements">;
+  let storedPlan: string;
   if (/^Bearer\s+sg_/i.test(header ?? "")) {
     const token = parseApiToken(header);
     if (!token) throw invalid();
@@ -92,9 +95,10 @@ export async function requireAgent(request: Request, oauth: boolean, seen?: Seen
     if (error) throw unavailable();
     const matches = matchesApiToken(data?.workspace_id ?? "", token.secret, data?.hash ?? "", pepper);
     if (!data || !matches || data.revoked_at !== null) throw invalid();
-    const owner = await db().from("workspaces").select("id,clerk_org_id").eq("id", data.workspace_id).single();
+    const owner = await db().from("workspaces").select("id,clerk_org_id,plan").eq("id", data.workspace_id).single();
     if (owner.error) throw unavailable();
-    principal = { workspace: owner.data, actor: data.id, client: clientLabel(data.name), scope: data.scope, auth: "api_token" };
+    storedPlan = owner.data.plan;
+    principal = { workspace: { id: owner.data.id, clerk_org_id: owner.data.clerk_org_id }, actor: data.id, client: clientLabel(data.name), scope: data.scope, auth: "api_token" };
     seen?.(principal);
     await deps.budget(agentHash("admission-token", data.workspace_id, pepper), 120);
     const touched = await db().from("api_tokens").update({ last_used_at: new Date().toISOString() }).eq("id", data.id).is("revoked_at", null).or(`last_used_at.is.null,last_used_at.lt.${new Date(Date.now() - 60000).toISOString()}`);
@@ -117,11 +121,18 @@ export async function requireAgent(request: Request, oauth: boolean, seen?: Seen
     const { data, error } = await db().rpc("ensure_workspace", { p_clerk_org_id: identity.orgId });
     if (error || !data) throw unavailable();
     const workspace = { id: data.id, clerk_org_id: data.clerk_org_id };
+    storedPlan = data.plan;
     requireWorkspaceAccess(workspace, caller, "monitors:read");
     principal = { workspace, actor, scope: "write", auth: "oauth", client: clientLabel(await deps.clientName(identity.clientId)) };
   }
   seen?.(principal);
   const entitlements = await deps.entitlements(principal.workspace.clerk_org_id);
   await deps.budget(agentHash("workspace", principal.workspace.id, pepper), entitlements.limits.apiPerMin);
+  // MCP can create a workspace before its first dashboard visit. In self-hosted mode it must
+  // reach Builder-only probes too. Hosted billing keeps its existing member-session sync;
+  // a failed machine billing read there is Free, not evidence for downgrading the stored plan.
+  if (selfHostedPlanEnabled()) {
+    await syncWorkspacePlan(principal.workspace.id, storedPlan, "builder");
+  }
   return { ...principal, entitlements };
 }

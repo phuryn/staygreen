@@ -2,6 +2,7 @@ import "server-only";
 import { clerkClient } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { entitlementsFrom, FREE, type Entitlements } from "./plans";
+import { SELF_HOSTED_ENTITLEMENTS, selfHostedPlanEnabled } from "./self-hosted-plan";
 
 const subscription = z.object({ status: z.string(), subscriptionItems: z.array(z.object({
   // Backend SDK BillingSubscriptionItem.periodEnd is a Unix timestamp in milliseconds.
@@ -38,10 +39,13 @@ async function orgPlanFeatures(client: Awaited<ReturnType<typeof clerkClient>>):
   return plans;
 }
 
-/** Machine credentials have no browser session/has(). Clerk remains the source, per
+/** Machine credentials have no browser session/has(). Unless self-hosted, Clerk is the source, per
  * integrations.md § Billing. `workspaces.plan` only routes Builder monitors to Builder-only probes;
  * nothing reads it for entitlements, and no subscription is copied into our database. */
 export async function apiEntitlements(orgId: string): Promise<Entitlements> {
+  // The caller authenticates the credential and resolves its owning organization first.
+  if (!orgId) return FREE;
+  if (selfHostedPlanEnabled()) return SELF_HOSTED_ENTITLEMENTS;
   try {
     const client = await clerkClient();
     const [current, plans] = await Promise.all([client.billing.getOrganizationBillingSubscription(orgId), orgPlanFeatures(client)]);

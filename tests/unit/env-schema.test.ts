@@ -31,6 +31,7 @@ const REQUIRED_SERVER = [...REQUIRED_PUBLIC, "APP_URL", "SUPABASE_URL", "SUPABAS
 
 /** Optional: absent turns a feature off rather than breaking anything. */
 const OPTIONAL_VALID: Record<string, string> = {
+  SELF_HOSTED_PLAN: "builder",
   NEXT_PUBLIC_CLARITY_PROJECT_ID: "abc123xyz",
   NEXT_PUBLIC_LEGAL_CONTACT_EMAIL: "privacy@example.com",
   CLERK_WEBHOOK_SECRET: "whsec_ZmFrZXNlY3JldA",
@@ -39,6 +40,34 @@ const OPTIONAL_VALID: Record<string, string> = {
   EMAIL_REDIRECT_TO: "test@blackhole.postmarkapp.com",
   TELEGRAM_BOT_TOKEN: `1234567890:${"AAFa1ke".repeat(5)}`,
 };
+
+describe("the self-hosted plan", () => {
+  it.each([undefined, "", "builder"])("accepts %j on a private installation", value => {
+    expect(parseServerEnv({ ...SERVER, SELF_HOSTED_PLAN: value }).SELF_HOSTED_PLAN).toBe(value || undefined);
+  });
+
+  it.each(["free", "demo", "on", "true", "Builder", "builder "])("refuses %j", value => {
+    expect(refusal(() => parseServerEnv({ ...SERVER, SELF_HOSTED_PLAN: value }))).toContain("SELF_HOSTED_PLAN");
+  });
+
+  it.each([
+    "https://staygreen.io", "https://tenant.staygreen.io", "http://a.b.staygreen.io:3000/path",
+    "https://STAYGREEN.IO", "https://staygreen.io.", "https://tenant.staygreen.io./", "https://%73taygreen.io",
+  ])("refuses Builder without billing on the hosted service (%s)", APP_URL => {
+    const message = refusal(() => parseServerEnv({ ...SERVER, APP_URL, SELF_HOSTED_PLAN: "builder" }));
+    expect(message).toContain("SELF_HOSTED_PLAN cannot grant Builder without billing on staygreen.io or its subdomains");
+    expect(parseServerEnv({ ...SERVER, APP_URL }).SELF_HOSTED_PLAN).toBeUndefined();
+    expect(parseServerEnv({ ...SERVER, APP_URL, SELF_HOSTED_PLAN: "" }).SELF_HOSTED_PLAN).toBeUndefined();
+  });
+
+  it.each(["http://localhost:3000", "https://monitor.example.com", "https://notstaygreen.io", "https://staygreen.io.example.com"])("allows an independent host (%s)", APP_URL => {
+    expect(parseServerEnv({ ...SERVER, APP_URL, SELF_HOSTED_PLAN: "builder" }).SELF_HOSTED_PLAN).toBe("builder");
+  });
+
+  it("still reports an invalid APP_URL through the env error", () => {
+    expect(refusal(() => parseServerEnv({ ...SERVER, APP_URL: "not a url", SELF_HOSTED_PLAN: "builder" }))).toContain("APP_URL");
+  });
+});
 
 const SECRET_SHAPES = [fakeKey("sk_test_"), fakeKey("sk_live_"), fakeKey("sb_secret_"), "whsec_ZmFrZXNlY3JldA", "re_Fa1keFa1keFa1ke", fakeKey("rk_live_"), fakeKey("sk-ant-api03-"), `1234567890:${"AAFa1ke".repeat(5)}`];
 
