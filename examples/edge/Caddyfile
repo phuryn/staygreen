@@ -1,0 +1,33 @@
+# /etc/caddy/Caddyfile for the status edge, as Staygreen's own provisioning writes it.
+# Replace app.example.com with your app's public HTTPS origin and status.example.com with your
+# status host (EDGE_STATUS_HOST). Install it only once Caddy accepts it (examples/README.md).
+{
+  # A custom domain gets a certificate only when the app answers 200 to
+  # GET /api/edge/ask?domain=<host>, which it does for a verified claim on a public page.
+  on_demand_tls {
+    ask https://app.example.com/api/edge/ask
+  }
+  # A request's Host must match the name its TLS handshake asked for.
+  servers {
+    strict_sni_host on
+  }
+}
+# The status host, proxied by Cloudflare; its certificate is obtained the usual way.
+status.example.com {
+  # Paths meant only for the box itself answer 404 from outside.
+  @internal path /health /ask
+  respond @internal 404
+  # reverse_proxy passes the original Host through unchanged, and the renderer serves pages by
+  # it: don't add a header_up Host. The renderer trusts no forwarded headers.
+  reverse_proxy 127.0.0.1:7080
+}
+# Every other name: builders' custom domains, each a CNAME to its claim's target under your
+# custom-domain suffix. The renderer answers only the hosts its pages claim.
+https:// {
+  tls {
+    on_demand
+  }
+  @internal path /health /ask
+  respond @internal 404
+  reverse_proxy 127.0.0.1:7080
+}

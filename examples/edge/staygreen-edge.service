@@ -1,0 +1,38 @@
+# The status renderer's systemd unit, as Staygreen's own provisioning writes it.
+# Install as /etc/systemd/system/staygreen-edge.service (root-owned, mode 644).
+# It runs /opt/staygreen-edge/main.js, which reads its four companion files (status.css, w.js,
+# icon.svg, Switzer-Variable.woff2) from that working directory and listens on 127.0.0.1:7080,
+# behind Caddy. It runs as the unprivileged `staygreen-edge` user that setup.sh creates.
+# Its variables come from /etc/staygreen-edge.env (see edge.env.example), root-owned with
+# mode 600. The limits keep it from starving the probe on the same box.
+[Unit]
+Description=Staygreen status renderer
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=staygreen-edge
+Group=staygreen-edge
+WorkingDirectory=/opt/staygreen-edge
+EnvironmentFile=/etc/staygreen-edge.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node --max-old-space-size=128 /opt/staygreen-edge/main.js
+Restart=on-failure
+RestartSec=5
+CPUQuota=25%
+CPUWeight=20
+MemoryMax=192M
+TasksMax=64
+Nice=10
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+UMask=0077
+[Install]
+WantedBy=multi-user.target

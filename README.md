@@ -69,9 +69,20 @@ Issues are public. **Never paste a secret, service-role or restricted key, a tok
 
 For a security problem, don't open an issue: use [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new) instead. For anything else private, see [staygreen.io/support](https://staygreen.io/support).
 
-## Run and deploy
+## Run it yourself
 
-This is a multi-service system, not a one-click app. Start with [deploying](docs/deploying.md), the [environment reference](docs/environment.md), and the [architecture](docs/architecture.md). The product is at the repository root; the standalone npm package is in `packages/staygreen/`. Root `server.json` and `glama.json` retain the hosted MCP and npm listing identities.
+Staygreen is several services, not a one-click app, but a coding agent with your providers' API tokens can do most of an installation. You may run a copy for your own organizations; the [license](LICENSE) rules out offering it to others as a competing commercial product or service.
+
+| Layout | What runs where | Good for |
+|---|---|---|
+| Recommended | The dashboard on Netlify, the database on Supabase, sign-in on Clerk, two probe VMs in different regions (one also runs the status edge), and three Cloudflare Workers for heartbeats, alerts and the watchdog | Monitoring you rely on: every failure is confirmed from a second location before an incident opens |
+| Smallest | One VM running the dashboard, one probe and the status edge, with Supabase, Clerk and the three Workers as above | Trying it, or watching a few apps where an occasional false alarm is acceptable |
+
+- [Deploying](docs/deploying.md): what you need, suggested resources and their monthly cost, the smallest installation, setting it up with an agent, and the setup order.
+- [Sample configurations](examples/): the probe's and the status edge's service units, variables and Caddyfile, and the alert sender's and watchdog's Wrangler configurations.
+- The [environment reference](docs/environment.md) and the [architecture](docs/architecture.md).
+
+The product is at the repository root; the standalone npm package is in `packages/staygreen/`. Root `server.json` and `glama.json` retain the hosted MCP and npm listing identities.
 
 ## Development
 

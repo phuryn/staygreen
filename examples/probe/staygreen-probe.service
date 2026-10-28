@@ -1,0 +1,34 @@
+# The probe's systemd unit, as Staygreen's own provisioning writes it.
+# Install as /etc/systemd/system/staygreen-probe.service (root-owned, mode 644).
+# It runs the bundle from `npm run probe:build` (probe/dist/main.js), copied to
+# /opt/staygreen-probe/main.js, as the unprivileged `staygreen` user that setup.sh creates.
+# Its variables come from /etc/staygreen-probe.env (see probe.env.example), root-owned with
+# mode 600: systemd reads it as root, and the service user can't open it.
+[Unit]
+Description=Staygreen probe
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=staygreen
+Group=staygreen
+WorkingDirectory=/opt/staygreen-probe
+EnvironmentFile=/etc/staygreen-probe.env
+ExecStart=/usr/bin/node /opt/staygreen-probe/main.js
+Restart=on-failure
+RestartSec=5
+# A planned stop drains: the probe finishes and writes its own checks before leaving the fleet.
+TimeoutStopSec=90
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+UMask=0077
+StateDirectory=staygreen-probe
+[Install]
+WantedBy=multi-user.target

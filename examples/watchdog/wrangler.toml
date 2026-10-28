@@ -1,0 +1,42 @@
+# The probe watchdog Worker (watchdog/worker.ts): every minute it reads when each expected probe
+# last delivered its numbers, and messages an operator Telegram chat when one has been silent
+# for ten minutes, every 30 minutes while it stays silent, and when it recovers. It has no
+# public route: every HTTP request answers 404. Copy this file to watchdog/wrangler.toml and
+# replace the name and the Hyperdrive id. No secret lives here: see the end.
+name = "monitoring-watchdog"
+main = "worker.ts"
+compatibility_date = "2026-04-01"
+# `pg` reaches Postgres through Workers' TCP sockets, which it finds through Node's APIs.
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+preview_urls = false
+
+[triggers]
+crons = ["* * * * *"]
+
+# The watchdog's own Hyperdrive configuration, with caching off, whose origin is a login that
+# is a member of `watchdog` and nothing else: it can call public.watchdog_flush_status only.
+#   wrangler hyperdrive create <name>-db --connection-string="postgres://<login>:<password>@db.<project-ref>.supabase.co:5432/postgres" --caching-disabled true
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "<hyperdrive-id>"
+
+# One SQLite-backed Durable Object, the exported Watchdog class, runs the checks one at a time
+# and keeps the alert receipts, so a silent probe isn't reported again every minute.
+[[durable_objects.bindings]]
+name = "WATCHDOG"
+class_name = "Watchdog"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Watchdog"]
+
+[observability]
+enabled = true
+
+# Values, each set with `wrangler secret put <NAME> --config watchdog/wrangler.toml`, which
+# reads it from the prompt or stdin. All three are required.
+#   TELEGRAM_BOT_TOKEN         the bot's token, the same bot as the app's
+#   WATCHDOG_TELEGRAM_CHAT_ID  the operator chat's numeric id; the bot must be able to post there
+#   WATCHDOG_PROBES            every probe's PROBE_ID, comma-separated: the fleet you expect,
+#                              not whichever probes happen to be running

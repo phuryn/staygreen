@@ -1,0 +1,45 @@
+# The alert sender Worker (sender/worker.ts): a one-minute cron that delivers email, Telegram,
+# Slack, Discord and webhook alerts, and Telegram's webhook at POST /api/telegram/webhook on its
+# own custom domain; every other path answers 404. Copy this file to sender/wrangler.toml and
+# replace the name, the host and the Hyperdrive id. No secret lives here: see the end.
+name = "monitoring-sender"
+main = "worker.ts"
+compatibility_date = "2026-04-01"
+# `pg` reaches Postgres through Workers' TCP sockets, which it finds through Node's APIs.
+compatibility_flags = ["nodejs_compat"]
+workers_dev = false
+preview_urls = false
+
+# The webhook's host: a Workers custom domain in a zone on the same Cloudflare account.
+routes = [{ pattern = "alerts.example.com", custom_domain = true }]
+
+[triggers]
+crons = ["* * * * *"]
+
+# The sender's own Hyperdrive configuration, with caching off, whose origin is a login that is
+# a member of `alert_sender` and nothing else:
+#   wrangler hyperdrive create <name>-db --connection-string="postgres://<login>:<password>@db.<project-ref>.supabase.co:5432/postgres" --caching-disabled true
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "<hyperdrive-id>"
+
+# Request logs can carry Telegram's secret header and update bodies: keep only the Worker's own
+# log lines, which hold no values.
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = false
+
+# Values, each set with `wrangler secret put <NAME> --config sender/wrangler.toml`, which reads
+# it from the prompt or stdin. All are required except EMAIL_REDIRECT_TO.
+#   APP_URL                  the app's public origin, the base of every link in an alert
+#   CREDENTIALS_KEY          the app's key, the same value; it opens Slack, Discord and webhook channels
+#   CLERK_SECRET_KEY         the app's Clerk secret key; members' addresses are read at send time
+#   POSTMARK_SERVER_TOKEN    the Postmark server token
+#   EMAIL_FROM               a verified sender: alerts@example.com or Name <alerts@example.com>
+#   ALERT_LINK_SECRET        the app's value; changing it breaks unsubscribe links already sent
+#   TELEGRAM_BOT_TOKEN       the bot's token, the same bot as the app's
+#   TELEGRAM_WEBHOOK_SECRET  32 random bytes, base64url; give Telegram's setWebhook the same value
+#   EMAIL_REDIRECT_TO        test deployments only: every email goes to this one address instead
