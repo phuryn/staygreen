@@ -5,6 +5,9 @@ compatibility_date = "2026-04-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 preview_urls = false
+# The heartbeat host your app's HEARTBEAT_HOST names, as a Workers custom domain in a zone on
+# this account. Uncomment it with your host:
+# routes = [{ pattern = "in.example.com", custom_domain = true }]
 
 [[hyperdrive]]
 binding = "HYPERDRIVE"

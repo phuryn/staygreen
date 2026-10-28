@@ -60,7 +60,7 @@ curl -s http://127.0.0.1:7080/health
 
 `/health` answers `"ready": true` with your `EDGE_RELEASE` once a full read of the published pages has worked and no cache purge is waiting.
 
-**`edge/Caddyfile`** puts Caddy in front of the renderer: your status host with an ordinary certificate, builders' custom domains with on-demand certificates that your app's `/api/edge/ask` approves, strict SNI and Host checks, the original Host passed through, and `/health` closed to the outside. Replace `app.example.com` with your app's origin and `status.example.com` with your status host. Deploy the app first, so the ask route answers, then:
+**`edge/Caddyfile`** puts Caddy in front of the renderer: your status host with an ordinary certificate, builders' custom domains with on-demand certificates that your app's `/api/edge/ask` approves, strict SNI and Host checks, the original Host passed through, and `/health` closed to the outside. Replace `app.example.com` with your app's origin and `status.example.com` with your status host. In the smallest installation, where the app runs on the same box, uncomment the app's site: without it the app's host falls through to the catch-all. Deploy the app first, so the ask route answers, then:
 
 ```sh
 install -m 644 -o root -g root Caddyfile /etc/caddy/Caddyfile.next
@@ -76,9 +76,9 @@ On Cloudflare, point the status host at the box as a proxied A record, with the 
 
 ## Workers
 
-Both Workers deploy with the Wrangler that `ingest/` pins: run `npm --prefix ingest ci` once, then use `node ingest/node_modules/wrangler/bin/wrangler.js` from the repository root wherever `wrangler` appears below, with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set or after `wrangler login`. Each Worker gets its own database login, made as in `probe.env.example` with its own group role, and its own Hyperdrive configuration with caching off: a cached answer would skip the database call. Set a Worker's values before its first deploy: Wrangler offers to create the Worker when it doesn't exist yet.
+Both Workers deploy with the Wrangler that `ingest/` pins: run `npm --prefix ingest ci` once, then use `node ingest/node_modules/wrangler/bin/wrangler.js` from the repository root wherever `wrangler` appears below, with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set or after `wrangler login`. Each Worker gets its own database login, made as in `probe.env.example` with its own group role and a hex password (`openssl rand -hex 24`), which needs no escaping in the connection string, and its own Hyperdrive configuration with caching off: a cached answer would skip the database call. Set a Worker's values before its first deploy: Wrangler offers to create the Worker when it doesn't exist yet.
 
-**`sender/wrangler.toml`** configures the alert sender: `sender/worker.ts` on a one-minute cron, with Telegram's webhook at `/api/telegram/webhook` on a custom domain. Copy it to `sender/wrangler.toml`, replace the name, `alerts.example.com` and the Hyperdrive id, and make its login a member of `alert_sender` only. Set each of the nine values the file lists, deploy, then register the webhook with the same `TELEGRAM_WEBHOOK_SECRET`:
+**`sender/wrangler.toml`** configures the alert sender: `sender/worker.ts` on a one-minute cron, with Telegram's webhook at `/api/telegram/webhook` on a custom domain. Copy it to `sender/wrangler.toml`, replace the name, `alerts.example.com` and the Hyperdrive id, and make its login a member of `alert_sender` only. Set the eight required values the file lists, and leave `EMAIL_REDIRECT_TO` unset outside a test deployment, since it sends every alert email to that one address. Deploy, then register the webhook with the same `TELEGRAM_WEBHOOK_SECRET`:
 
 ```sh
 wrangler hyperdrive create <name>-db --connection-string="postgres://<login>:<password>@db.<project-ref>.supabase.co:5432/postgres" --caching-disabled true

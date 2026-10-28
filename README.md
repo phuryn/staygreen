@@ -77,7 +77,7 @@ Staygreen is several services, not a one-click app, but a coding agent with your
 
 | Layout | What runs where | Good for |
 |---|---|---|
-| Recommended | The dashboard on Netlify, the database on Supabase, sign-in on Clerk, two probe VMs in different regions (one also runs the status edge), and three Cloudflare Workers for heartbeats, alerts and the watchdog | Monitoring you rely on: every failure is confirmed from a second location before an incident opens |
+| Recommended | The dashboard on Netlify, the database on Supabase, sign-in on Clerk, two probe VMs in different regions (one also runs the status edge), and three Cloudflare Workers for heartbeats, alerts and the watchdog | Monitoring you rely on: an HTTP, TCP or service check that fails is confirmed from a second location before an incident opens |
 | Smallest | One VM running the dashboard, one probe and the status edge, with Supabase, Clerk and the three Workers as above | Trying it, or watching a few apps where an occasional false alarm is acceptable |
 
 - [Deploying](docs/deploying.md): what you need, suggested resources and their monthly cost, the smallest installation, setting it up with an agent, and the setup order.

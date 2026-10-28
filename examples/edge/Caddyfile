@@ -21,6 +21,12 @@ status.example.com {
   # it: don't add a header_up Host. The renderer trusts no forwarded headers.
   reverse_proxy 127.0.0.1:7080
 }
+# The smallest installation (docs/deploying.md) serves the app from this box too: uncomment this
+# site with your app's host, so the catch-all below doesn't take it for a builder's custom domain.
+# `npm run start` listens on port 3000, which ufw keeps closed to the outside.
+# app.example.com {
+#   reverse_proxy 127.0.0.1:3000
+# }
 # Every other name: builders' custom domains, each a CNAME to its claim's target under your
 # custom-domain suffix. The renderer answers only the hosts its pages claim.
 https:// {
