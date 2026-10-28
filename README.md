@@ -2,6 +2,8 @@
 
 Uptime and incident monitoring for apps built with coding agents: checks from more than one location, incidents with the evidence attached, and a public status page for each app. Free plan at [staygreen.io](https://staygreen.io).
 
+![Staygreen's dashboard: every monitor of an app with its state, latest checks and response time, and the locations they run from](docs/images/dashboard-overview.webp)
+
 This repository holds Staygreen's source under the [Functional Source License, Version 1.1, MIT Future License (FSL-1.1-MIT)](LICENSE): the dashboard, the probes, the status edge, the Workers, the widget and the agent API, with the `staygreen` command-line package in `packages/staygreen/`. You may use, change and redistribute it for any purpose except offering a competing commercial product or service, and each version becomes MIT two years after it is published. It is also Staygreen's public issue tracker.
 
 It is a reviewed, one-way copy of the private working repository, refreshed after each release. Staygreen is not accepting pull requests or outside contributions at the moment; issues are welcome through the templates, and security problems go to [private vulnerability reporting](https://github.com/phuryn/staygreen/security/advisories/new).
