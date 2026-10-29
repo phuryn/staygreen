@@ -111,8 +111,8 @@ export const limits: Record<PlanId, Limits> = {
 
 /** The owner's own plan for demo status pages of well-known apps (2026-10-25): Builder cloned in
  *  production's Clerk, kept off the pricing table, with this one feature added. It raises the counts
- *  alone; the plan read and stored stays `builder`, so probes and screens treat the workspace as
- *  Builder. Clerk's development instance has no such plan (`tests/integration/clerk-plans.test.ts`). */
+ *  and permits the page editor to mark a public page as a demo. The stored plan stays `builder`,
+ *  so probes and screens treat the workspace as Builder. Clerk's development instance has no such plan (`tests/integration/clerk-plans.test.ts`). */
 export const demoSlug = "scale_demo";
 export const demoLimits: Limits = { ...limits.builder, apps: 100, monitors: 1000, heartbeats: 500, statusPages: 100 };
 
@@ -124,6 +124,8 @@ export const has = (plan: PlanId, slug: Slug) => plan === "builder" && builderSl
 
 /** What a workspace's plan allows, as the session reports it. */
 export type Entitlements = {
+  /** Private scale_demo entitlement, read from the verified session only. */
+  demo?: true;
   /** Which column of the table the limits come from. Cosmetic beyond that. */
   plan: PlanId;
   /** The Builder features held, each independently. */
@@ -154,9 +156,9 @@ export function entitlementsFrom(hasFeature: HasFeature): Entitlements {
     }
   });
   const plan: PlanId = held.includes("scale_builder") ? "builder" : "free";
-  // Read only on Builder, and a failed read costs only the higher counts.
+  // Read only on Builder; a failed read loses the higher counts and the demo switch.
   const demo = plan === "builder" && (() => { try { return hasFeature(demoSlug) === true; } catch { return false; } })();
-  return { plan, features: held, limits: demo ? demoLimits : limits[plan], ...(unread ? { unread: true as const } : {}) };
+  return { plan, features: held, ...(demo ? { demo: true as const } : {}), limits: demo ? demoLimits : limits[plan], ...(unread ? { unread: true as const } : {}) };
 }
 
 export const holds = (e: Pick<Entitlements, "features">, slug: Slug) => e.features.includes(slug);

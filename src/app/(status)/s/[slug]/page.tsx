@@ -28,5 +28,5 @@ export default async function PublicStatusPage({ params }: Props) {
   const view = found?.view;
   if (!view) notFound();
   if (!found!.membersOnly && env().STATUS_EDGE_ENABLED === "on") redirect(`https://${statusHost()}/${view.page.slug}`);
-  return <StatusPageView view={view} />;
+  return <StatusPageView view={view} appUrl={env().APP_URL} />;
 }

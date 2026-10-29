@@ -1405,6 +1405,7 @@ export type Database = {
           homepage: string | null
           id: string
           logo_text: string
+          demo: boolean
           members_only: boolean
           name: string
           noindex: boolean
@@ -1424,6 +1425,7 @@ export type Database = {
           homepage?: string | null
           id?: string
           logo_text?: string
+          demo?: boolean
           members_only?: boolean
           name: string
           noindex?: boolean
@@ -1443,6 +1445,7 @@ export type Database = {
           homepage?: string | null
           id?: string
           logo_text?: string
+          demo?: boolean
           members_only?: boolean
           name?: string
           noindex?: boolean
@@ -1521,6 +1524,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      demo_clone_source: { Args: { p_slug: string }; Returns: Json }
+      clone_demo_page: {
+        Args: { p_workspace_id: string; p_source_slug: string; p_slug: string; p_max_apps: number;
+          p_max_pages: number; p_max_monitors: number; p_max_assertions: number; p_per_host: number;
+          p_http_interval_sec: number; p_white_label: boolean }
+        Returns: Json
+      }
+
       ack_incident: {
         Args: { p_incident_id: string; p_via: string; p_workspace_id: string }
         Returns: {
@@ -1813,6 +1824,7 @@ export type Database = {
           homepage: string | null
           id: string
           logo_text: string
+          demo: boolean
           members_only: boolean
           name: string
           noindex: boolean
@@ -2284,6 +2296,54 @@ export type Database = {
           homepage: string | null
           id: string
           logo_text: string
+          demo: boolean
+          members_only: boolean
+          name: string
+          noindex: boolean
+          powered_by: boolean
+          slug: string
+          theme: string
+          updated_at: string
+          visibility_version: number
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "status_pages"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      save_demo_page: {
+        Args: {
+          p_accent: string
+          p_components: Json
+          p_history_days: number
+          p_homepage: string
+          p_logo_text: string
+          p_demo?: boolean
+          p_members_only: boolean
+          p_name: string
+          p_noindex: boolean
+          p_page_id: string
+          p_powered_by: boolean
+          p_private_pages: boolean
+          p_slug: string
+          p_theme: string
+          p_white_label: boolean
+          p_withdrawal_version?: number
+          p_workspace_id: string
+        }
+        Returns: {
+          accent: string
+          app_id: string
+          created_at: string
+          edge_withdrawn: boolean
+          history_days: number
+          homepage: string | null
+          id: string
+          logo_text: string
+          demo: boolean
           members_only: boolean
           name: string
           noindex: boolean
@@ -2329,6 +2389,7 @@ export type Database = {
           homepage: string | null
           id: string
           logo_text: string
+          demo: boolean
           members_only: boolean
           name: string
           noindex: boolean

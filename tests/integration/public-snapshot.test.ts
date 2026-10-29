@@ -96,7 +96,7 @@ describeTarget("public snapshot: only the allowlist, only what a page shows", ta
     expect(id).toMatch(/^note_/);
     const s = (await snapshot(otherPage.slug))!;
     expect(Object.keys(s).sort()).toEqual(["components", "incidents", "page"]);
-    expect(Object.keys(s.page).sort()).toEqual(["accent", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
+    expect(Object.keys(s.page).sort()).toEqual(["accent", "demo", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
     expect(s.components).toHaveLength(1);
     expect(Object.keys(s.components[0]).sort()).toEqual(["daily", "inApp", "key", "name", "states"]);
     expect(s.incidents).toHaveLength(1);

@@ -3,6 +3,7 @@ import { databaseUrl, parseConfig, key32 } from "../probe/env";
 import { hostnameSchema } from "../src/lib/hostname";
 
 export const edgeSchema = z.object({
+  APP_URL: z.url().refine(v => /^https?:\/\//.test(v) && !new URL(v).username && !new URL(v).password, "App URL must be HTTP(S) without credentials"),
   EDGE_STATUS_HOST: hostnameSchema.default("status.staygreen.io"),
   EDGE_DATABASE_URL: databaseUrl,
   EDGE_ZONE_ID: z.string().regex(/^[a-f0-9]{32}$/),

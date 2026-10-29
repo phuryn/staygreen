@@ -1,5 +1,6 @@
 "use server";
 
+import { pageSlugBase } from "@/lib/page-slug";
 import { env } from "@/lib/env";
 import { randomBytes } from "node:crypto";
 import { Resolver } from "node:dns/promises";
@@ -796,15 +797,6 @@ export async function removePageAsset(pageId: string, kind: unknown): Promise<Re
   return error ? refused(error, member) : { ok: true };
 }
 
-const slugify = (s: string) =>
-  s
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 32)
-    .replace(/-+$/g, "") || "status";
-
 /** A new status page for an app, made from what the app already has: its name, its address as
  *  the homepage, one component per HTTP monitor, the brand colour its site was found to use as
  *  the accent, and its logo as the page's header logo and favicon (`docs/flows.md § A status page,
@@ -827,7 +819,7 @@ export async function addPage(appId: string): Promise<Result<{ id: string }>> {
   if (appError) return refused(appError, member);
 
   // Slugs are global, so a taken one gets a short random tail; a reserved one too.
-  const base = slugify(app.name);
+  const base = pageSlugBase(app.name);
   let created: { id: string } | null = null;
   for (let attempt = 0; attempt < 4 && !created; attempt++) {
     const slug = attempt === 0 ? base : `${base}-${randomBytes(2).toString("hex")}`;
@@ -894,6 +886,9 @@ export async function savePage(pageId: string, input: unknown): Promise<Result> 
   const parsed = pageDraftSchema.safeParse(input);
   if (!parsed.success) return { ok: false, reason: "Check the highlighted fields.", fieldErrors: fieldErrorsOf(parsed.error) };
   const p = parsed.data;
+  if (member.entitlements.demo && p.demo && p.membersOnly) return { ok: false,
+    reason: "A demo page must be public. Turn off Demo page before making it members-only.",
+    fieldErrors: { demo: "A demo page must be public." } };
   // Without the feature, its choice takes the plan's default rather than refusing the save: a page
   // set up under Builder stays editable after it, and its next save puts the mark back.
   const whiteLabel = holds(member.entitlements, "white_label");
@@ -910,7 +905,7 @@ export async function savePage(pageId: string, input: unknown): Promise<Result> 
   }
   // The type generator marks every SQL argument non-null; 029's function takes null for no
   // homepage and for a save that withdraws nothing.
-  const { error } = await db().rpc("save_status_page_access", {
+  const { error } = await db().rpc("save_demo_page", {
     p_workspace_id: member.workspace.id,
     p_page_id: pageId,
     p_slug: p.slug,
@@ -928,6 +923,7 @@ export async function savePage(pageId: string, input: unknown): Promise<Result> 
     p_private_pages: privatePages,
     p_members_only: p.membersOnly ?? false,
     p_withdrawal_version: withdrawal as number,
+    p_demo: (member.entitlements.demo ? (p.demo ?? false) : null) as unknown as boolean,
   });
   return error ? refused(error, member) : { ok: true };
 }

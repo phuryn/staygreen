@@ -76,7 +76,7 @@ const view = (raw: unknown = snapshot()) => viewFromDto(snapshotDto.parse(raw), 
 describe("the DTO is an allowlist", () => {
   it("maps a snapshot to exactly the PublicView shape", () => {
     expect(view()).toStrictEqual({
-      page: { slug: "askone", name: "AskOne status", logoText: "AskOne", logoUrl: null, faviconUrl: null, homepage: "", accent: "#1F2DE6", theme: "visitor", poweredBy: true, noindex: false, historyDays: 90 },
+      page: { demo: false, slug: "askone", name: "AskOne status", logoText: "AskOne", logoUrl: null, faviconUrl: null, homepage: "", accent: "#1F2DE6", theme: "visitor", poweredBy: true, noindex: false, historyDays: 90 },
       components: [
         { key: "0", name: "API", inApp: true, state: "up", daily: days90({ 87: 100, 89: 99.5 }) },
         { key: "1", name: "Database", inApp: false, state: "unchecked", daily: days90({}) },
@@ -104,7 +104,7 @@ describe("the DTO is an allowlist", () => {
   it("drops extra keys already at the parse, so nothing downstream can reach them", () => {
     const parsed = snapshotDto.parse(snapshot());
     expect(Object.keys(parsed).sort()).toEqual(["components", "incidents", "page"]);
-    expect(Object.keys(parsed.page).sort()).toEqual(["accent", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
+    expect(Object.keys(parsed.page).sort()).toEqual(["accent", "demo", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
     expect(Object.keys(parsed.components[0]).sort()).toEqual(["daily", "inApp", "key", "name", "states"]);
     expect(Object.keys(parsed.components[0].daily[0]).sort()).toEqual(["d", "up"]);
     expect(Object.keys(parsed.incidents[0]).sort()).toEqual(["components", "id", "notes", "openedAt", "resolvedAt", "severity", "title"]);

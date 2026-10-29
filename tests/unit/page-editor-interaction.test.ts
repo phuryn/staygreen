@@ -54,6 +54,22 @@ beforeEach(() => {
     loadedAt: NOW, features: [], can: Object.fromEntries(PERMISSIONS.map(p => [p, true])) as Workspace["can"] };
 });
 
+it("shows Demo page only for scale_demo, keeps demo/private mutually exclusive, and lets Free publish its private copy", () => {
+  const options = () => invoke(part("Options"));
+  expect(elements(options()).some(el => el.props["aria-describedby"] === "pe-sw-demo")).toBe(false);
+  fake.workspace!.demoAllowed = true;
+  expect(get(options(), el => el.props["aria-describedby"] === "pe-sw-demo").props.checked).toBe(false);
+  setDraft({ demo: true });
+  expect(get(options(), el => el.props["aria-describedby"] === "pe-sw-members").props.disabled).toBe(true);
+  setDraft({ demo: false, membersOnly: true });
+  expect(get(options(), el => el.props["aria-describedby"] === "pe-sw-demo").props.disabled).toBe(true);
+  fake.workspace!.demoAllowed = false;
+  const members = get(options(), el => el.props["aria-describedby"] === "pe-sw-members");
+  expect(members.props.disabled).toBe(false);
+  (members.props.onChange as (e: unknown) => void)({ target: { checked: false } });
+  expect(get(options(), el => el.props["aria-describedby"] === "pe-sw-members").props.checked).toBe(false);
+});
+
 it("retains unsaved edits through collapse, reveals local field errors and makes no invalid save", async () => {
   setDraft({ name: "", slug: "new-address", components: [{ key: "stable", name: "", monitorIds: [], inApp: true }] });
   for (const name of ["Branding", "Address", "Components", "Options"]) toggle(name);

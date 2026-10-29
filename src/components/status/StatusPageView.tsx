@@ -62,7 +62,7 @@ function useNarrow<T extends HTMLElement>() {
 }
 
 /** The page's frame: its brand, its theme and its accent, around whatever it shows. */
-export function PublicFrame({ page, embedded, children }: { page: PublicView["page"]; embedded?: boolean; children: React.ReactNode }) {
+export function PublicFrame({ page, embedded, appUrl = "https://staygreen.io", children }: { page: PublicView["page"]; embedded?: boolean; appUrl?: string; children: React.ReactNode }) {
   const brand = (
     <>
       {page.logoUrl ? <img className="sp-uploaded-logo" src={page.logoUrl} alt={page.logoText ? "" : page.name} /> : <BrandMark />}
@@ -81,7 +81,11 @@ export function PublicFrame({ page, embedded, children }: { page: PublicView["pa
           )}
         </header>
         {children}
-        <footer className="sp-foot">{page.poweredBy ? <Link href="/" className="sp-foot-link">Powered by Staygreen</Link> : <span />}</footer>
+        <footer className="sp-foot">{page.demo ? <div className="stack-sm sp-demo">
+          <p>A demo created by the <a href={new URL("/", appUrl).href} className="link">Staygreen</a> team. Clone and manage it in your account:</p>
+          <a className="btn btn-primary" href={new URL(`/app/clone/${encodeURIComponent(page.slug)}`, appUrl).href}>Clone status page</a>
+          <p>Next, you can add extra monitors (Supabase, Stripe, webhooks etc.)</p>
+        </div> : page.poweredBy ? <Link href="/" className="sp-foot-link">Powered by Staygreen</Link> : <span />}</footer>
       </div>
     </div>
   );
@@ -117,7 +121,7 @@ function Uptime({ daily, days, now, name, narrow }: { daily: number[]; days: num
   );
 }
 
-export function StatusPageView({ view, embedded, notice }: { view: PublicView; embedded?: boolean; notice?: ReactNode }) {
+export function StatusPageView({ view, embedded, notice, appUrl }: { view: PublicView; embedded?: boolean; notice?: ReactNode; appUrl?: string }) {
   const [ref, narrow] = useNarrow<HTMLDivElement>();
   const { page, components: comps, incidents, now } = view;
   const head = headline(view);
@@ -129,7 +133,7 @@ export function StatusPageView({ view, embedded, notice }: { view: PublicView; e
 
   return (
     <div ref={ref}>
-      <PublicFrame page={page} embedded={embedded}>
+      <PublicFrame page={page} embedded={embedded} appUrl={appUrl}>
         {notice}
         <section className={`sp-overall ${head.state}`} aria-live="polite">
           <StateIcon state={head.state} size={26} />
@@ -193,13 +197,13 @@ export function StatusPageView({ view, embedded, notice }: { view: PublicView; e
 }
 
 /** One incident, at the short link alerts carry (`/i/<id>`), inside its page's frame. */
-export function PublicIncidentView({ view, incidentId }: { view: PublicView; incidentId: string }) {
+export function PublicIncidentView({ view, incidentId, appUrl }: { view: PublicView; incidentId: string; appUrl?: string }) {
   const { page, now } = view;
   const i = view.incidents.find((x) => x.id === incidentId);
   const back = <Link href={`/s/${page.slug}`} className="link">See the whole status page</Link>;
   if (!i) {
     return (
-      <PublicFrame page={page}>
+      <PublicFrame page={page} appUrl={appUrl}>
         <section className="sp-section stack">
           <h1 className="t-title">This incident is no longer on the status page</h1>
           <p className="t-2">The page shows the last {page.historyDays} days of incidents, and this one is older.</p>
@@ -210,7 +214,7 @@ export function PublicIncidentView({ view, incidentId }: { view: PublicView; inc
   }
   const state = i.resolvedAt ? "up" : i.severity;
   return (
-    <PublicFrame page={page}>
+    <PublicFrame page={page} appUrl={appUrl}>
       <section className={`sp-overall ${state}`}>
         <StateIcon state={state} size={26} />
         <div className="sp-overall-text">

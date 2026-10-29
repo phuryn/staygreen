@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppLogo } from "@/components/AppLogo";
+import { CloneReceipt } from "@/components/CloneReceipt";
 import { Loading, PageHead } from "@/components/Shell";
 import { SuggestedChecks } from "@/components/SuggestedChecks";
 import type { App } from "@/lib/model";
@@ -29,19 +30,22 @@ export function ChecksScreen({ id }: { id: string }) {
         title={<span className="row"><AppLogo app={app} size={32} />Suggested checks for {app.name}</span>}
         sub="Find checks for this app's address and sign-in dependencies. Existing checks in this workspace are kept under Already covered."
       />
-      <section className="panel" aria-label={`Suggested checks for ${app.name}`}>
-        {address ? (
-          <SuggestedChecks
-            key={`${app.id}:${address}`}
-            appId={app.id}
-            address={address}
-            skip={<Link href="/app" className="btn">Skip for now</Link>}
-            onDone={() => router.push("/app")}
-          />
-        ) : (
-          <AppAddressForm key={app.id} app={app} onSaved={(url) => setSaved({ id: app.id, url })} />
-        )}
-      </section>
+      <div className="stack">
+        <CloneReceipt appId={id} />
+        <section className="panel" aria-label={`Suggested checks for ${app.name}`}>
+          {address ? (
+            <SuggestedChecks
+              key={`${app.id}:${address}`}
+              appId={app.id}
+              address={address}
+              skip={<Link href="/app" className="btn">Skip for now</Link>}
+              onDone={() => router.push("/app")}
+            />
+          ) : (
+            <AppAddressForm key={app.id} app={app} onSaved={(url) => setSaved({ id: app.id, url })} />
+          )}
+        </section>
+      </div>
     </>
   );
 }

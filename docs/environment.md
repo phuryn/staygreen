@@ -9,7 +9,7 @@ Keep secrets in each service's secret store. NEXT_PUBLIC_ values are embedded in
 | `ALERT_LINK_SECRET` | app, sender Worker, configuration sample | app: optional / defaulted; sender Worker: required | Signs alert links; shared by app and sender. Generate 32 random bytes encoded as base64url and keep stable. | Your secret generator |
 | `ANTHROPIC_API_KEY` | app, configuration sample | app: optional / defaulted | Optional model-assisted scan suggestions; deterministic discovery works without it. | Your Anthropic API console |
 | `API_TOKEN_PEPPER` | app, configuration sample | app: required | HMAC key for workspace API tokens and admission fingerprints; 32 random base64url bytes. Rotation invalidates tokens. | Your secret generator |
-| `APP_URL` | app, sender Worker, app / build, configuration sample | app: required; sender Worker: required | Public HTTPS origin used for links, OAuth resource and alert links; localhost HTTP for development. | Your app host and DNS |
+| `APP_URL` | app, edge, sender Worker, app / build, configuration sample | app: required; edge: required; sender Worker: required | Public HTTPS origin used for links, OAuth resource and alert links; localhost HTTP for development. | Your app host and DNS |
 | `BENCH_CERTS` | probe | Optional / tool-managed | Directory with benchmark-only TLS fixtures. | Local benchmark setup |
 | `BENCH_HOST` | probe | Optional / tool-managed | Benchmark target host; defaults to localhost. | Local benchmark setup |
 | `BENCH_PORT` | probe | Optional / tool-managed | Port passed to benchmark target child processes. | Benchmark runner |

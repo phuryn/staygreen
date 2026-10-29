@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useMounted } from "./use-mounted";
 import { useRouter } from "next/navigation";
+import { cloneDemo } from "@/app/(app)/app/clone/[slug]/actions";
+import type { CloneReceipt } from "./demo-clone";
 import { createToken, revokeToken } from "@/app/(app)/app/agents/actions";
 import {
   ackIncident,
@@ -63,6 +65,8 @@ import { POLL_CHECK_MS, pollDue } from "./poll";
 export type Workspace = Snapshot & { toasts: Toast[] };
 
 type Root = {
+  cloneReceipt: CloneReceipt | null;
+  setCloneReceipt(receipt: CloneReceipt): void;
   latest: Snapshot | null;
   offer(s: Snapshot): void;
   now: number | null;
@@ -85,6 +89,7 @@ const TOAST_MS = 9000;
 const TICK_MS = 5000;
 
 export function WorkspaceRoot({ workspaceId, children }: { workspaceId: string; children: React.ReactNode }) {
+  const [cloneReceipt, setCloneReceipt] = useState<CloneReceipt | null>(null);
   const [latest, setLatest] = useState<Snapshot | null>(null);
   const [now, setNow] = useState<number | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -165,7 +170,7 @@ export function WorkspaceRoot({ workspaceId, children }: { workspaceId: string; 
     [dismiss],
   );
 
-  const value = useMemo(() => ({ latest, offer, now, toasts, toast, dismiss, app, selectApp, enlist }), [latest, offer, now, toasts, toast, dismiss, app, enlist]);
+  const value = useMemo(() => ({ cloneReceipt, setCloneReceipt, latest, offer, now, toasts, toast, dismiss, app, selectApp, enlist }), [cloneReceipt, latest, offer, now, toasts, toast, dismiss, app, enlist]);
   return <RootCtx.Provider value={value}>{children}</RootCtx.Provider>;
 }
 
@@ -192,6 +197,11 @@ export function useWorkspace(): Workspace | null {
     if (!mounted || !snap) return null;
     return { ...snap, now: Math.max(snap.now, now ?? 0), toasts: toasts ?? [] };
   }, [mounted, snap, now, toasts]);
+}
+
+export function useCloneReceipt(appId: string) {
+  const receipt = useContext(RootCtx)?.cloneReceipt;
+  return receipt?.appId === appId ? receipt : null;
 }
 
 export function useToasts() {
@@ -240,6 +250,7 @@ export function useActs() {
   const router = useRouter();
   const root = useContext(RootCtx);
   const toast = root?.toast;
+  const setCloneReceipt = root?.setCloneReceipt;
   const enlist = root?.enlist;
 
   return useMemo(() => {
@@ -275,6 +286,11 @@ export function useActs() {
       createToken: (input: unknown) => run(() => createToken(input), "Token created", true),
       revokeToken: (id: string) => run(() => revokeToken(id), "Token revoked", true),
       testMonitor: (draft: unknown, monitorId: string | null) => ask(() => testMonitor(draft, monitorId)),
+      cloneDemo: async (slug: string) => {
+        const r = await run(() => cloneDemo(slug), null, true);
+        if (r.ok) setCloneReceipt?.(r);
+        return r as Awaited<ReturnType<typeof cloneDemo>>;
+      },
       addApp: (input: { name: string; url: string }) => run(() => addApp(input), "App added", true),
       updateApp: (id: string, input: { name: string; url: string }) => run(() => updateApp(id, input), "App saved", true),
       uploadAppLogo: (id: string, form: FormData, opts?: { keep?: boolean }) => run(() => uploadAppLogo(id, form, opts), null, true),
@@ -302,7 +318,7 @@ export function useActs() {
       deletePage: (id: string) => run(() => deletePage(id), "Status page deleted", true),
       toast: (t: Omit<Toast, "id" | "t">) => toast?.(t),
     };
-  }, [router, toast, enlist]);
+  }, [router, toast, enlist, setCloneReceipt]);
 }
 
 export type Acts = ReturnType<typeof useActs>;

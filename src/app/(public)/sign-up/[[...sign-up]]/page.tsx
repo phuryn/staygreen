@@ -1,3 +1,4 @@
+import { cloneReturnPath } from "@/lib/clone-return-path";
 import type { Metadata } from "next";
 import { SignUp } from "@clerk/nextjs";
 
@@ -8,11 +9,15 @@ import { SignUp } from "@clerk/nextjs";
 
 export const metadata: Metadata = { title: "Create your workspace" };
 
-export default function SignUpPage() {
+export default async function SignUpPage({ searchParams }: { searchParams: Promise<{ redirect_url?: string | string[] }> }) {
+  const returnTo = cloneReturnPath((await searchParams).redirect_url);
+  const otherUrl = returnTo ? `/sign-in?redirect_url=${encodeURIComponent(returnTo)}` : "/sign-in";
+
   return (
     <div className="wrap band-tight">
       <div className="narrow pb-touch pb-signin">
-        <SignUp path="/sign-up" signInUrl="/sign-in" />
+        <SignUp path="/sign-up" signInUrl={otherUrl}
+          fallbackRedirectUrl={returnTo} signInFallbackRedirectUrl={returnTo} />
       </div>
     </div>
   );

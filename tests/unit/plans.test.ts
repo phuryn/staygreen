@@ -124,7 +124,7 @@ describe("entitlementsFrom", () => {
 
   it("raises only the counts for the owner's demo plan, and only on Builder", () => {
     const demo = entitlementsFrom(() => true);
-    expect(demo).toEqual({ plan: "builder", features: [...builderSlugs], limits: demoLimits });
+    expect(demo).toEqual({ demo: true, plan: "builder", features: [...builderSlugs], limits: demoLimits });
     expect(demoLimits).toEqual({ ...limits.builder, apps: 100, monitors: 1000, heartbeats: 500, statusPages: 100 });
     // Without scale_builder the demo slug brings nothing; a failed read of it keeps Builder.
     expect(entitlementsFrom((slug) => slug === demoSlug)).toEqual(FREE);

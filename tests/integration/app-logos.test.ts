@@ -135,11 +135,12 @@ describeTarget("app logos: uploaded, imported, served, replaced and removed, and
     expect(await rows()).toEqual(before);
   });
 
-  it("refuses on its own what the action refuses: a JPEG, an oversized file, an app of another workspace", async () => {
+  it("refuses a non-raster MIME, an oversized file, or an app of another workspace", async () => {
     const insert = (over: Record<string, unknown>) =>
       db.from("app_logos").insert({ id: `asset_${hex(16)}`, workspace_id: A.id, app_id: app, mime: "image/png", content: `\\x${imageBytes("png").toString("hex")}`, ...over });
     await db.from("app_logos").delete().eq("app_id", app);
-    expect((await insert({ mime: "image/jpeg" })).error?.code).toBe("23514");
+    // Legacy page JPEGs can now be copied into app logos; HTML/SVG still cannot be stored.
+    expect((await insert({ mime: "image/svg+xml" })).error?.code).toBe("23514");
     expect((await insert({ content: `\\x${"00".repeat(512 * 1024 + 1)}` })).error?.code).toBe("23514");
     expect((await insert({ id: "asset_nope" })).error?.code).toBe("23514");
     const other = await fx.workspace();

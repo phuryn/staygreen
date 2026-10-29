@@ -7,7 +7,7 @@ import { purge } from "./purge";
 import { withdraw } from "./control";
 
 const env = config(process.env);
-const cache = new EdgeCache(env.EDGE_STATUS_HOST);
+const cache = new EdgeCache(env.EDGE_STATUS_HOST, env.APP_URL);
 const pool = new Pool({ connectionString: env.EDGE_DATABASE_URL, max: 1, connectionTimeoutMillis: 10_000, statement_timeout: 20_000, query_timeout: 25_000 });
 pool.on("error", () => {});
 const css = readFileSync("status.css");

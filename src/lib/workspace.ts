@@ -454,6 +454,7 @@ export const loadSnapshot = cache(async (member: Member): Promise<Snapshot> => {
     components: rows.page_components.filter((c) => c.page_id === p.id).map((c) => ({ id: c.id, name: c.name, inApp: c.in_app, monitorIds: bound.get(c.id) ?? [] })),
     poweredBy: p.powered_by,
     membersOnly: p.members_only ?? false,
+    demo: p.demo ?? false,
     noindex: p.noindex,
     subscribersOn: false,
     subscribers: 0,
@@ -469,6 +470,7 @@ export const loadSnapshot = cache(async (member: Member): Promise<Snapshot> => {
     name: a.name,
     url: a.url ?? "",
     logoUrl: logoOf(a.id),
+    accent: a.accent ?? null,
     blurb: "",
     channelIds: [],
     pageId: pageRows.find((p) => p.app_id === a.id)?.id,
@@ -524,6 +526,7 @@ export const loadSnapshot = cache(async (member: Member): Promise<Snapshot> => {
     seq: 0,
     can,
     features: [...member.entitlements.features],
+    demoAllowed: member.entitlements.demo === true,
     limits: member.entitlements.limits,
   };
 });

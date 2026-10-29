@@ -8,14 +8,16 @@ import { SuggestedChecksResult } from "@/components/SuggestedChecks";
 import { PERMISSIONS } from "@/lib/authz";
 import type { Suggestions } from "@/lib/suggestions";
 import type { Workspace } from "@/lib/workspace-store";
+import type { CloneReceipt } from "@/lib/demo-clone";
 import { NOW, sim } from "./fixtures";
 
 // Real screen markup with only workspace/actions/navigation faked; no browser layout claim.
-const feed = vi.hoisted(() => ({ workspace: null as Workspace | null }));
+const feed = vi.hoisted(() => ({ workspace: null as Workspace | null, receipt: null as CloneReceipt | null }));
 vi.mock("@/lib/workspace-store", () => ({
   useWorkspace: () => feed.workspace,
   useAppSelection: () => ({ app: "all", setApp: vi.fn() }),
   useActs: () => ({}), usePoll: vi.fn(), useEagerPoll: vi.fn(),
+  useCloneReceipt: () => feed.receipt,
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), useSearchParams: () => new URLSearchParams() }));
 
@@ -26,12 +28,23 @@ const found: Suggestions = {
 };
 const result = (s: Suggestions) => renderToStaticMarkup(createElement(SuggestedChecksResult, { appId: app.id, s, skip: null, onDone: vi.fn() }));
 beforeEach(() => {
+  feed.receipt = null;
   feed.workspace = { ...sim({ apps: [app], monitors: [] }), loadedAt: NOW, features: [],
     can: Object.fromEntries(PERMISSIONS.map(p => [p, true])) as Workspace["can"],
   };
 });
 
 describe("finding missing checks from an existing app", () => {
+  it("keeps the back link in the head and the clone notice below the description, spaced above content", () => {
+    feed.receipt = { appId: app.id, pageId: `page_${"a".repeat(24)}`, copied: ["Website"], added: [], skipped: [] };
+    const html = renderToStaticMarkup(createElement(ChecksScreen, { id: app.id }));
+    const header = html.match(/<header class="page-head">[\s\S]*?<\/header>/)![0];
+    expect(header).toMatch(/<a[^>]*class="back"[^>]*>Overview<\/a>/);
+    expect(header).toContain("Suggested checks for Harbor");
+    expect(header).toContain("Existing checks in this workspace");
+    expect(header).not.toContain("Clone result");
+    expect(html).toMatch(/<\/header><div class="stack"><section class="callout callout-info" aria-label="Clone result">[\s\S]*?<\/section><section class="panel" aria-label="Suggested checks for Harbor">/);
+  });
   it.each(["", "https://example.com/"])("offers the action from overview and Settings with address %j", url => {
     const s = feed.workspace!;
     s.apps = [{ ...app, url }];

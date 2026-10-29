@@ -22,7 +22,7 @@ export const pageUrls = (slug: string, host = edgeSchema.shape.EDGE_STATUS_HOST.
  * Deletions and newly private pages are removed before any purge is attempted. Purge retries
  * retain only URLs, never a withdrawn snapshot. A restart does not restore an old disk copy. */
 export class EdgeCache {
-  constructor(readonly statusHost = edgeSchema.shape.EDGE_STATUS_HOST.parse(undefined)) {}
+  constructor(readonly statusHost = edgeSchema.shape.EDGE_STATUS_HOST.parse(undefined), readonly appUrl = "https://staygreen.io") {}
   private pages = new Map<string, Entry>();
   private domains = new Map<string, string>();
   readonly pendingPurge = new Map<string, number>();
@@ -50,7 +50,7 @@ export class EdgeCache {
         const paths = new Set([view.page.logoUrl, view.page.faviconUrl]);
         const assets = new Map(parsed.assets.filter(a => paths.has(`/page-assets/${a.id}`))
           .map(a => [`/page-assets/${a.id}`, { mime: a.mime, bytes: Buffer.from(a.content, "base64") }]));
-        next.set(slug, { fingerprint, html: renderPage(view), summary: JSON.stringify(summaryFor(view)),
+        next.set(slug, { fingerprint, html: renderPage(view, this.appUrl), summary: JSON.stringify(summaryFor(view)),
           badge: badgeFor(view).svg, domain: parsed.domain, assets });
         changed.add(slug);
       }

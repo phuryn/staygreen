@@ -309,7 +309,7 @@ describe("the privacy policy", () => {
   it("says what a status page shows: the homepage link a new page takes from its app, and no monitor's settings", () => {
     expect(read("src/app/(app)/app/actions.ts")).toMatch(/p_homepage: app\.url,/);
     expect(read("src/components/status/StatusPageView.tsx")).toContain("href={page.homepage}");
-    expect(Object.keys(snapshotDto.shape.page.shape).sort()).toEqual(["accent", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
+    expect(Object.keys(snapshotDto.shape.page.shape).sort()).toEqual(["accent", "demo", "faviconUrl", "historyDays", "homepage", "logoText", "logoUrl", "name", "noindex", "poweredBy", "slug", "theme"]);
     expect(Object.keys(snapshotDto.shape.components.element.shape).sort()).toEqual(["daily", "inApp", "key", "name", "states"]);
     expect(Object.keys(snapshotDto.shape.incidents.element.shape).sort()).toEqual(["components", "id", "notes", "openedAt", "resolvedAt", "severity", "title"]);
     expect(t).toContain("The page shows its name and logo, a link to the homepage the builder sets, its components with their state and daily uptime");

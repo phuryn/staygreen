@@ -56,6 +56,7 @@ export const pageDraftSchema = z.object({
   poweredBy: z.boolean(),
   noindex: z.boolean(),
   membersOnly: z.boolean().optional(),
+  demo: z.boolean().optional(),
   historyDays: z.union([z.literal(30), z.literal(90)]),
   components: z
     .array(

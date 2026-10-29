@@ -87,6 +87,7 @@
 .sp .input, .sp .btn { min-height: var(--target); }
 
 .sp-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4); flex-wrap: wrap; padding-top: var(--s-3); border-top: var(--hair) solid var(--line); }
+.sp-demo { align-items: flex-start; color: var(--ink-2); font-size: var(--t-1); }
 .sp-foot-link { display: inline-flex; align-items: center; min-height: var(--target); color: var(--ink-2); font-size: var(--t-1); text-decoration-color: var(--edge); }
 .sp-foot-link:hover { color: var(--ink); }
 

@@ -32,7 +32,7 @@ export const KEPT_SCREEN_S = 30;
  *  Publish, Settings), and the monitor's page, which alone carries its ping URL and history. Shown
  *  from a copy a teammate's save has since changed, they would write the old values back. The
  *  lists keep theirs: their buttons send an id. Pinned by `tests/unit/navigation.test.ts`. */
-export const FRESH_ON_EVERY_VISIT = ["monitors/[id]", "monitors/[id]/edit", "incidents/[id]", "status-pages/[id]", "settings", "apps/[id]/checks"] as const;
+export const FRESH_ON_EVERY_VISIT = ["monitors/[id]", "monitors/[id]/edit", "incidents/[id]", "status-pages/[id]", "settings", "apps/[id]/checks", "clone/[slug]"] as const;
 
 export type PollInput = {
   /** A screen that wants polling is showing. */

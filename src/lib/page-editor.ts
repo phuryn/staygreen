@@ -14,7 +14,7 @@ export type PageEditorSection = "branding" | "address" | "components" | "options
 const fieldSection: Record<keyof PageDraft, PageEditorSection> = {
   name: "branding", logoText: "branding", homepage: "branding", accent: "branding", theme: "branding",
   slug: "address", components: "components",
-  poweredBy: "options", noindex: "options", membersOnly: "options", historyDays: "options",
+  demo: "options", poweredBy: "options", noindex: "options", membersOnly: "options", historyDays: "options",
 };
 
 /** Both browser validation and server refusals name the draft's top-level fields. */

@@ -22,28 +22,45 @@ beforeEach(() => {
   fake.row.mockResolvedValue({ data: { host: "status.example.com", cname_target: target, created_at: new Date().toISOString(), verified_at: null, monitor_id: null }, error: null });
 });
 describe("private publication boundary", () => {
+  it("passes the demo choice only for scale_demo and ignores forged flags on every other plan", async () => {
+    for (const entitlements of [FREE, member.entitlements]) {
+      fake.member.mockResolvedValue({ ...member, entitlements });
+      expect(await savePage("page_a", { ...draft, membersOnly: false, demo: true })).toEqual({ ok: true });
+      expect(fake.rpc).toHaveBeenLastCalledWith("save_demo_page", expect.objectContaining({ p_demo: null }));
+    }
+    fake.member.mockResolvedValue({ ...member, entitlements: entitlementsFrom(() => true) });
+    for (const demo of [true, false]) {
+      expect(await savePage("page_a", { ...draft, membersOnly: false, demo })).toEqual({ ok: true });
+      expect(fake.rpc).toHaveBeenLastCalledWith("save_demo_page", expect.objectContaining({ p_demo: demo }));
+    }
+  });
+  it("refuses the contradictory demo/private draft before withdrawing the public copy", async () => {
+    fake.member.mockResolvedValue({ ...member, entitlements: entitlementsFrom(() => true) });
+    expect(await savePage("page_a", { ...draft, demo: true })).toMatchObject({ ok: false, fieldErrors: { demo: expect.any(String) } });
+    expect(fake.rpc).not.toHaveBeenCalled(); expect(fake.withdraw).not.toHaveBeenCalled();
+  });
   it("passes the reordered component array to the save transaction without sorting or losing bindings", async () => {
     const components = ["Website", "API", "Database"].map((name, i) => ({ name, inApp: i !== 1, monitorIds: [`mon_${String(i).padStart(24, "0")}`] }));
     expect(await savePage("page_a", { ...draft, membersOnly: false, components })).toEqual({ ok: true });
-    expect(fake.rpc).toHaveBeenLastCalledWith("save_status_page_access", expect.objectContaining({ p_components: components }));
+    expect(fake.rpc).toHaveBeenLastCalledWith("save_demo_page", expect.objectContaining({ p_components: components }));
   });
   it("withdraws before saving private content and supplies the matching version", async () => {
     expect(await savePage("page_a", draft)).toEqual({ ok: true });
     expect(fake.withdraw).toHaveBeenCalledWith("page_a", "harbor", 7);
-    expect(fake.rpc).toHaveBeenLastCalledWith("save_status_page_access", expect.objectContaining({ p_members_only: true, p_withdrawal_version: 7 }));
+    expect(fake.rpc).toHaveBeenLastCalledWith("save_demo_page", expect.objectContaining({ p_members_only: true, p_withdrawal_version: 7 }));
     expect(fake.withdraw.mock.invocationCallOrder[0]).toBeLessThan(fake.rpc.mock.invocationCallOrder.at(-1)!);
   });
   it("does not save private edits when the renderer or purge cannot acknowledge", async () => {
     fake.withdraw.mockResolvedValue(false);
     expect(await savePage("page_a", draft)).toMatchObject({ ok: false, reason: expect.stringContaining("Private changes were not saved") });
-    expect(fake.rpc.mock.calls.map(c => c[0])).not.toContain("save_status_page_access");
+    expect(fake.rpc.mock.calls.map(c => c[0])).not.toContain("save_demo_page");
   });
   it("keeps an already private page editable after downgrade without a public phase", async () => {
     fake.member.mockResolvedValue({ ...member, entitlements: FREE });
     fake.rpc.mockResolvedValue({ data: null, error: null });
     expect(await savePage("page_a", draft)).toEqual({ ok: true });
     expect(fake.withdraw).not.toHaveBeenCalled();
-    expect(fake.rpc).toHaveBeenLastCalledWith("save_status_page_access", expect.objectContaining({ p_members_only: true, p_private_pages: false }));
+    expect(fake.rpc).toHaveBeenLastCalledWith("save_demo_page", expect.objectContaining({ p_members_only: true, p_private_pages: false }));
   });
 });
 describe("custom domain actions", () => {

@@ -47,6 +47,7 @@ function draftOf(p: StatusPage): Draft {
     poweredBy: p.poweredBy,
     noindex: p.noindex,
     membersOnly: p.membersOnly,
+    demo: p.demo ?? false,
     historyDays: p.showHistoryDays === 30 ? 30 : 90,
     components: p.components.map((c) => ({ key: c.id, name: c.name, inApp: c.inApp, monitorIds: c.monitorIds })),
   };
@@ -513,6 +514,14 @@ function Options({ s, draft, set, expanded, onToggle }: SectionToggle & { s: Wor
   return (
     <CollapsibleSection id="pe-opts" title="Options" expanded={expanded} onToggle={onToggle}>
       <ul className="pe-switches">
+        {s.demoAllowed && <li className="pe-switch">
+          <label className="switch">
+            <input type="checkbox" role="switch" checked={draft.demo ?? false} disabled={!!draft.membersOnly}
+              onChange={(e) => set({ demo: e.target.checked })} aria-describedby="pe-sw-demo" />
+            <span>Demo page</span>
+          </label>
+          <span id="pe-sw-demo" className="hint">Visitors can clone this public page and its checks into their own workspace. Turn off Members only first.</span>
+        </li>}
         <li className="pe-switch">
           <fieldset className="pe-fieldset">
             <legend className="label">Incident history</legend>
@@ -556,7 +565,7 @@ function Options({ s, draft, set, expanded, onToggle }: SectionToggle & { s: Wor
         <li className="pe-switch">
           <div className="pe-switch-row">
             <label className="switch">
-              <input type="checkbox" role="switch" checked={draft.membersOnly ?? false} aria-describedby="pe-sw-members"
+              <input type="checkbox" role="switch" checked={draft.membersOnly ?? false} disabled={!!draft.demo} aria-describedby="pe-sw-members"
                 onClick={(e) => { if (!priv && !draft.membersOnly) { e.preventDefault(); showOffer("pe-offer-members"); } }}
                 onChange={(e) => { if (priv || draft.membersOnly) set({ membersOnly: e.target.checked }); }} />
               <span>Members only</span>

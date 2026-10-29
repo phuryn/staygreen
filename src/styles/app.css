@@ -137,6 +137,7 @@ a.kpi:hover { border-color: var(--line-strong); }
 .mon-name { display: flex; align-items: center; gap: var(--s-2); min-width: 0; }
 .mon-name > svg { color: var(--ink-3); flex: none; }
 .mon-name a { font-weight: var(--w-bold); text-decoration: none; color: var(--ink); }
+.mon-name .mon-title { font-weight: var(--w-bold); color: var(--ink); }
 .mon-name a:hover { text-decoration: underline; }
 .mon-target { display: block; color: var(--ink-3); max-width: 340px; font-size: var(--t-1); }
 /* On a phone the table keeps the name, the state and the day's uptime: the address gives way
@@ -308,10 +309,10 @@ a.kpi:hover { border-color: var(--line-strong); }
 @media (max-width: 640px) { .add-app { grid-template-columns: minmax(0, 1fr); } }
 .add-app-block { margin-top: var(--s-5); }
 
-/* An app's logo beside its name (`AppLogo`): its image, or its first letter on a neutral square.
-   Never a state colour and never the accent. */
+/* AppLogo uses the app's own brand colour for its initial, with contrast-checked ink.
+   Without a brand it stays neutral; neither colour represents a monitor state. */
 .app-logo { flex: none; border-radius: var(--r-1); object-fit: contain; }
-.app-logo-none { display: inline-grid; place-items: center; background: var(--sunk); color: var(--ink-2); font-weight: var(--w-bold); line-height: 1; }
+.app-logo-none { display: inline-grid; place-items: center; background: var(--app-logo-fill, var(--sunk)); color: var(--app-logo-ink, var(--ink-2)); font-weight: var(--w-bold); line-height: 1; }
 
 /* Settings: an app's row, and its editor and suggested checks under it. */
 .app-row { border-top: var(--hair) solid var(--line); }

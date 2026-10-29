@@ -29,7 +29,7 @@ export type PublicIncident = {
 export type PublicComponent = { key: string; name: string; inApp: boolean; state: State; daily: number[] };
 
 export type PublicView = {
-  page: { slug: string; name: string; logoText: string; logoUrl: string | null; faviconUrl: string | null; homepage: string; accent: string; theme: StatusPage["theme"]; poweredBy: boolean; noindex: boolean; historyDays: number };
+  page: { demo?: boolean; slug: string; name: string; logoText: string; logoUrl: string | null; faviconUrl: string | null; homepage: string; accent: string; theme: StatusPage["theme"]; poweredBy: boolean; noindex: boolean; historyDays: number };
   components: PublicComponent[];
   incidents: PublicIncident[];
   /** The newest check behind the page, or null before the first one. */
@@ -44,6 +44,7 @@ const when = z.string().refine((v) => !Number.isNaN(Date.parse(v)), "a timestamp
 /** The snapshot function's output, as an allowlist: `z.object` drops keys it doesn't name. */
 export const snapshotDto = z.object({
   page: z.object({
+    demo: z.boolean().default(false),
     slug: z.string(),
     name: z.string(),
     logoText: z.string(),
@@ -121,7 +122,7 @@ export function viewFromSim(s: Sim, p: StatusPage): PublicView {
   // A window still open (a new monitor's first check, written at once) ends ahead of now.
   const last = Math.max(0, ...s.monitors.filter((m) => ids.has(m.id)).flatMap((m) => m.reports.map((r) => Math.min(r.end, s.now))));
   return {
-    page: { slug: p.slug, name: p.name, logoText: p.logoText, logoUrl: p.logoUrl, faviconUrl: p.faviconUrl, homepage: p.homepage, accent: p.accent, theme: p.theme, poweredBy: showsMark(s, p), noindex: p.noindex, historyDays: p.showHistoryDays },
+    page: { demo: !!p.demo && !p.membersOnly, slug: p.slug, name: p.name, logoText: p.logoText, logoUrl: p.logoUrl, faviconUrl: p.faviconUrl, homepage: p.homepage, accent: p.accent, theme: p.theme, poweredBy: showsMark(s, p), noindex: p.noindex, historyDays: p.showHistoryDays },
     components: shown.map((c) => ({ key: c.id, name: c.name, inApp: c.inApp, state: compState(s, c), daily: componentDaily(s, c, 90) })),
     incidents: publicIncidents(s, p).map((i) => ({
       id: i.id,

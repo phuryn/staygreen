@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Monitor, Sim } from "@/lib/model";
+import { typeLabel } from "@/lib/model";
 import { ms, pct, time } from "@/lib/format";
 import { sslLine } from "@/lib/expiry";
 import { newestReport, noNumber, recoveryNote, reportedWhen, reportResult, stateLabel, versionSince } from "@/lib/history";
@@ -10,6 +11,21 @@ import { useEagerPoll } from "@/lib/workspace-store";
 import { locations } from "@/lib/plans";
 import { StateBadge } from "./State";
 import { TypeIcon } from "./TypeIcon";
+
+/** Shared monitor identity, without a state/history claim. Previews omit the link and may
+ * withhold the target entirely; dashboard rows retain their existing target formatting. */
+export function MonitorIdentity({ monitor: m, href }: {
+  monitor: Pick<Monitor, "name" | "type"> & Partial<Pick<Monitor, "target">>; href?: string;
+}) {
+  return <div className="mon-name">
+    <TypeIcon type={m.type} />
+    <span className="sr-only">{typeLabel[m.type]}: </span>
+    <div className="grow">
+      {href ? <Link href={href}>{m.name}</Link> : <span className="mon-title">{m.name}</span>}
+      {m.target !== undefined && <span className="mon-target addr">{m.type === "heartbeat" ? m.target : m.target.replace(/^https:\/\//, "")}</span>}
+    </div>
+  </div>;
+}
 
 /** The "Latest checks" cell: the newest 5-minute window any location reported, and where from. An
  *  SSL monitor whose certificate a check has read gives its two expiries instead. */
@@ -59,13 +75,7 @@ export function MonitorTable({ s, monitors, showApp }: { s: Sim; monitors: Monit
             return (
               <tr key={m.id}>
                 <td>
-                  <div className="mon-name">
-                    <TypeIcon type={m.type} />
-                    <div className="grow">
-                      <Link href={`/app/monitors/${m.id}`}>{m.name}</Link>
-                      <span className="mon-target addr">{m.type === "heartbeat" ? m.target : m.target.replace(/^https:\/\//, "")}</span>
-                    </div>
-                  </div>
+                  <MonitorIdentity monitor={m} href={`/app/monitors/${m.id}`} />
                 </td>
                 {showApp && <td className="hide-sm">{s.apps.find((a) => a.id === m.appId)?.name}</td>}
                 <td>

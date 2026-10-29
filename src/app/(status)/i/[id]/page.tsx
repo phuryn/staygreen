@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { loadStatusIncident } from "@/lib/status-access";
 import { PublicIncidentView } from "@/components/status/StatusPageView";
+import { env } from "@/lib/env";
 import { faviconOf } from "@/lib/page-assets";
 
 // One incident at the short link alerts carry (staygreen.io/i/inc_…), in its status page's frame.
@@ -24,5 +25,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function PublicIncidentPage({ params }: Props) {
   const found = await load((await params).id);
   if (!found) notFound();
-  return <PublicIncidentView view={found.view} incidentId={found.incidentId} />;
+  return <PublicIncidentView view={found.view} incidentId={found.incidentId} appUrl={env().APP_URL} />;
 }

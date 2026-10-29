@@ -169,6 +169,8 @@ export type App = {
   id: string;
   name: string;
   url: string;
+  /** Stored brand colour, including a demo page's fallback when the app had none. */
+  accent?: string | null;
   /** Its logo's address (`/page-assets/<id>`), or null: chosen in Settings or imported from the
    *  app's own icon when it was added. Never the bytes. */
   logoUrl: string | null;
@@ -236,6 +238,7 @@ export type Delivery = {
 export type Component = { id: string; name: string; monitorIds: string[]; inApp: boolean };
 
 export type StatusPage = {
+  demo?: boolean;
   id: string;
   appId: string;
   slug: string;
@@ -291,6 +294,7 @@ export type Sim = {
  *  plus one boolean per permission and the plan features held. What the probes measured comes
  *  from `workspace_history` (`history.ts`). */
 export type Snapshot = Sim & {
+  demoAllowed?: boolean;
   /** Server time when this was read; the client keeps the newest snapshot it has seen. */
   loadedAt: number;
   can: Record<Permission, boolean>;
