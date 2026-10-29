@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { publicPageMetadata } from "@/lib/public-metadata";
+import { HOME_DESCRIPTION, homeStructuredData, jsonLd, publicPageMetadata } from "@/lib/public-metadata";
 import Link from "next/link";
 import { Catches } from "@/components/landing/Catches";
 import { Comparison } from "@/components/landing/Comparison";
@@ -14,7 +14,7 @@ import { limits } from "@/lib/plans";
 export const metadata: Metadata = {
   ...publicPageMetadata("/"),
   title: { absolute: "Staygreen: monitoring for apps you built yourself" },
-  description: "Uptime checks that read what your app returns, heartbeats for your crons, Stripe webhook failures, a paused Supabase project, SSL and domain expiry, a status page on your domain, and an MCP server for your coding agent.",
+  description: HOME_DESCRIPTION,
 };
 
 // The page shows the product working in every section instead of describing it. Each section
@@ -29,8 +29,10 @@ const F = limits.free;
 const second = isBuilt("scan") ? { href: "/scan", label: "Scan your app" } : { href: "/pricing", label: "See pricing" };
 
 export default function Landing() {
+  const structuredData = homeStructuredData();
   return (
     <>
+      {structuredData && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }} />}
       <section className="wrap lp-hero" aria-labelledby="hero-h">
         <h1 id="hero-h" className="lp-h1">
           <span>Your app is up.</span>

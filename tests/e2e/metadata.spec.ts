@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { isBuilt } from "../../src/lib/launch";
+import { offers } from "../../src/lib/plan-offer";
 import { BASE_URL } from "./web-server";
 
 // Work from the response text: a hydrated DOM can hide missing crawler metadata.
@@ -28,6 +30,7 @@ for (const path of ["/", "/pricing", "/scan", "/bot", "/legal/terms", "/legal/pr
     expect(meta(html, "twitter:card")).toBe("summary_large_image");
     expect(meta(html, "twitter:image")).toBe(meta(html, "og:image"));
     expect(meta(html, "robots")).toBe("noindex, nofollow");
+    if (path !== "/") expect(html).not.toContain("application/ld+json");
     const canonical = [...html.matchAll(/<link\s[^>]*>/g)].map(([tag]) => attributes(tag)).find((attrs) => attrs.rel === "canonical");
     expect(canonical?.href).toBeTruthy();
     expect(new URL(canonical!.href).href).toBe(new URL(path, BASE_URL).href);
@@ -68,6 +71,26 @@ test("the linked SVG parses, the PNG decodes, and the conventional favicon is an
   expect(favicon.headers()["content-type"]).toMatch(/^image\/(x-icon|vnd\.microsoft\.icon)/);
   const ico = await favicon.body();
   expect([ico.readUInt16LE(0), ico.readUInt16LE(2)]).toEqual([0, 1]);
+});
+
+// Crawlers that run no script read only the response, so the homepage's JSON-LD is checked there.
+test("/ serves its organisation, site and product as JSON-LD in the response", async ({ request }) => {
+  const html = await (await request.get("/")).text();
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json">([^<]*)<\/script>/g)].map((match) => JSON.parse(match[1]));
+  expect(blocks).toHaveLength(1);
+  const nodes = blocks[0]["@graph"] as Record<string, any>[];
+  expect(blocks[0]["@context"]).toBe("https://schema.org");
+  expect(nodes.map((node) => node["@type"])).toEqual(["Organization", "WebSite", "SoftwareApplication"]);
+  const [org, site, app] = nodes;
+  expect(org["@id"]).toBe(new URL("/#organization", BASE_URL).href);
+  expect(org.sameAs).toEqual(["https://github.com/phuryn/staygreen"]);
+  expect([site.publisher, app.publisher]).toEqual([{ "@id": org["@id"] }, { "@id": org["@id"] }]);
+  expect(app.description).toBe(meta(html, "description"));
+  // Read from `launch.ts`, as the landing's tests do: Builder is offered while its card sells it.
+  expect(app.offers.map((offer: Record<string, any>) => [offer.name, offer.price, offer.priceCurrency, offer.url, offer.priceSpecification.referenceQuantity.unitCode]))
+    .toEqual([offers.free, ...(isBuilt("billing") ? [offers.builder] : [])].map(({ name, monthly }) => [name, String(monthly), "USD", new URL("/pricing", BASE_URL).href, "MON"]));
+  for (const url of [org.url, org.logo, site.url, app.url]) expect(new URL(url).origin).toBe(BASE_URL);
+  expect((await request.get(org.logo)).status()).toBe(200);
 });
 
 test("non-production robots and sitemap never invite indexing", async ({ request }) => {

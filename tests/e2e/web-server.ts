@@ -32,6 +32,9 @@ export const webServer: PlaywrightTestConfig["webServer"] = {
     // Off: no simulated plan. `next start` runs in production mode, where the override is
     // ignored anyway; the unit suite covers both sides (`tests/unit/dev-plan.test.ts`).
     DEV_PLAN_OVERRIDE: "",
+    // Off: the hosted mode, with Clerk's pricing table and the homepage's JSON-LD. The
+    // self-hosted side is covered in the unit suite (`self-hosted-billing`, `home-structured-data`).
+    SELF_HOSTED_PLAN: "",
     // Exercise the local status routes without reaching a deployed renderer.
     STATUS_EDGE_ENABLED: "off",
     NEXT_PUBLIC_STATUS_HOST: "status.staygreen.io",

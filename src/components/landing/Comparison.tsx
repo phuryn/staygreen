@@ -6,7 +6,9 @@ import { has, limits } from "@/lib/plans";
 //
 // Every competitor figure is a receipt from `docs/product/research/competitors-202610.md`,
 // labelled V there (read from the vendor's own pricing page on the date below). A cell the
-// research could not verify says so instead of guessing; re-verify before changing a figure,
+// research could not verify says so instead of guessing; where a paid plan is known to offer a
+// feature, included or as an add-on, and only the free plan is unstated, the cell shows the cheapest
+// paid way to get it and the footer names the feature. Re-verify before changing a figure,
 // and change `checked` with it. "Not offered" is only for a capability absent from the vendor's
 // own exhaustive list of monitor types (`competitors-stripe-supabase-202610.md`, `absentChecked`). Staygreen's column names the tier from the plan
 // module and links to live prices; only the dated competitor figures are kept here.
@@ -39,11 +41,14 @@ const rows: { label: string; staygreen: Cell; cells: Record<string, Cell> }[] = 
   { label: "A paused Supabase project", staygreen: staygreenFor(limits.free.supabaseMonitors !== 0), cells: nowhere },
   {
     label: "Webhook alerts",
-    // Every alert channel is on both plans (spec.md § 1).
+    // Every alert channel is on both plans (spec.md § 1). Better Stack's free plan names Slack and
+    // e-mail alerts and its seat names phone and SMS, so neither says which plan has webhooks.
+    // OpenStatus's pricing table has no free column (re-read 2026-10-29), so here, as for an own
+    // domain and without its name, its cell is on its cheapest paid plan, Starter, as the footer says.
     staygreen: free,
     cells: {
       uptimerobot: { amount: 41, currency: "EUR", plan: "Team" },
-      betterstack: { amount: 34, currency: "USD", plan: "One responder seat" },
+      betterstack: { unknown: "Its pricing page doesn't say which plan" },
       openstatus: { amount: 30, currency: "USD", plan: "Starter" },
       hyperping: { amount: 24, currency: "USD", plan: "Essentials, billed yearly" },
     },
@@ -150,7 +155,7 @@ export function Comparison({ headingLevel = 3 }: { headingLevel?: 2 | 3 }) {
 
       <p className="cmp-foot">
         Not offered means it isn&rsquo;t among the monitor types the vendor lists, read on <time dateTime={absentChecked}>{dateLabel(absentChecked)}</time>. Watching Stripe&rsquo;s own status page doesn&rsquo;t count: it can&rsquo;t see your failed deliveries.{" "}
-        UptimeRobot showed its prices in euros, so they stay in euros here. Prices change: check{" "}
+        UptimeRobot showed its prices in euros, so they stay in euros here. OpenStatus&rsquo;s pricing table covers only its paid plans, so for webhooks, an own domain and a page without its name, its prices are on its cheapest paid plan. Prices change: check{" "}
         {vendors.map((v, i) => (
           <span key={v.id}>
             <a className="link" href={v.source} rel="noreferrer">{v.name}</a>

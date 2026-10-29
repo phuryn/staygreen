@@ -143,7 +143,7 @@ d12188239bdee33c2bc9752519ae74acec8901d31098836da86542269268fc87  src/app/(publi
 2c358c58e4eff984bd2ac0e42912898c71bc10f7e13a9d14fcd0d9ab759536b7  src/app/(public)/legal/terms/page.tsx
 c5098aee138fc231a9a67efceb448098bcb51c69f64c0fc202a4b4e18546ec64  src/app/(public)/opengraph-image.alt.txt
 08ba393a41860f2d18c7df2fa0ce3f96d5ed0c735d3c66f05c315a90cb356c93  src/app/(public)/opengraph-image.png
-cf66ac55c2fa6809d41f31895d82e17610c4e705d5aad988479c80315421ecad  src/app/(public)/page.tsx
+c98738bbc364a95797844d6a7883b9fc37d2bbcebf234d74b2fbf5ee7ac58634  src/app/(public)/page.tsx
 19866557732f55f281dbf88c90b767c6fc427091d969f40acd035f45624c4106  src/app/(public)/pricing/page.tsx
 af29afd3164b68a38a4d58650bd01d6d0f7d3d33dd30b346edcd066853027b94  src/app/(public)/scan/page.tsx
 96d68b56a6bfc7222c47d88ee8ac0e210622733fc34864e4819967befa85b23a  src/app/(public)/sign-in/[[...sign-in]]/page.tsx
@@ -202,7 +202,7 @@ b47677c1dce01648aab7f142d08e034ef2aed42ecf08061965d1c326594d9139  src/components
 a9026606a8186ef00467e78bd36cb5136f3fa41849735bb37f8a6d2700fa0f60  src/components/Flag.tsx
 dd1e51239bc97fd081a8514d4fbd690e489695226ddbbd8db1240b1886fc8655  src/components/HeartbeatUrl.tsx
 ea15d92ee505c58e5364caf9621fb628cb6aaf7767ae59a0872538c8c656c407  src/components/landing/Catches.tsx
-795563168beed23924eec669567d38ed55a6c2f672245755b93e4b57305ef8b0  src/components/landing/Comparison.tsx
+c07e0e575dc5c93b1d19cecac942973c19bfd5969370a21ff5ce1c9cc1e3e6f8  src/components/landing/Comparison.tsx
 97d64dbd0165b5f41b8cd5391c3dcb5abd1f60545ad3af52bac7584f04832758  src/components/landing/Disagree.tsx
 c666142e1989adc52c2e1f5335c46a710d2631358c82644f6634989d395fe057  src/components/landing/plan-copy.ts
 2618c93fa80b5aa6092b10dcef8202e3e29ed995966ce434dae39c56450f36cc  src/components/landing/PlanCards.tsx
@@ -311,7 +311,7 @@ ab925cbd238717c4a69360cdd7006ea6340bf4114777434bd35a8da7d472b8e2  src/lib/page-d
 337ff4520dd93af09cc37257366c8facdc7191b46cab6ef5a6f0ead5f38059cb  src/lib/plans.ts
 f0f9ce7060f63a22e1202ca83383f6ed6f1bffa8e2586dae8a500c2733326dfd  src/lib/poll.ts
 1782e12fb8954f627413f707150c8a1480f4f91303737189e799e775b5193300  src/lib/public-data.ts
-db528cf9165bad6e44779436722c3c351e4813711e03746c3fc315dee7575bec  src/lib/public-metadata.ts
+c435928b6d710514a877b98676b8134372ca252ec6605b1bffa3c7271c3bf5e8  src/lib/public-metadata.ts
 165a6003fa61318aa8347f2680e8f7b42ad1da7ad82ccded2636eeddf4df2afa  src/lib/public-page.ts
 b6f24a4c38446f8a28646beafea35b26a269345a6962bb3639601b7d7673177b  src/lib/request-limit.ts
 6a445546b22fd6ca023e8f7a7d4e555ec6a924f2660c95ce425f136c2bd55a60  src/lib/request.ts
@@ -394,7 +394,7 @@ f83b5db570dff2dbe86c07c398bf503344dba77841ea321ae0749e09c001cb23  tests/e2e/cros
 68f2dedfeaa6722a08ce6ca17ad555ae9fc7e271ce82d6f5a10f394cdc3bac8c  tests/e2e/front-door.spec.ts
 2c59ef1b74f9b51df23eed0a4061c1b1c9c2a1c2ae35c3e0c04e569bbebdafaf  tests/e2e/journeys.auth.spec.ts
 7da07104090c18cc7eb6fbcf3f78a9477700c834c656a065d352fe57ca87d40f  tests/e2e/landing.spec.ts
-428666e3d05f3b416e4c9e476f5f463c164bd4938059103cfe37d93d3ea60da5  tests/e2e/metadata.spec.ts
+4fa60f5d7a5743a0f51c573a0c7357e2d53b49df26dd364e042758943e64be54  tests/e2e/metadata.spec.ts
 93533d59dfb0fef3756d0f40646a4e6af1186afb3143ad72d03a12cc9f252440  tests/e2e/public-pages.spec.ts
 e0136778ff6d128322f5c0584ee20729875dbc0146b8beb1f4ed6eea6f5de0eb  tests/e2e/scan.spec.ts
 bcf9d76087fc4ced1ca408ece6570502dd05bc0e328d786c2736bfcc657b6349  tests/e2e/sign-in.setup.ts
@@ -408,7 +408,7 @@ e41e7ef2c1b2385ef0083c71e0aa883ee8c44f359923442cf832564aab4c6f07  tests/e2e/supp
 cf731c9f64d941bd36b53b05c8b6ecabac3ea582887b5ccb15dfbb4202880573  tests/e2e/support/public-setup.ts
 b20ed528126ea7ffbff7e25c02c587525bee4f85e79cb04143fad1bfc8f80350  tests/e2e/support/rest.ts
 702d9fdc449bd72a912e6e7a77805991fe29215772190dc1f2d145ae0dfa1518  tests/e2e/support/seed.ts
-600d6a66a67d02284679dd7a03627a9a949bf49fcbe002a544dfd76b2e0c1f7a  tests/e2e/web-server.ts
+5d5fc990d5b50d563d4e52a5f11f815a744e678d90c9fad785b2ba47e1422a5c  tests/e2e/web-server.ts
 1011ade42875e32410ff7b6e82197bcf707b400ac4d14e8e7a6bd443f75a1e11  tests/fixtures/dependencies/catalog.json
 128e0847966b37d4ef0e85755620161a771814b93754c776f6a60e8ddeeb26fc  tests/fixtures/page-assets/logo.ico
 5ebc17797e6a1c28a8dbd37ed3eab5e1979e1f55394af269764820e383b457b9  tests/fixtures/page-assets/logo.jpg
@@ -492,7 +492,7 @@ d934bbffc376877442ab57f38139163b37433c88d0314ad9cba17a79492fdb50  tests/unit/che
 4edb4fef2dea265164b243a2c6f610518429a6ad356e05cac1fc09d1986340e7  tests/unit/checks-net.test.ts
 3fdb2a6705dca9396038ad120bc4bf62ef7d74f18f319fec66a197d2a402342c  tests/unit/clerk-billing-config.test.ts
 e409a7656d87832fa2b085a29fb4f8e5467631ed3ce132cdd11d6adb66240485  tests/unit/colour.test.ts
-1deddbaaff101325307c5eee48151a34c9d42b519d895574884ce31017bb2fd3  tests/unit/comparison.test.ts
+0cd49851bf6e5af4732bfde2d005f4cd800e3ceff8203c5590be5338304509f5  tests/unit/comparison.test.ts
 eaa405eab69f07c9a9ba3daf2c8cbf5cf3d9907eeb5ff2016cef6cff68d2f805  tests/unit/credentials.test.ts
 4670f16717ca77117cb7985766f732d78aa89f8092d9f73de61d2aff14649fee  tests/unit/cron.test.ts
 e1aa719e621ac1d6fa0eb2570f838f0778ce65615043840f72abd891345585db  tests/unit/db-errors.test.ts
@@ -518,6 +518,7 @@ eba5595d95214837c5b696d0d62493bc21363f8d6e1e793c043f9d638dcbad6a  tests/unit/fin
 14b34b26dc9329fde395222d711e92ad70f4b2889d4b03d7806452419ddfda57  tests/unit/heartbeat-view.test.ts
 8a843f81306507d55e6df4694ba2c7c3a0832921faeaa596654c3b41f6582de3  tests/unit/heartbeat.test.ts
 725227b774d2c4cfefdf8a10d25fd391cf636a7efadbee8955fc2de7c4594fba  tests/unit/history.test.ts
+3b183dcc794ce202b89473eb68e33926bcc289c8180edd1d1887c79e45168ed3  tests/unit/home-structured-data.test.ts
 4754c540c1f8bef16e78e289fab4bfb2f1313e430823b499eb41eeb7d6b461bf  tests/unit/icon-colour.test.ts
 750dff5b50dba8eeb3e22679ca90cdc68604cffe71f8e80f2058ca2384e4d167  tests/unit/ingest-handler.test.ts
 e1a4758ddfb28b26bb710b0f81e74319c926009f41eafcbe204069617adb49c8  tests/unit/ip.test.ts
