@@ -30,5 +30,13 @@ const offer = (p: Plan): Offer => ({
 
 export const offers = { free: offer(plans.free_org), builder: offer(plans.builder) };
 
+/** The free card's lines that hold on every plan, for what the product does as a whole (the homepage's
+    `featureList`). Its counts and its interval are Free's alone, since Builder raises them, so they
+    are left out by key rather than by wording (review s52-1, 2026-11-08). */
+const FREE_ONLY = ["show_free_apps", "show_free_interval"];
+export const productLines: string[] = plans.free_org.features
+  .filter((k) => features[k].publicly_visible && !FREE_ONLY.includes(k))
+  .map((k) => features[k].name);
+
 /** "$9", "$7.50". */
 export const usd = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 }).format(n);

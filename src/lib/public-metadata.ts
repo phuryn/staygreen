@@ -1,8 +1,9 @@
 import type { Metadata, MetadataRoute } from "next";
 import { isBuilt } from "./launch";
-import { offers, type Offer } from "./plan-offer";
+import { COMPANY } from "./legal";
+import { offers, productLines, type Offer } from "./plan-offer";
 import { selfHostedPlanEnabled } from "./self-hosted-plan";
-import { GITHUB_REPO } from "./site-links";
+import { GITHUB_REPO, MAKER } from "./site-links";
 
 export const INDEXED_PATHS = ["/", "/pricing", "/scan", "/bot", "/legal/terms", "/legal/privacy"] as const;
 
@@ -41,6 +42,11 @@ export function siteSitemap(appUrl = process.env.APP_URL): MetadataRoute.Sitemap
     : [];
 }
 
+// "Staygreen" alone is a landscaping company to a search engine (US results for `staygreen`,
+// `staygreen monitoring` and even `staygreen.io` held no staygreen.io page on 2026-11-08), so the
+// homepage's title names the category beside the name.
+export const HOME_TITLE = "Staygreen: uptime monitoring for apps you built yourself";
+
 export const HOME_DESCRIPTION = "Uptime checks that read what your app returns, heartbeats for your crons, Stripe webhook failures, a paused Supabase project, SSL and domain expiry, a status page on your domain, and an MCP server for your coding agent.";
 
 // The homepage's structured data: the organisation, the site, and the product with an offer for
@@ -49,6 +55,10 @@ export const HOME_DESCRIPTION = "Uptime checks that read what your app returns, 
 // while `billing` is built, the switch its card reads to say it isn't on sale yet. The price is
 // per month (`referenceQuantity`), not for a month: `billingDuration` would read as a term, which
 // no plan has. The organisation's one other home the site links is the repository, in the footer.
+// The company behind it is the one the legal pages name (`legal.ts`), its founder the maker every
+// public page's footer names (`site-links.ts`), and the product's features are the free card's
+// own lines that hold on every plan, its counts and interval left out (`productLines`,
+// `plan-offer.ts`): nothing here says what no page shows, or what only one plan gets.
 // A self-hosted copy (`SELF_HOSTED_PLAN`) gets none: it sells no plan, and an operator reviewing
 // the page's copy can't see markup. A copy that sets no plan serves what its own cards print.
 export function homeStructuredData(appUrl = process.env.APP_URL) {
@@ -62,11 +72,14 @@ export function homeStructuredData(appUrl = process.env.APP_URL) {
   return {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "Organization", "@id": organization, name: "Staygreen", url: at("/"), logo: at("/icon.svg"), sameAs: [GITHUB_REPO] },
+      { "@type": "Organization", "@id": organization, name: "Staygreen", url: at("/"), logo: at("/icon.svg"), sameAs: [GITHUB_REPO],
+        parentOrganization: { "@type": "Organization", name: COMPANY.name },
+        founder: { "@type": "Person", name: MAKER.name, url: MAKER.url, sameAs: [...MAKER.sameAs] } },
       { "@type": "WebSite", "@id": at("/#website"), name: "Staygreen", url: at("/"), description: HOME_DESCRIPTION, publisher: { "@id": organization } },
       {
         "@type": "SoftwareApplication", "@id": at("/#software"), name: "Staygreen", url: at("/"), description: HOME_DESCRIPTION,
         applicationCategory: "DeveloperApplication", operatingSystem: "Web", publisher: { "@id": organization },
+        featureList: productLines,
         offers: [offers.free, ...(isBuilt("billing") ? [offers.builder] : [])].map(offer),
       },
     ],

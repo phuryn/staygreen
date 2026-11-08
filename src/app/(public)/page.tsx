@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { HOME_DESCRIPTION, homeStructuredData, jsonLd, publicPageMetadata } from "@/lib/public-metadata";
+import { HOME_DESCRIPTION, HOME_TITLE, homeStructuredData, jsonLd, publicPageMetadata } from "@/lib/public-metadata";
 import Link from "next/link";
 import { Catches } from "@/components/landing/Catches";
 import { Comparison } from "@/components/landing/Comparison";
@@ -13,7 +13,9 @@ import { limits } from "@/lib/plans";
 
 export const metadata: Metadata = {
   ...publicPageMetadata("/"),
-  title: { absolute: "Staygreen: monitoring for apps you built yourself" },
+  // The category leads after the name: "Staygreen" alone ranks landscaping firms, staygreen.io
+  // included, so the title says what the product is (`HOME_TITLE`).
+  title: { absolute: HOME_TITLE },
   description: HOME_DESCRIPTION,
 };
 

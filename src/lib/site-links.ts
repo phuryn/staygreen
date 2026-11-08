@@ -1,6 +1,15 @@
 /* Where Staygreen points people outside the app: its public repository and issue tracker, and its
    own status page. The footer, `/support` and the app's rail read these, so a move is one edit. */
 
+/** The person who makes Staygreen, named in the footer and as the founder in the homepage's
+    structured data. `url` is where the footer links; `sameAs` are his own profiles, so search
+    engines can tie the product to the person who posts about it (the owner, 2026-11-08). */
+export const MAKER = {
+  name: "Pawel Huryn",
+  url: "https://x.com/PawelHuryn",
+  sameAs: ["https://x.com/PawelHuryn", "https://www.linkedin.com/in/pawel-huryn", "https://github.com/phuryn"],
+} as const;
+
 /** The public repository: the code under FSL-1.1-MIT, the issue tracker and the MCP server's README. */
 export const GITHUB_REPO = "https://github.com/phuryn/staygreen";
 

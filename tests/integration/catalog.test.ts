@@ -239,7 +239,10 @@ function queryCatalog(ref: string): Catalog {
   const file = join(dir, "catalog.sql");
   try {
     writeFileSync(file, CATALOG_SQL, "utf8");
-    const run = spawnSync("npx", ["supabase", "db", "query", "--linked", "--project-ref", ref, "--file", `"${file}"`, "--output-format", "json"], {
+    // The CLI's major is pinned: npx otherwise takes the newest, and 3.0 (2026-11) refused this read
+    // as an unconfirmed agent "mutation" until it was marked `--read-only`, failing the gate with no
+    // change in the tree. `--remote` names the ref directly, never the link (3.0 deprecates both).
+    const run = spawnSync("npx", ["--yes", "supabase@3", "db", "query", `--remote=${ref}`, "--read-only", "--file", `"${file}"`, "--output-format", "json"], {
       cwd: process.cwd(),
       encoding: "utf8",
       shell: process.platform === "win32",

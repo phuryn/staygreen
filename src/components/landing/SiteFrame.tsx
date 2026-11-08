@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Logo } from "@/components/Logo";
 import { isBuilt } from "@/lib/launch";
-import { GITHUB_REPO, OWN_STATUS_PAGE } from "@/lib/site-links";
+import { GITHUB_REPO, MAKER, OWN_STATUS_PAGE } from "@/lib/site-links";
 import { checkedFromNow } from "./plan-copy";
 
 // The signed-out site's header and footer, shared by the public layout and the root 404.
@@ -50,7 +50,7 @@ export async function SiteFrame({ children }: { children: React.ReactNode }) {
       <main id="main">{children}</main>
       <footer className="site-foot">
         <div className="wrap site-foot-row">
-          <p className="site-foot-line">Monitoring for apps you built yourself, checked from {checkedFromNow()}.</p>
+          <p className="site-foot-line">Monitoring for apps you built yourself, checked from {checkedFromNow()}. Made by <a href={MAKER.url} rel="noreferrer">{MAKER.name}</a>.</p>
           <nav aria-label="Footer" className="site-foot-nav">
             <Link href="/pricing">Pricing</Link>
             <Link href="/scan">{isBuilt("scan") ? "Scan your app" : "The scan"}</Link>
