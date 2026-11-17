@@ -251,8 +251,10 @@ function queryCatalog(ref: string): Catalog {
     });
     if (run.error) throw new Error(`supabase db query did not run: ${run.error.message}`);
     if (run.status !== 0) throw new Error(`supabase db query exited ${run.status}: ${(run.stderr || run.stdout).slice(0, 2000)}`);
-    const out = JSON.parse(run.stdout) as { rows?: { catalog?: Catalog }[] };
-    const catalog = out.rows?.[0]?.catalog;
+    // 3.0 and 3.1 print `{ rows: [...] }`; 3.2 (2026-11) prints the rows as a bare array, which
+    // failed the gate with no change in the tree. Either shape is read; anything else still throws.
+    const out = JSON.parse(run.stdout) as { rows?: { catalog?: Catalog }[] } | { catalog?: Catalog }[];
+    const catalog = (Array.isArray(out) ? out : out.rows)?.[0]?.catalog;
     if (!catalog) throw new Error(`supabase db query returned no catalog row: ${run.stdout.slice(0, 500)}`);
     return catalog;
   } finally {

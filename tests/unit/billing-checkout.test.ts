@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createElement, type ReactNode } from "react";
@@ -8,6 +8,7 @@ import { PERMISSIONS } from "@/lib/authz";
 import { built } from "@/lib/launch";
 import { offers, usd } from "@/lib/plan-offer";
 import { FREE } from "@/lib/plans";
+import { GITHUB_REPO } from "@/lib/site-links";
 import type { Member } from "@/lib/workspace";
 import type { Workspace } from "@/lib/workspace-store";
 import { NOW, sim } from "./fixtures";
@@ -172,6 +173,29 @@ it.each(["billing@example.test", ""])("offers receipts and company/VAT invoices 
     expect(faq).toContain("00-521");
     expect(faq).not.toContain("mailto:");
   }
+});
+
+it("says a copy can be run, links the public repository and its deployment guide, and claims only what they say", () => {
+  const html = renderToStaticMarkup(createElement(Pricing));
+  const start = html.indexOf("Is Staygreen open source? Can I host it myself?");
+  expect(start).toBeGreaterThan(-1);
+  const faq = html.slice(start, html.indexOf("What happens if I cancel Builder?"));
+  expect(faq).toContain(`href="${GITHUB_REPO}"`);
+  expect(faq).toContain(`href="${GITHUB_REPO}/blob/main/docs/deploying.md"`);
+  expect(faq).toContain("FSL-1.1-MIT");
+  expect(faq).toContain("competing commercial product or service");
+  expect(faq).toContain("without billing");
+  // The answer's facts are the public copy's own: the license it names, the guide it links and the
+  // guide's no-billing switch. This file ships, so it runs in both trees: here they sit under
+  // `open-source/` and the manifest must ship the guide (so the URL exists publicly); in the public
+  // copy they are at the root, where the guide's presence is that proof.
+  const at = (path: string) => readFileSync(fileURLToPath(new URL(`../../${path}`, import.meta.url)), "utf8");
+  const privateTree = existsSync(fileURLToPath(new URL("../../open-source/manifest.json", import.meta.url)));
+  const dir = privateTree ? "open-source/" : "";
+  expect(at(`${dir}LICENSE`)).toContain("FSL-1.1-MIT");
+  expect(at(`${dir}LICENSE`)).toContain("Competing Use");
+  if (privateTree) expect(JSON.parse(at("open-source/manifest.json")).ship).toContain("open-source/docs/deploying.md");
+  expect(at(`${dir}docs/deploying.md`)).toContain("`SELF_HOSTED_PLAN=builder` on the app gives every workspace every Builder feature");
 });
 
 const root = fileURLToPath(new URL("../../src", import.meta.url));

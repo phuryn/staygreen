@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentError, type AgentPrincipal } from "@/lib/agent-contract";
 import { FREE } from "@/lib/plans";
 const mocks = vi.hoisted(() => {
@@ -104,6 +104,11 @@ describe("call shapes, names without values (owner, 2026-10-27)", () => {
   const rows = async () => { for (const [task] of mocks.after.mock.calls) await task(); return mocks.insert.mock.calls.map(([row]) => row as { shape: { token: { age_s: number } } }); };
   const _meta = { progressToken: 7, "openai/subject": "subject-value", "openai/session": "session-value", "openai/userLocation": { city: "Krakow" } };
   const metaNames = ["openai/session", "openai/subject", "openai/userLocation", "progressToken"];
+  // Shapes are recorded only before SHAPES_UNTIL, so these run on a clock set to the day before it.
+  // On the real clock they turned red on 2026-11-10 with no code change (found 2026-11-17, s53's gate).
+  // The last test sets its own time to check that nothing is recorded from SHAPES_UNTIL on.
+  beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(SHAPES_UNTIL - 86_400_000); });
+  afterEach(() => { vi.useRealTimers(); });
   it("logs _meta's key names on initialize and tools/call, initialize's declared client, and no value", async () => {
     await mcpRequest(request({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: { elicitation: {} }, clientInfo: { name: "openai-mcp", version: "1.0.0" }, _meta } }, { "user-agent": "openai-mcp/1.0.0 (host-value)" }));
     await mcpRequest(request({ ...call, params: { ...call.params, _meta } }));

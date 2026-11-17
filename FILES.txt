@@ -144,7 +144,7 @@ d12188239bdee33c2bc9752519ae74acec8901d31098836da86542269268fc87  src/app/(publi
 c5098aee138fc231a9a67efceb448098bcb51c69f64c0fc202a4b4e18546ec64  src/app/(public)/opengraph-image.alt.txt
 08ba393a41860f2d18c7df2fa0ce3f96d5ed0c735d3c66f05c315a90cb356c93  src/app/(public)/opengraph-image.png
 53596511e7d629c8f23ac4be7860638b54983b3d6338cbbac85be93adb5a7ff8  src/app/(public)/page.tsx
-19866557732f55f281dbf88c90b767c6fc427091d969f40acd035f45624c4106  src/app/(public)/pricing/page.tsx
+01a2be12e15d1c869577eafcea4009890d0fa792d0e981c7e82fe992cb64563c  src/app/(public)/pricing/page.tsx
 af29afd3164b68a38a4d58650bd01d6d0f7d3d33dd30b346edcd066853027b94  src/app/(public)/scan/page.tsx
 96d68b56a6bfc7222c47d88ee8ac0e210622733fc34864e4819967befa85b23a  src/app/(public)/sign-in/[[...sign-in]]/page.tsx
 e2345e51956f4f985b822fe9dd172fcbe0adbac9959aa2c593fcfd262f26d32f  src/app/(public)/sign-up/[[...sign-up]]/page.tsx
@@ -431,7 +431,7 @@ e1d2e32b7fe536c41f1f7f251d7f5a79505fda84e9e440d9c42ce3806f6589ec  tests/golive/g
 558c069678d1dee5e62aa0732e60d376930307ed5c920b5d625b90752095162c  tests/integration/alert-actions.test.ts
 ec808e67b6ea2448dcdf31172c3e036b6b27fbb657fa03a3fa2c5b7fd06f4905  tests/integration/alerts.test.ts
 4f2c943582ce9ffa42238a3ddb9a7fdedba5d2ca62ca99dc6f5f445d170d89fa  tests/integration/app-logos.test.ts
-5e09e3198fa8dcac7168b184a225b25e1c410ccac84aaf542bc4182bdbae2b29  tests/integration/catalog.test.ts
+cbaf801da9256da11318a4b539d99e5f7d178846352ee12d716966a8da20bcf3  tests/integration/catalog.test.ts
 cd314412482001ff4c4af919b885dfc34e1d8c7c6f9abecc901475df628de3b2  tests/integration/channels.test.ts
 06dce22f0eb196c2bbd54ab742d580b8f5ddab70b54a6a3f56ec54e5de0821ad  tests/integration/clerk-plans.test.ts
 404f8bf06245bf9f7c40094f011ac36536647ceb720ececf9a4dcf0c456f9844  tests/integration/cross-tenant.test.ts
@@ -469,7 +469,7 @@ b070e933b7a100ff68820daba2cedaf83f7252c0267a93eef6de48a929e019c3  tests/unit/age
 12cef3e4cc554ac044fc0a1151756bf1ebb628cc81d9e07f2ce75d1f754e5e02  tests/unit/agent-proxy.test.ts
 da34157d653f6aeb2fffe6245f0ab0707cb0d017c486ef32a991666604bf6420  tests/unit/agent-screen.test.ts
 25155a01626e53b70008dddc2d074e53d9a549f52b10c3aba114f832174fc39f  tests/unit/agent-shapes.test.ts
-dcbdb065f5d14174054932308240213246b3d1896b9728cb4d8184f8c8ad8d25  tests/unit/agent-transport.test.ts
+988eae79859cd29ebd8c89d4a650aae19e3ba0e7effb3a2eaf0f07d93805bbe0  tests/unit/agent-transport.test.ts
 7df6683b8b49b84c4d343db47ae4da7d5e2683b01fcaa7a45d0135a679ab94af  tests/unit/alerts.test.ts
 d69f733143c9e20d9b9e35f160e3fc29f807e8773530c87cc88efd404a41156a  tests/unit/api-tokens.test.ts
 71d540ac4843c68d1dca2fa7c9377682e9c27a12d020ada7c2d03827c7223c04  tests/unit/app-delete-menu.test.ts
@@ -479,7 +479,7 @@ d69f733143c9e20d9b9e35f160e3fc29f807e8773530c87cc88efd404a41156a  tests/unit/api
 e5939b7010fc83342128c7fcf80cf3338fe70bc838d8e1f2a273dffb31af4a60  tests/unit/authz.test.ts
 b3deddee4dd226b03eff03c57dc41f8ed102cc910c383c7942a89f88d7c4ca43  tests/unit/badge-route.test.ts
 a50e24b17782fcd729c38a3caa2fceaf3ab02f365ceda635f72ed5eab85d8dfe  tests/unit/badge.test.ts
-37efccb21c42bab46f0274119e9b620b710b2be48a4aa280b155178e114f362b  tests/unit/billing-checkout.test.ts
+1a7860c74ac7cd3dede7f9902b1d19a8d07d3a65f1df6a853d1e3fba95f055b6  tests/unit/billing-checkout.test.ts
 40721423b484a5d1e7c5ff9d313601406cc32ce39b76fac5151fb69c9ddbe3e5  tests/unit/brand.test.ts
 587d8f6cce6b66dbbbd530bdc0edc662a091b0b93aa698e67d1180a270c7ec5e  tests/unit/buttons-guard.test.ts
 f51319672f4a7f3076f6d9be8e30a22c0eceaffa5b1f3607e57df8db56e2467a  tests/unit/channel-actions.test.ts

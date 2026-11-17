@@ -8,8 +8,14 @@ import { SoonTag } from "@/components/Tags";
 import { soonAreas } from "@/lib/launch";
 import { limits } from "@/lib/plans";
 import { ADDRESS_LINE, COMPANY, legalContactEmail } from "@/lib/legal";
+import { GITHUB_REPO } from "@/lib/site-links";
 
 const F = limits.free;
+
+// The public repository's deployment guide (`open-source/docs/deploying.md`, exported to `docs/`).
+// Built from GITHUB_REPO here rather than added to site-links.ts, whose bytes the public copy's
+// leak-scan exception pins (`open-source/leak-allow.json`).
+const DEPLOY_GUIDE = `${GITHUB_REPO}/blob/main/docs/deploying.md`;
 
 export const metadata: Metadata = {
   ...publicPageMetadata("/pricing"),
@@ -51,6 +57,15 @@ export default function Pricing() {
           <div>
             <dt>What if Staygreen shuts down?</dt>
             <dd>You get a refund for the unused part of your plan.</dd>
+          </div>
+          {/* The owner's go, 2026-11-17 ("They can"): say plainly that a copy can be run, in the
+              words the Product Compass guides use (his call of 2026-11-05: "open source", with the
+              license and its OSI status named). The facts are the public deployment guide's. */}
+          <div>
+            <dt>Is Staygreen open source? Can I host it myself?</dt>
+            <dd>
+              Yes. The source is <a className="link" href={GITHUB_REPO} rel="noreferrer">on GitHub</a>, and you can change it and run your own copy. Its license is the Functional Source License (FSL-1.1-MIT), which isn&rsquo;t on the Open Source Initiative&rsquo;s approved list, and each version becomes MIT two years after it&rsquo;s published. The one use it rules out is offering Staygreen to others as a competing commercial product or service. Your copy can give every workspace Builder&rsquo;s features without billing. It isn&rsquo;t one click: <a className="link" href={DEPLOY_GUIDE} rel="noreferrer">the deployment guide</a> lists the services it runs on.
+            </dd>
           </div>
           <div>
             <dt>What happens if I cancel Builder?</dt>
