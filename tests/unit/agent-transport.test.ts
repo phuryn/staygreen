@@ -1,20 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AgentError, type AgentPrincipal } from "@/lib/agent-contract";
 import { FREE } from "@/lib/plans";
 const mocks = vi.hoisted(() => {
-  const single = vi.fn(async () => ({ data: { id: "call_1" } as unknown, error: null as unknown }));
-  const eq = vi.fn(async () => ({ error: null }));
-  // A row inserted plain resolves; one inserted with its shape is read back for its id.
-  const insert = vi.fn((_row: unknown) => ({ select: () => ({ single }), then: (ok: (v: unknown) => unknown, ko?: (e: unknown) => unknown) => Promise.resolve({ error: null }).then(ok, ko) }));
-  return { authenticate: vi.fn(), execute: vi.fn(), after: vi.fn(), single, eq, insert, update: vi.fn((_v: unknown) => ({ eq })) };
+  // A call log is one insert, awaited after the reply.
+  const insert = vi.fn((_row: unknown) => Promise.resolve({ error: null }));
+  return { authenticate: vi.fn(), execute: vi.fn(), after: vi.fn(), insert };
 });
 vi.mock("@/lib/agent-auth", () => ({ requireAgent: mocks.authenticate }));
 vi.mock("@/lib/agent-service", () => ({ executeAgentTool: mocks.execute }));
 vi.mock("next/server", () => ({ after: mocks.after }));
-vi.mock("@/lib/db", () => ({ db: () => ({ from: () => ({ insert: mocks.insert, update: mocks.update }) }) }));
+vi.mock("@/lib/db", () => ({ db: () => ({ from: () => ({ insert: mocks.insert }) }) }));
 vi.mock("@/lib/env", () => ({ env: () => ({ APP_URL: "https://staygreen.test", NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_" + Buffer.from("clerk.test$").toString("base64") }) }));
 import { BODY_LIMIT, mcpRequest, restRequest } from "@/lib/agent-transport";
-import { resetRanges, SHAPES_UNTIL } from "@/lib/agent-shapes";
 import * as route from "@/app/mcp/route";
 import { mcpResourceMetadata, mcpAuthorizationMetadata } from "@/lib/mcp-oauth-metadata";
 const p: AgentPrincipal = { workspace: { id: "ws_a", clerk_org_id: "org_a" }, actor: "actor", client: "CI", scope: "read", auth: "api_token", entitlements: FREE };
@@ -100,63 +97,20 @@ describe("authenticated transports", () => {
   });
 });
 
-describe("call shapes, names without values (owner, 2026-10-27)", () => {
-  const rows = async () => { for (const [task] of mocks.after.mock.calls) await task(); return mocks.insert.mock.calls.map(([row]) => row as { shape: { token: { age_s: number } } }); };
-  const _meta = { progressToken: 7, "openai/subject": "subject-value", "openai/session": "session-value", "openai/userLocation": { city: "Krakow" } };
-  const metaNames = ["openai/session", "openai/subject", "openai/userLocation", "progressToken"];
-  // Shapes are recorded only before SHAPES_UNTIL, so these run on a clock set to the day before it.
-  // On the real clock they turned red on 2026-11-10 with no code change (found 2026-11-17, s53's gate).
-  // The last test sets its own time to check that nothing is recorded from SHAPES_UNTIL on.
-  beforeEach(() => { vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(SHAPES_UNTIL - 86_400_000); });
-  afterEach(() => { vi.useRealTimers(); });
-  it("logs _meta's key names on initialize and tools/call, initialize's declared client, and no value", async () => {
-    await mcpRequest(request({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25", capabilities: { elicitation: {} }, clientInfo: { name: "openai-mcp", version: "1.0.0" }, _meta } }, { "user-agent": "openai-mcp/1.0.0 (host-value)" }));
+describe("call logs", () => {
+  const rows = async () => { for (const [task] of mocks.after.mock.calls) await task(); return mocks.insert.mock.calls.map(([row]) => row as Record<string, unknown>); };
+  // Call shapes were recorded until 2026-11-10 and their column is dropped (migration 20261117150000):
+  // a log is one plain row, and nothing a client sends in params._meta reaches it.
+  it("writes one plain row per call, MCP and REST, with no shape and no _meta value", async () => {
+    const _meta = { progressToken: 7, "openai/subject": "subject-value", "openai/session": "session-value" };
     await mcpRequest(request({ ...call, params: { ...call.params, _meta } }));
-    const [init, toolCall] = await rows();
-    expect(init).toMatchObject({ method: "initialize", shape: { meta: metaNames, params: ["_meta", "capabilities", "clientInfo", "protocolVersion"], user_agent: "openai-mcp/1.0.0",
-      init: { client: "openai-mcp", version: "1.0.0", requested: "2025-11-25", agreed: "2025-11-25", capabilities: ["elicitation"] } } });
-    expect(toolCall).toMatchObject({ tool: "get_status", shape: { meta: metaNames, params: ["_meta", "arguments", "name"] } });
-    for (const value of ["subject-value", "session-value", "Krakow", "host-value"]) expect(JSON.stringify([init, toolCall])).not.toContain(value);
-    // No address, so no range to add.
-    expect(init.shape).not.toHaveProperty("openai_range"); expect(mocks.update).not.toHaveBeenCalled();
-  });
-  it("adds OpenAI's range after the row, and writes the row without its shape when the shape is refused (review shapes1)", async () => {
-    resetRanges(); vi.stubGlobal("fetch", vi.fn(async () => Response.json({ prefixes: [{ ipv4Prefix: "104.210.139.192/28" }] })));
-    try { await mcpRequest(request(call, { "x-nf-client-connection-ip": "104.210.139.200" })); await rows(); } finally { vi.unstubAllGlobals(); }
-    expect(mocks.update).toHaveBeenCalledWith({ shape: expect.objectContaining({ openai_range: true }) });
-    expect(mocks.eq).toHaveBeenCalledWith("id", "call_1");
-    expect(JSON.stringify(mocks.update.mock.calls)).not.toContain("104.210.139.200");
-    vi.clearAllMocks(); mocks.authenticate.mockResolvedValue(p); mocks.execute.mockResolvedValue({ apps: [] });
-    mocks.single.mockResolvedValueOnce({ data: null, error: { code: "PGRST204", message: "Could not find the 'shape' column" } });
-    await mcpRequest(request(call));
-    const [withShape, plain] = await rows();
-    expect(withShape).toHaveProperty("shape");
-    expect(plain).toMatchObject({ tool: "get_status", status: 200, outcome: "ok" }); expect(plain).not.toHaveProperty("shape");
-    // Any other error may follow a commit (a lost reply, a timeout): nothing is written twice (review shapes2).
-    vi.clearAllMocks(); mocks.authenticate.mockResolvedValue(p); mocks.execute.mockResolvedValue({ apps: [] });
-    mocks.single.mockResolvedValueOnce({ data: null, error: { message: "AbortError: This operation was aborted" } });
-    await mcpRequest(request(call));
-    expect(await rows()).toHaveLength(1);
-  });
-  it("records a verified grant's age and lifetime, and a refused call's headers", async () => {
-    const now = Math.floor(Date.now() / 1000);
-    mocks.authenticate.mockImplementationOnce(async (_r: Request, _o: boolean, seen: (x: unknown) => void) => { seen({ actor: "a", auth: "oauth", client: "ChatGPT (oauthapp_x)", grant: { clientId: "oauthapp_x", scopes: ["user:org:read"], issuedAt: now - 120, expiresAt: now + 3480 } }); return p; });
-    await mcpRequest(request(call));
-    mocks.authenticate.mockRejectedValueOnce(new AgentError(401, "invalid_token", "Sign in"));
-    await mcpRequest(request({ jsonrpc: "2.0", id: 1, method: "initialize" }, { authorization: "Bearer token-value" }));
-    const [granted, refused] = await rows();
-    expect(granted.shape.token).toMatchObject({ lifetime_s: 3600, scopes: ["user:org:read"], client_id: "opaque" });
-    expect(granted.shape.token.age_s).toBeGreaterThanOrEqual(120);
-    expect(refused).toMatchObject({ status: 401, shape: { headers: ["accept", "authorization", "content-type"] } });
-    expect(JSON.stringify(refused)).not.toContain("token-value");
-  });
-  it("keeps REST calls shapeless, and records nothing from SHAPES_UNTIL", async () => {
     await restRequest(new Request("https://staygreen.test/api/v1/get_status", { method: "POST", headers, body: "{}" }), "get_status");
-    vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(SHAPES_UNTIL);
-    try { await mcpRequest(request(call)); } finally { vi.useRealTimers(); }
     const logged = await rows();
     expect(logged).toHaveLength(2);
+    expect(logged[0]).toMatchObject({ source: "mcp", method: "tools/call", tool: "get_status", status: 200, outcome: "ok" });
+    expect(logged[1]).toMatchObject({ source: "rest", tool: "get_status", status: 200 });
     for (const row of logged) expect(row).not.toHaveProperty("shape");
+    expect(JSON.stringify(logged)).not.toMatch(/subject-value|session-value|openai\//);
   });
 });
 

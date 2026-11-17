@@ -7,7 +7,7 @@ export type AgentTables = {
   api_tokens: Table<ApiTokenRow>;
   agent_activity: Table<ActivityRow>;
   agent_requests: Table<{ workspace_id: string; actor: string; request_id: string; input_hash: string; tool: string; result: Json; created_at: string }>;
-  agent_calls: Table<{ id: string; workspace_id: string | null; actor: string | null; client: string | null; auth: string; source: string; method: string; tool: string | null; status: number; outcome: string; duration_ms: number; shape: Json | null; created_at: string }>;
+  agent_calls: Table<{ id: string; workspace_id: string | null; actor: string | null; client: string | null; auth: string; source: string; method: string; tool: string | null; status: number; outcome: string; duration_ms: number; created_at: string }>;
 };
 export type AgentFunctions = {
   agent_check_times: { Args: { p_workspace_id: string }; Returns: Json };

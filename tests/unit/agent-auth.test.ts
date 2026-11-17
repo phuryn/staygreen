@@ -137,7 +137,7 @@ describe("verified OAuth JWTs", () => {
     mocks.verify.mockResolvedValue(payload);
     const verify = createOAuthVerifier(async () => ["known"], () => now);
     expect(await verify(token())).toEqual({ ...identity, scopes: ["openid", "user:org:read"], expiresAt: payload.exp });
-    // Issue and expiry times feed the call log's grant age and lifetime (`agent-shapes.ts`).
+    // Issue and expiry times are read from the token's claims.
     mocks.verify.mockResolvedValue({ ...payload, iat: now / 1000 - 60 });
     expect(await verify(token())).toMatchObject({ issuedAt: now / 1000 - 60, expiresAt: payload.exp });
     expect(mocks.verify).toHaveBeenCalledWith(token(), expect.objectContaining({ audience: payload.aud, headerType: ["at+jwt", "application/at+jwt"] }));

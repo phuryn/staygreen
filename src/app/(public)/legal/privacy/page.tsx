@@ -8,7 +8,6 @@ import { SNIPPET_BYTES } from "@/checks/mask";
 import { checkedFromNow, cities, list, locationsNow } from "@/components/landing/plan-copy";
 import { isBuilt } from "@/lib/launch";
 import { ADDRESS_LINE, COMPANY, DPA, FAILED_CHECKS_KEPT, LEGAL_UPDATED, legalContactEmail } from "@/lib/legal";
-import { legalDate, SHAPES_UNTIL } from "@/lib/agent-shapes";
 import { CONFIRM_MAX_AGE_SEC } from "@/lib/alerts/links";
 import { THEME_COOKIE, THEME_COOKIE_MAX_AGE } from "@/lib/theme-cookie";
 
@@ -203,7 +202,7 @@ export default function PrivacyPage() {
 
         <h2>When you connect a coding agent</h2>
         <p>Clerk handles OAuth sign-in and consent. We verify the selected workspace and current membership on each call and store no OAuth access or refresh tokens. Your agent receives workspace monitoring data and can create monitors, pause them briefly and draft updates if its access allows it. The client you choose processes that data under its own terms.</p>
-        <p>API tokens have a name and scope, a public identifier and a keyed hash; the secret value is shown once and is never stored. Revocation leaves a tombstone. Writes keep an activity record with the client name and resource identifier, plus a retry receipt with a keyed input fingerprint and the result. A provisioning receipt can include encrypted copies of the new heartbeat credentials, so the creating request can recover a lost reply; existing heartbeat credentials are not exposed to agents. Call logs record method, tool, result code, duration, client and a workspace or hashed actor identifier when known, including refused calls. They contain no request arguments, tokens, IP addresses or response bodies. Until {legalDate(SHAPES_UNTIL)}, a call to the MCP endpoint also records its shape, so we can learn what agent clients send: the names of its headers, parameters and metadata fields, never their values; the name, version and protocol version the client declares; the product names in its user agent; whether the calling address is one OpenAI publishes for ChatGPT, never the address; and an OAuth access token&rsquo;s age, lifetime and scope names, never the token. Admission counters use keyed identifiers.</p>
+        <p>API tokens have a name and scope, a public identifier and a keyed hash; the secret value is shown once and is never stored. Revocation leaves a tombstone. Writes keep an activity record with the client name and resource identifier, plus a retry receipt with a keyed input fingerprint and the result. A provisioning receipt can include encrypted copies of the new heartbeat credentials, so the creating request can recover a lost reply; existing heartbeat credentials are not exposed to agents. Call logs record method, tool, result code, duration, client and a workspace or hashed actor identifier when known, including refused calls. They contain no request arguments, tokens, IP addresses or response bodies. Admission counters use keyed identifiers.</p>
         <p>These records and the hourly and daily response-time summaries currently have no scheduled deletion. Workspace records are deleted with the workspace; counters and unattributed call logs are removed on request. Revoking a token stops its use but does not erase its activity.</p>
 
         <h2>How long we keep it</h2>
@@ -227,9 +226,6 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Alert receipts</strong> are kept as long as their incident, and a test&rsquo;s as long as the workspace. A removed channel&rsquo;s receipts stay in the list without it.
-          </li>
-          <li>
-            <strong>Call shapes</strong> are recorded until {legalDate(SHAPES_UNTIL)} and kept with the call logs they belong to, until we remove them.
           </li>
           <li>
             <strong>An added address, chat or webhook channel</strong> is kept until a member removes it, unsubscribed, stopped or never confirmed included. Removing it deletes it at once.
