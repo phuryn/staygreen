@@ -1,9 +1,5 @@
 /* site.css: the signed-out site (landing, pricing, scan, sign-in, connect). Tokens only. */
 
-/* Clerk names its own internal variable --accent, so handing it var(--accent) is a cycle and the
-   primary button paints transparent. It gets the kit's accent under a name of its own. */
-:root { --clerk-primary: var(--accent); }
-
 .site { min-height: 100dvh; display: flex; flex-direction: column; }
 .site > main { flex: 1 0 auto; }
 .wrap { width: 100%; max-width: calc(var(--w-site) + 2 * var(--s-6)); margin: 0 auto; padding-left: max(var(--s-5), env(safe-area-inset-left, 0px)); padding-right: max(var(--s-5), env(safe-area-inset-right, 0px)); }

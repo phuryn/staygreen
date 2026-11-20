@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --project unit --project integration",
     "test:unit": "vitest run --project unit",
+    "contract:invoice-service": "vitest run --config vitest.invoice-contract.config.mts",
     "golive:check": "vitest run --project golive",
     "test:live": "vitest run --project live",
     "probe:build": "esbuild probe/main.ts probe/bench.ts --bundle --platform=node --target=node22 --external:pg-native --outdir=probe/dist --log-level=warning",

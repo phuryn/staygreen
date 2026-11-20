@@ -23,6 +23,9 @@ export const webServer: PlaywrightTestConfig["webServer"] = {
     // Links to the app that leave the request are built from this: the README badge's Markdown,
     // which `journeys.auth.spec.ts` reads back against `BASE_URL`.
     APP_URL: BASE_URL,
+    // Invoice journeys use the loopback-only in-memory service.
+    INVOICE_SERVICE_URL: "mock",
+    INVOICE_SERVICE_KEY: "",
     // Every ping URL a suite sees names production's host, whatever a developer's `.env` says.
     HEARTBEAT_HOST: "in.staygreen.io",
     // Empty, so the day a component reads these a developer's `.env` still can't change a run.

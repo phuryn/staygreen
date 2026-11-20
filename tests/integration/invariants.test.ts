@@ -101,7 +101,10 @@ describeTarget("invariants: once-only actions, idempotency and the schema's own 
       await db.from("incidents").insert({ workspace_id: W.id, monitor_id: mon.id, title: "itest second open", severity: "down" }).select("id"),
       uniqueViolation("incidents_one_open_per_monitor"),
     );
-    const resolved = await db.from("incidents").update({ resolved_at: new Date().toISOString() }).eq("id", first.id).select("id");
+    // The incident's own opened_at, from the database's clock: this machine's clock can run behind
+    // it by more than the round trips since the insert, and incidents_resolved_after_open then
+    // refuses a resolution stamped before the opening.
+    const resolved = await db.from("incidents").update({ resolved_at: first.opened_at }).eq("id", first.id).select("id");
     expect(resolved.data).toHaveLength(1);
     await fx.incident(W.id, mon.id);
   });

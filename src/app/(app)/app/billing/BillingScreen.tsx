@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useClerk } from "@clerk/nextjs";
 import { Loading, PageHead } from "@/components/Shell";
 import { PlanTable } from "@/components/PlanTable";
 import { OrganizationPlans } from "@/components/OrganizationPlans";
 import { useSelfHostedPlan } from "@/components/SelfHostedPlan";
+import { useWorkspaceProfile } from "@/components/WorkspaceProfile";
 import { builderOnlyLocations, builderRegion } from "@/components/landing/plan-copy";
 import { SoonTag } from "@/components/Tags";
 import { isBuilt, isLive } from "@/lib/launch";
@@ -56,7 +56,7 @@ function Billing({ s, simulation }: { s: Workspace; simulation: Simulation }) {
     <section className={builder ? "section pb-section-gap" : "section pb-upgrade"} aria-labelledby="checkout-h">
       <h2 id="checkout-h" className="t-section">{builder ? "Plans and payment" : "Upgrade to Builder"}</h2>
       <OrganizationPlans />
-      {builder && <ManageSubscription />}
+      <ManageSubscription subscription={builder} />
     </section>
   );
 
@@ -127,6 +127,7 @@ function Billing({ s, simulation }: { s: Workspace; simulation: Simulation }) {
       </div>
 
       {builder && plans}
+      {!checkout && <ManageSubscription subscription={false} />}
 
       <section className="section pb-section-gap" aria-labelledby="cmp-h">
         <h2 id="cmp-h" className="t-section">Free and Builder side by side</h2>
@@ -147,12 +148,17 @@ function Billing({ s, simulation }: { s: Workspace; simulation: Simulation }) {
   );
 }
 
-function ManageSubscription() {
-  const clerk = useClerk();
+function ManageSubscription({ subscription }: { subscription: boolean }) {
+  const profile = useWorkspaceProfile();
+  if (!subscription && !profile.invoicesEnabled) return null;
   return (
     <div className="stack-sm">
-      <div><button type="button" className="btn" onClick={() => clerk.openOrganizationProfile()}>Manage subscription and payments</button></div>
-      <p className="t-meta">Open Billing in your workspace settings to see statements, update payment details or cancel. Cancellation takes effect at the end of the paid period.</p>
+      <div className="cluster">
+        {subscription && <button type="button" className="btn" disabled={!profile.open} onClick={profile.open}>Manage subscription and payments</button>}
+        {profile.invoicesEnabled && <button type="button" className="btn" onClick={profile.open}>Open workspace settings for invoices</button>}
+      </div>
+      {subscription && <p className="t-meta">Open Billing in your workspace settings to see statements, update payment details or cancel. Cancellation takes effect at the end of the paid period.</p>}
+      {profile.invoicesEnabled && <p className="t-meta">Choose Invoices after Billing to find your invoices and corrections.</p>}
     </div>
   );
 }
@@ -194,6 +200,6 @@ function DevPlanSwitch({ on }: { on: boolean }) {
 export function BillingScreen({ simulation }: { simulation: Simulation }) {
   const s = useWorkspace();
   const selfHosted = useSelfHostedPlan();
-  if (selfHosted) return <PageHead title="Plan" sub="This installation includes every Builder feature." />;
+  if (selfHosted) return <><PageHead title="Plan" sub="This installation includes every Builder feature." /><ManageSubscription subscription={false} /></>;
   return s ? <Billing s={s} simulation={simulation} /> : <Loading />;
 }

@@ -7,21 +7,59 @@ import { createContext, useContext, useId, useLayoutEffect, useRef, useState, ty
 
 const TitleId = createContext<string | undefined>(undefined);
 
-export function Modal({ open, onClose, children, wide, undismissable = false }: { open: boolean; onClose: () => void; children: ReactNode; wide?: boolean; undismissable?: boolean }) {
+export function Modal({ open, onClose, children, wide, nested, describedBy, undismissable = false }: {
+  open: boolean; onClose: () => void; children: ReactNode; wide?: boolean;
+  nested?: boolean; describedBy?: string; undismissable?: boolean;
+}) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
   useLayoutEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) {
+      d.querySelector("[data-modal-autofocus]")?.setAttribute("autofocus", "");
+      d.showModal();
+    }
     else if (!open && d.open) d.close();
   }, [open]);
+  useLayoutEffect(() => {
+    const dialog = ref.current;
+    if (!nested || !dialog || !open) return;
+    // Clerk also handles Escape and Tab. The native dialog owns those keys
+    // while it is above Clerk's profile, including when opened in the drawer.
+    function onKey(event: globalThis.KeyboardEvent) {
+      if (!dialog?.open || (event.key !== "Escape" && event.key !== "Tab")) return;
+      const active = document.activeElement;
+      if (active !== document.body && active?.closest("dialog:modal") !== dialog) return;
+      event.stopImmediatePropagation();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        if (!undismissable) dialog.close();
+        return;
+      }
+      const stops = Array.from(dialog.querySelectorAll<HTMLElement>("a[href], button, input, select, textarea, [tabindex]"))
+        .filter(el => el.tabIndex >= 0 && !el.matches(":disabled") && el.getClientRects().length);
+      const edge = event.shiftKey ? stops[0] : stops.at(-1);
+      if (!stops.includes(active as HTMLElement) || active === edge) {
+        event.preventDefault();
+        (event.shiftKey ? stops.at(-1) : stops[0])?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [nested, open, undismissable]);
+  useLayoutEffect(() => {
+    const dialog = ref.current;
+    // Close before removing a nested dialog so the browser restores focus to its trigger.
+    return () => { if (nested && dialog?.open) dialog.close(); };
+  }, [nested]);
   return (
     <dialog
       ref={ref}
       className={`dialog${wide ? " pb-dialog-wide" : ""}`}
       aria-labelledby={id}
-      onClose={() => { if (!undismissable) onClose(); }}
+      aria-describedby={describedBy}
+      onClose={event => { if (!undismissable && !event.currentTarget.open) onClose(); }}
       onCancel={(e) => { if (undismissable) e.preventDefault(); }}
       onClick={(e) => {
         if (!undismissable && e.target === e.currentTarget) onClose();
@@ -44,6 +82,20 @@ export function ModalBody({ title, children }: { title: ReactNode; children?: Re
 
 export function ModalFoot({ children }: { children: ReactNode }) {
   return <div className="dialog-foot">{children}</div>;
+}
+
+export function ProfilePage({ title, children }: { title: string; children: ReactNode }) {
+  return <div className="profile-page"><h1 className="profile-title">{title}</h1>{children}</div>;
+}
+
+export function ProfileSection({ title, wide, children }: { title: string; wide?: boolean; children: ReactNode }) {
+  const id = useId();
+  return (
+    <section className={`profile-section${wide ? " profile-section-wide" : ""}`} aria-labelledby={id}>
+      <h2 id={id}>{title}</h2>
+      <div className="stack">{children}</div>
+    </section>
+  );
 }
 
 export type Tab = { id: string; label: ReactNode; body: ReactNode };

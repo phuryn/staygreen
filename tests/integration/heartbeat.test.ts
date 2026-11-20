@@ -73,6 +73,14 @@ suite("heartbeat receiver", () => {
   const failures = async () => (await admin.query("select kind, message from public.check_failures where monitor_id = $1 order by at", [mon])).rows;
   /** Judge until nothing is due, as the home's loop does. */
   async function settle() {
+    // The receiver stamps each record at least 1 ms after the one before it, so records that
+    // arrive faster than once a millisecond, as back-to-back calls to a local database do, are
+    // stamped ahead of its clock, and the commit refuses a judgement ahead of the clock
+    // (`probe_heartbeat_order_invalid`). The probe counts that refusal and judges again at its
+    // next refresh, within 30 s (`probe/runtime.ts`); here the judge waits until the clock has
+    // passed the newest stamp instead.
+    await admin.query(`select pg_catalog.pg_sleep(greatest(0, extract(epoch from greatest(ping_at, start_at, fail_at) - pg_catalog.clock_timestamp())) + 0.002)
+      from public.heartbeat_latest where monitor_id = $1`, [mon]);
     const runs: { at: number; ok: boolean }[] = [];
     for (let i = 0; i < 20; i++) {
       const r = await store.judgeHeartbeat(mon, "tor1");

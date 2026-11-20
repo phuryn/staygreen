@@ -1,4 +1,6 @@
 import { Shell } from "@/components/Shell";
+import { WorkspaceProfile } from "@/components/WorkspaceProfile";
+import { invoicesAvailable } from "@/lib/invoices/access";
 import { getMember } from "@/lib/workspace";
 import { WorkspaceRoot } from "@/lib/workspace-store";
 
@@ -13,7 +15,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!member) return children;
   return (
     <WorkspaceRoot key={member.workspace.id} workspaceId={member.workspace.id}>
-      <Shell>{children}</Shell>
+      <WorkspaceProfile organizationId={member.workspace.clerk_org_id} invoicesEnabled={invoicesAvailable(member)}>
+        <Shell>{children}</Shell>
+      </WorkspaceProfile>
     </WorkspaceRoot>
   );
 }

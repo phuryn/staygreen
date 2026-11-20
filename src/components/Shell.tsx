@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { OrganizationSwitcher, UNSAFE_PortalProvider, UserButton } from "@clerk/nextjs";
+import { UNSAFE_PortalProvider, UserButton } from "@clerk/nextjs";
 import { Activity, Bell, Bot, CreditCard, Gauge, LayoutDashboard, LifeBuoy, Menu, PanelsTopLeft, Settings, Siren, X } from "lucide-react";
 import { openIncidents } from "@/lib/derive";
 import { isBuilt, isLive, type LaunchArea } from "@/lib/launch";
@@ -16,6 +16,7 @@ import { SoonTag } from "./Tags";
 import { Toasts } from "./Toasts";
 import { DocTitle } from "@/components/DocTitle";
 import { useSelfHostedPlan } from "./SelfHostedPlan";
+import { WorkspaceSwitcher } from "./WorkspaceProfile";
 
 // Every screen of the dashboard, in the order a builder meets the jobs. A screen whose area
 // isn't built yet (`launch.ts`) is still listed, so the whole product is in view, and says
@@ -142,7 +143,7 @@ function Rail({ s, at, onNavigate }: { s: Workspace | null; at: string; onNaviga
         </nav>
         <div className="rail-user">
           <div className="rail-org">
-            <OrganizationSwitcher hidePersonal afterSelectOrganizationUrl="/app" afterCreateOrganizationUrl="/app" />
+            <WorkspaceSwitcher />
           </div>
           <UserButton />
         </div>

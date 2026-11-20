@@ -7,6 +7,7 @@ import { PlanTable } from "@/components/PlanTable";
 import { SoonTag } from "@/components/Tags";
 import { soonAreas } from "@/lib/launch";
 import { limits } from "@/lib/plans";
+import { invoicesEnabled } from "@/lib/invoices/enabled";
 import { ADDRESS_LINE, COMPANY, legalContactEmail } from "@/lib/legal";
 import { GITHUB_REPO } from "@/lib/site-links";
 
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
 
 export default function Pricing() {
   const contact = legalContactEmail();
+  const invoices = invoicesEnabled();
   return (
     <>
       <section className="wrap band-tight stack-lg">
@@ -79,11 +81,17 @@ export default function Pricing() {
           </div>
           <div>
             <dt>Do you send invoices?</dt>
-            <dd>
-              You get a receipt for each payment. An invoice with your company details and VAT number is available on request. Send those details to {contact
-                ? <a className="link" href={`mailto:${contact}`}>{contact}</a>
-                : <>{COMPANY.name}, {ADDRESS_LINE}</>}. Prices are in US dollars.
-            </dd>
+            {invoices ? (
+              <dd>
+                Yes, for every payment. Your workspace&rsquo;s admins find them under Invoices in the workspace settings, each with a PDF, and save the company or personal details and VAT ID they are issued to. Within 90 days of an invoice&rsquo;s date, they can ask for its buyer details to be corrected to the saved ones, unless it has been fully refunded; a change to a printed VAT ID goes through support. An invoice that hasn&rsquo;t appeared can be asked for on the same page. Prices are in US dollars.
+              </dd>
+            ) : (
+              <dd>
+                You get a receipt for each payment. An invoice with your company details and VAT number is available on request. Send those details to {contact
+                  ? <a className="link" href={`mailto:${contact}`}>{contact}</a>
+                  : <>{COMPANY.name}, {ADDRESS_LINE}</>}. Prices are in US dollars.
+              </dd>
+            )}
           </div>
         </dl>
       </section>

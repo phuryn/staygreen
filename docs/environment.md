@@ -34,6 +34,8 @@ Keep secrets in each service's secret store. NEXT_PUBLIC_ values are embedded in
 | `HEARTBEAT_HOST` | app, configuration sample | app: required | Heartbeat receiver hostname, without scheme or path; a localhost port is allowed for development. | Your ingest Worker domain |
 | `HEARTBEAT_TOKEN_KEY` | app, ingest Worker, configuration sample | app: required; ingest Worker: required | 32 random base64url bytes; same token-signing key on app and ingest. | Your secret generator |
 | `HYPERDRIVE` | ingest Worker, sender Worker, watchdog Worker, ingest / sender / watchdog Workers | Required binding | Object binding providing connectionString; each Worker needs its own uncached configuration and least-privilege login. | Cloudflare Hyperdrive binding |
+| `INVOICE_SERVICE_KEY` | app, configuration sample | app: optional / defaulted | Server-only bearer key required for an HTTPS invoice service URL. Use the development key for the manual contract test. | Your invoice service |
+| `INVOICE_SERVICE_URL` | app, app / build, configuration sample | app: optional / defaulted | HTTPS invoice service base URL or loopback-only mock. Empty disables invoices. The manual contract test uses an HTTPS development URL. | Your invoice service or local mock |
 | `LIVE_REPORT` | tests | Optional / tool-managed | Optional destination for live suggestion-test output. | Local test invocation |
 | `LIVE_SITES` | tests | Optional / tool-managed | Optional site-list input for network tests. | Local test invocation |
 | `NEXT_DIST_DIR` | app / build | Optional / tool-managed | Next build directory override, used to isolate browser tests. | Build/test runner |

@@ -84,6 +84,47 @@ function refusal(run: () => unknown): string {
 
 const without = (source: Record<string, string>, key: string) => Object.fromEntries(Object.entries(source).filter(([k]) => k !== key));
 
+describe("optional invoice service", () => {
+  const key = "synthetic-invoice-key";
+  const base = "https://invoices.example.com/v1-prefix";
+
+  it.each([undefined, "", "  "])("disables invoices when the URL is %j", INVOICE_SERVICE_URL => {
+    expect(parseServerEnv({ ...SERVER, INVOICE_SERVICE_URL, INVOICE_SERVICE_KEY: key }).INVOICE_SERVICE_URL).toBeUndefined();
+    expect(parseServerEnv({ ...SERVER, INVOICE_SERVICE_URL, INVOICE_SERVICE_KEY: "" }).INVOICE_SERVICE_KEY).toBeUndefined();
+  });
+
+  it.each(["http://localhost:3101", "http://127.0.0.1", "http://[::1]:3101"])("allows the mock with a loopback app at %s", APP_URL => {
+    expect(parseServerEnv({ ...SERVER, APP_URL, INVOICE_SERVICE_URL: "mock" }).INVOICE_SERVICE_URL).toBe("mock");
+  });
+
+  it.each(["https://app.example.com", "https://localhost.example.com", "http://192.0.2.1:3101"])("refuses the mock with a non-loopback app at %s", APP_URL => {
+    expect(refusal(() => parseServerEnv({ ...SERVER, APP_URL, INVOICE_SERVICE_URL: "mock" }))).toContain("loopback APP_URL");
+  });
+
+  it("requires the key for HTTPS and keeps both settings server-only", () => {
+    for (const INVOICE_SERVICE_KEY of [undefined, "", " "]) {
+      expect(refusal(() => parseServerEnv({ ...SERVER, INVOICE_SERVICE_URL: base, INVOICE_SERVICE_KEY }))).toContain("INVOICE_SERVICE_KEY is required");
+    }
+    const config = { INVOICE_SERVICE_URL: base, INVOICE_SERVICE_KEY: key };
+    expect(parseServerEnv({ ...SERVER, ...config })).toMatchObject(config);
+    expect(parsePublicEnv({ ...PUBLIC, ...config })).not.toHaveProperty("INVOICE_SERVICE_KEY");
+    expect(parsePublicEnv({ ...PUBLIC, ...config })).not.toHaveProperty("INVOICE_SERVICE_URL");
+  });
+
+  it.each(["http://invoices.example.com", "https://name:secret@invoices.example.com", `${base}?`, `${base}#`, `${base}?secret=1`, `${base}#secret`, "not a URL"])("refuses an invalid service URL without exposing it (%s)", INVOICE_SERVICE_URL => {
+    const message = refusal(() => parseServerEnv({ ...SERVER, INVOICE_SERVICE_URL, INVOICE_SERVICE_KEY: key }));
+    expect(message).toContain("INVOICE_SERVICE_URL");
+    expect(message).not.toContain(INVOICE_SERVICE_URL);
+    expect(message).not.toContain(key);
+  });
+
+  it.each(["bad key", "bad-key\n"])("refuses a key with whitespace without exposing it (%j)", INVOICE_SERVICE_KEY => {
+    const message = refusal(() => parseServerEnv({ ...SERVER, INVOICE_SERVICE_URL: base, INVOICE_SERVICE_KEY }));
+    expect(message).toContain("INVOICE_SERVICE_KEY");
+    expect(message).not.toContain(INVOICE_SERVICE_KEY.trim());
+  });
+});
+
 it("defaults status addresses to production and validates environment overrides before building", () => {
   expect(parsePublicEnv(PUBLIC).NEXT_PUBLIC_STATUS_HOST).toBe("status.staygreen.io");
   expect(parseServerEnv(SERVER).STATUS_DOMAIN_SUFFIX).toBe("domains.staygreen.io");

@@ -116,6 +116,23 @@ pre.snippet.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
   .set-row-control { justify-content: flex-start; }
 }
 
+/* A page mounted into Clerk's workspace profile. Clerk owns the frame and close button. */
+.profile-page { --btn-r: var(--r-control); display: flex; flex-direction: column; gap: var(--s-4); min-width: 0; padding-bottom: var(--s-4); font-size: var(--t-1); }
+/* Clerk sets its profile's text and buttons at 13 px and its page titles at 17 px (measured in 7.9.11), so a page
+   beside General and Billing does the same. Fields keep the kit's size, because a smaller one makes a phone zoom
+   in on focus, and a dialog opened from the page keeps the app's dialog type. */
+.profile-page :is(.table, .callout, .kv, .btn):not(.dialog *) { font-size: var(--t-1); }
+.profile-page .dialog { font-size: var(--t-2); }
+.profile-title { font-size: var(--t-clerk-title); font-weight: var(--w-black); line-height: var(--lh-body); padding-inline-end: var(--target); }
+.profile-section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--s-4); border-top: var(--hair) solid var(--line); padding-block: var(--s-4); }
+.profile-section h2 { font-size: var(--t-1); line-height: var(--lh-body); font-weight: var(--w-medium); }
+.profile-section > .stack { min-width: 0; }
+.profile-section-wide { grid-template-columns: minmax(0, 1fr); }
+/* Match the profile section breakpoint in the reference profile (992px at default zoom). */
+@media (max-width: 62em) {
+  .profile-section { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+}
+
 /* ---------- buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
@@ -152,6 +169,8 @@ pre.snippet.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* ---------- forms ---------- */
 .field { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; }
+.field-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--w-field-column)), 1fr)); gap: var(--s-3); min-width: 0; }
+.field-columns .input, .field-columns .select { min-width: 0; }
 .label { font-size: var(--t-1); font-weight: var(--w-bold); color: var(--ink); display: flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
 .hint { font-size: var(--t-1); color: var(--ink-3); }
 .error { font-size: var(--t-1); color: var(--down); font-weight: var(--w-medium); }
@@ -163,7 +182,7 @@ pre.snippet.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 .input.mono, .textarea.mono { font-family: var(--f-mono); font-size: var(--t-1); }
 .textarea { min-height: 112px; resize: vertical; line-height: var(--lh-body); }
-.input[aria-invalid="true"] { border-color: var(--down); }
+.input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--down); }
 .input:disabled, .select:disabled, .textarea:disabled { background: var(--sunk); color: var(--ink-3); opacity: 0.6; cursor: not-allowed; }
 .input-group { display: flex; min-width: 0; }
 .input-group > .input { border-radius: var(--r-1) 0 0 var(--r-1); }
@@ -216,6 +235,21 @@ pre.snippet.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
 .table tbody tr.clickable:hover td { background: var(--raised); }
 .table a.row-link { text-decoration: none; font-weight: var(--w-bold); color: var(--ink); }
 .table a.row-link:hover { text-decoration: underline; }
+.table-container { container-type: inline-size; position: relative; }
+.table-responsive { table-layout: fixed; }
+.table-responsive th:last-child { width: var(--w-table-actions); }
+.table-row-related { background: var(--raised); }
+.table-row-related .table-desktop-note { display: block; }
+.table-mobile-label { display: none; }
+@container (max-width: 32rem) {
+  .table-responsive, .table-responsive tbody { display: block; }
+  .table-responsive thead { position: absolute; width: var(--hair); height: var(--hair); overflow: hidden; clip-path: inset(50%); }
+  .table-responsive tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--s-3); gap: var(--s-2); }
+  .table-responsive tr + tr { border-top: var(--hair) solid var(--line); }
+  .table-responsive td { display: block; min-width: 0; padding: 0; border: 0; }
+  .table-responsive td:empty, .table-row-related .table-desktop-note { display: none; }
+  .table-mobile-label { display: inline; color: var(--ink-3); }
+}
 
 /* ---------- labels and states ---------- */
 .tag { display: inline-flex; align-items: center; gap: 5px; min-height: 22px; padding: 0 var(--s-2); border-radius: var(--r-pill); font-size: var(--t-1); font-weight: var(--w-medium); background: var(--sunk); color: var(--ink-2); white-space: nowrap; line-height: 1; }
@@ -334,4 +368,7 @@ dialog.dialog::backdrop { background: var(--scrim); }
 .disclosure-chev { flex: none; width: 16px; height: 16px; transition: transform var(--d-1) var(--ease); }
 .disclosure[open] > summary > .disclosure-chev { transform: rotate(180deg); }
 .disclosure > :not(summary) { margin-top: var(--s-2); }
+.disclosure-fields { min-width: 0; }
+.disclosure-fields[open] { flex-basis: 100%; }
+@media (pointer: coarse) { .disclosure-fields > summary { min-height: var(--target); } }
 @media (prefers-reduced-motion: reduce) { .disclosure-chev { transition: none; } }

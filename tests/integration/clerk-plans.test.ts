@@ -58,4 +58,16 @@ suite("Clerk plans", () => {
       expect([live.fee.amount, live.annual_monthly_fee.amount], plan).toEqual([setup.plans[plan].amount, setup.plans[plan].annual_monthly_amount]);
     }
   });
+
+  // Only admins see or read billing, in Clerk as in Staygreen (the owner, 2026-11-18; `docs/billing.md`):
+  // Clerk's own Billing tab and checkout check these system permissions, so a dashboard grant to
+  // another role would open to it what Staygreen keeps to `billing:manage`.
+  it("grants Clerk's billing permissions to org:admin and to no other role", async () => {
+    const res = await fetch("https://api.clerk.com/v1/organization_roles?limit=100", { headers: { Authorization: `Bearer ${key}` } });
+    expect(res.status).toBe(200);
+    const roles = z.object({ data: z.array(z.object({ key: z.string(), permissions: z.array(z.object({ key: z.string() })) })) }).parse(await res.json()).data;
+    const billing = (role: { permissions: { key: string }[] }) => role.permissions.map((p) => p.key).filter((k) => k.startsWith("org:sys_billing:")).sort();
+    expect(billing(roles.find((r) => r.key === "org:admin")!)).toEqual(["org:sys_billing:manage", "org:sys_billing:read"]);
+    for (const role of roles.filter((r) => r.key !== "org:admin")) expect(billing(role), role.key).toEqual([]);
+  });
 });

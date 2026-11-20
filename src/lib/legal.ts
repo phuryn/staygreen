@@ -29,8 +29,8 @@ export const DPA = {
 
 /** Last substantive change to the privacy policy. The Terms have their own date so a change
  *  to only one page does not mark the other as revised. */
-export const LEGAL_UPDATED = "17 November 2026";
-export const TERMS_UPDATED = "24 October 2026";
+export const LEGAL_UPDATED = "20 November 2026";
+export const TERMS_UPDATED = "20 November 2026";
 
 /** Where a data request reaches a person, when one is configured (`docs/variables.md`). Empty
  *  means the pages give the postal address only and nothing links a mailto that goes nowhere.

@@ -19,6 +19,13 @@ const unsetIfEmpty = (value: unknown) => (typeof value === "string" && value.tri
 const required = <T extends z.ZodType>(schema: T) => z.preprocess(unsetIfEmpty, schema);
 const optional = <T extends z.ZodType>(schema: T) => z.preprocess(unsetIfEmpty, schema.optional());
 
+export const invoiceServiceHttpsUrl = z.string().refine(value => {
+  if (!/^https:\/\//i.test(value) || /[\\\s?#]/.test(value) || !URL.canParse(value)) return false;
+  const url = new URL(value);
+  return !url.username && !url.password;
+}, "must be an HTTPS base URL without credentials, query or fragment");
+export const invoiceServiceKey = z.string().min(1).refine(value => !/[^\x21-\x7e]/.test(value), "must be a bearer key without spaces or control characters");
+
 /** Vendor key shapes. A key in the wrong slot fails here, not as a 401 later. */
 const CLERK_PUBLISHABLE = /^pk_(test|live)_[A-Za-z0-9$]+$/;
 const CLERK_SECRET = /^sk_(test|live)_[A-Za-z0-9]+$/;
@@ -67,6 +74,10 @@ export const serverEnvSchema = publicEnvSchema
 
     /** Private installations can grant Builder without enabling Clerk Billing. */
     SELF_HOSTED_PLAN: optional(z.literal("builder")),
+
+    /** Unset disables invoices. The mock is confined to a local app URL. */
+    INVOICE_SERVICE_URL: optional(z.union([z.literal("mock"), invoiceServiceHttpsUrl])),
+    INVOICE_SERVICE_KEY: optional(invoiceServiceKey),
 
     SUPABASE_URL: required(z.url().refine((v) => /^https:\/\/[a-z0-9]{20}\.supabase\.co\/?$/.test(v) || /^http:\/\/(127\.0\.0\.1|localhost):\d+\/?$/.test(v), "is not a Supabase project URL (https://<ref>.supabase.co)")),
     /** The secret key. The browser never holds a Supabase key (`AGENTS.md § 1.4`). */
@@ -127,6 +138,13 @@ export const serverEnvSchema = publicEnvSchema
     DEV_PLAN_OVERRIDE: optional(z.string().refine((v) => v === "on" || v === "off", "is on or off (development only)")),
   })
   .superRefine((value, context) => {
+    if (value.INVOICE_SERVICE_URL === "mock") {
+      const host = URL.canParse(value.APP_URL) ? new URL(value.APP_URL).hostname : "";
+      if (!["localhost", "127.0.0.1", "[::1]"].includes(host))
+        context.addIssue({ code: "custom", path: ["INVOICE_SERVICE_URL"], message: "can use mock only with a loopback APP_URL" });
+    } else if (value.INVOICE_SERVICE_URL && !value.INVOICE_SERVICE_KEY) {
+      context.addIssue({ code: "custom", path: ["INVOICE_SERVICE_KEY"], message: "is required when INVOICE_SERVICE_URL is an HTTPS URL" });
+    }
     if (value.SELF_HOSTED_PLAN === "builder") {
       // URL canonicalizes case and escaped labels; a final DNS dot names the same host.
       const host = URL.canParse(value.APP_URL) ? new URL(value.APP_URL).hostname.replace(/\.$/, "") : "";

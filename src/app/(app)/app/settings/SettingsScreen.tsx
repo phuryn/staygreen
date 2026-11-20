@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useClerk, useOrganization } from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
+import { useWorkspaceProfile } from "@/components/WorkspaceProfile";
 import { canDeleteApps as mayDeleteApps, DeleteAppDialog } from "@/components/DeleteApp";
 import { Loading, PageHead } from "@/components/Shell";
 import { BuilderMark, BuilderTag, SoonTag } from "@/components/Tags";
@@ -30,7 +31,7 @@ const themes: { id: ThemeChoice; label: string }[] = [
 
 function Settings({ s }: { s: Workspace }) {
   const { organization } = useOrganization();
-  const clerk = useClerk();
+  const profile = useWorkspaceProfile();
   const [theme, setT] = useState<ThemeChoice>("system");
   useEffect(() => setT(currentTheme()), []);
   const builder = has(s.plan, "history_1y");
@@ -53,7 +54,7 @@ function Settings({ s }: { s: Workspace }) {
               <p className="t-2 prose">Rename the workspace, change its logo, and invite or remove members.</p>
             </div>
             <div className="set-row-control">
-              <button type="button" className="btn" onClick={() => clerk.openOrganizationProfile()}>Manage name and members</button>
+              <button type="button" className="btn" disabled={!profile.open} onClick={profile.open}>Manage name and members</button>
             </div>
             <p className="callout callout-info set-row-wide">
               <span>Staygreen has one role for now, admin, and it can do everything. Invite people as admins: anyone with another role can&apos;t open this workspace.</span>

@@ -3,6 +3,7 @@ import { publicPageMetadata } from "@/lib/public-metadata";
 import Link from "next/link";
 import { Info } from "lucide-react";
 import { checkedFromNow } from "@/components/landing/plan-copy";
+import { invoicesEnabled } from "@/lib/invoices/enabled";
 import { isBuilt } from "@/lib/launch";
 import { ADDRESS_LINE, COMPANY, TERMS_UPDATED, REFUND_IF_CLOSED, legalContactEmail } from "@/lib/legal";
 
@@ -31,6 +32,7 @@ function notRunningYet(): string[] {
 export default function TermsPage() {
   const email = legalContactEmail();
   const pending = notRunningYet();
+  const invoices = invoicesEnabled();
   return (
     <div className="wrap band-tight">
       <article className="prose prose-doc">
@@ -98,6 +100,7 @@ export default function TermsPage() {
             The Builder plan adds more apps and monitors, faster checks and the features listed on the <Link href="/pricing">pricing page</Link>; anything marked Coming soon there isn&rsquo;t part of it yet.{!isBuilt("billing") && " It isn’t on sale yet, and nothing takes payment. When it is, the rest of this section applies."}
           </li>
           <li>Builder is billed by Clerk through Stripe, and we never see your card details. Prices are in US dollars, and the price Clerk&rsquo;s checkout shows before you pay is what you are charged.</li>
+          {invoices && <li>We issue an invoice for every payment. Your workspace&rsquo;s admins download it as a PDF on the workspace&rsquo;s Invoices page and save the billing details it is issued to. Within 90 days of an invoice&rsquo;s date, they can ask for its buyer details to be corrected to the saved ones, unless it has been fully refunded; changing or removing a printed VAT ID goes through support.</li>}
           <li>Cancel at any time; Builder runs to the end of the period you paid for. Statutory consumer withdrawal rights are unaffected.</li>
           <li>If we change a price, we tell you before it applies to you, and you may cancel instead.</li>
           <li><strong>{REFUND_IF_CLOSED}</strong></li>

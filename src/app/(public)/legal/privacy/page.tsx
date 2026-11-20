@@ -6,6 +6,7 @@ import { PAYLOAD_LIMIT } from "../../../../../ingest/src/handler";
 import { USER_AGENT } from "@/checks/types";
 import { SNIPPET_BYTES } from "@/checks/mask";
 import { checkedFromNow, cities, list, locationsNow } from "@/components/landing/plan-copy";
+import { invoicesEnabled } from "@/lib/invoices/enabled";
 import { isBuilt } from "@/lib/launch";
 import { ADDRESS_LINE, COMPANY, DPA, FAILED_CHECKS_KEPT, LEGAL_UPDATED, legalContactEmail } from "@/lib/legal";
 import { CONFIRM_MAX_AGE_SEC } from "@/lib/alerts/links";
@@ -42,6 +43,8 @@ const DNS_KEPT = "every answer each resolver returned, in full and not masked, s
 export default function PrivacyPage() {
   const email = legalContactEmail();
   const receiving = isBuilt("probes");
+  // Invoices appear only where this deployment talks to the invoice service (`src/lib/invoices/enabled.ts`).
+  const invoices = invoicesEnabled();
   return (
     <div className="wrap band-tight">
       <article className="prose prose-doc">
@@ -123,6 +126,21 @@ export default function PrivacyPage() {
           <strong>Legal basis:</strong> performance of a contract (Art. 6(1)(b) GDPR). You asked us to watch your apps and publish what you choose.
         </p>
 
+        {invoices && (
+          <>
+            <h2 id="invoices">Invoices and billing details</h2>
+            <p>
+              We issue an invoice for every payment for Builder. A workspace&rsquo;s admins can save its billing details on its Invoices page, in the workspace settings: whether the buyer is a company or an individual, its name, address, postal code, city and country, and optionally a VAT ID. For an individual, those are your own name and address. The workspace&rsquo;s admins can read its billing details and download its invoices.
+            </p>
+            <p>
+              The billing details and the invoices are held by our invoice service, which we run ourselves in a separate database at Supabase; Staygreen&rsquo;s own database stores none of them. To issue an invoice, we read the payment from Stripe, matched to the workspace by its Clerk identifier, and issue the invoice in <strong>Fakturownia</strong>, our invoicing software. An EU VAT ID is checked in the European Commission&rsquo;s <strong>VIES</strong> system, and invoices to companies are issued through <strong>KSeF</strong>, the Polish National e-Invoicing System run by the Ministry of Finance, as Polish law requires.
+            </p>
+            <p>
+              <strong>Legal basis:</strong> compliance with a legal obligation (Art. 6(1)(c) GDPR) for issuing invoices, sending them to KSeF and keeping them for the period tax law sets; our legitimate interest (Art. 6(1)(f) GDPR) in checking VAT IDs, keeping the billing details ready for the next invoice, and keeping invoices after that period as our business records and to establish, exercise or defend legal claims. None of this relies on your consent.
+            </p>
+          </>
+        )}
+
         <h2>If you get alerts</h2>
         <p>
           A workspace&rsquo;s members who can see its monitors get its alerts at the email address their Clerk account holds, with times in the time zone Clerk has for them, or in UTC. An alert names the app and the monitor, says what failed with the masked evidence and the locations that saw it, and links to the incident and the status page; a second message follows when it recovers. Someone without an account gets alerts only at an address a member added, and only after confirming it from the one email we send there first; an address not confirmed within {CONFIRM_DAYS} days gets nothing more unless a member sends it a new link. A Telegram chat gets alerts once a member opens a one-time link in it and presses Start.
@@ -170,7 +188,7 @@ export default function PrivacyPage() {
             <strong>Clerk</strong>: accounts, workspaces, sign-in, its emails and the scripts every page loads{isBuilt("billing") ? ", and subscription billing" : ", and, once Builder is on sale, its billing"}.
           </li>
           <li>
-            <strong>Supabase</strong>: the database, holding everything a workspace holds, listed above.
+            <strong>Supabase</strong>: the database, holding everything a workspace holds, listed above{invoices && ", and, in a separate project, billing details and invoices"}.
           </li>
           <li>
             <strong>Our hosting provider</strong>: serves Staygreen&rsquo;s site, the dashboard and status pages, and runs the tests and suggested checks you start from the dashboard.
@@ -193,12 +211,22 @@ export default function PrivacyPage() {
             <strong>Telegram</strong>: delivers alerts to the chats connected to a workspace. It receives the chat&rsquo;s identifier and each message, and passes us the chat&rsquo;s name when it is connected and the commands sent to the bot.
           </li>
           <li>
-            <strong>Stripe</strong>, through Clerk, if you buy Builder. We never see or store your card details.
+            <strong>Stripe</strong>, through Clerk, if you buy Builder. We never see or store your card details.{invoices && " To issue an invoice we read the payment from Stripe: its amount, its date, and the billing address or the card's country."}
           </li>
+          {invoices && (
+            <li>
+              <strong>Fakturownia</strong>: issues and stores invoices, if your workspace pays for Builder.
+            </li>
+          )}
         </ul>
         <p>
           Each is a processor acting on our instructions under a data processing agreement. Where any of them processes data outside the European Economic Area, that transfer relies on the European Commission&rsquo;s Standard Contractual Clauses.
         </p>
+        {invoices && (
+          <p>
+            VIES (the European Commission with the EU member states&rsquo; tax administrations) and KSeF (the Polish Ministry of Finance) are not our processors: they receive a VAT ID or an invoice because the law requires or provides for it.
+          </p>
+        )}
 
         <h2>When you connect a coding agent</h2>
         <p>Clerk handles OAuth sign-in and consent. We verify the selected workspace and current membership on each call and store no OAuth access or refresh tokens. Your agent receives workspace monitoring data and can create monitors, pause them briefly and draft updates if its access allows it. The client you choose processes that data under its own terms.</p>
@@ -230,6 +258,16 @@ export default function PrivacyPage() {
           <li>
             <strong>An added address, chat or webhook channel</strong> is kept until a member removes it, unsubscribed, stopped or never confirmed included. Removing it deletes it at once.
           </li>
+          {invoices && (
+            <>
+              <li>
+                <strong>Invoices</strong>, including the buyer details printed on them, are kept for at least five years from the end of the year in which the tax was due, as Polish tax law requires (VAT Act art. 112; Tax Ordinance art. 70 § 1), and after that for as long as we need them as business records or to establish, exercise or defend legal claims.
+              </li>
+              <li>
+                <strong>Saved billing details</strong> are kept so that the workspace&rsquo;s next invoice uses them. An admin can change them at any time, and we delete them on request; invoices already issued keep the buyer details printed on them.
+              </li>
+            </>
+          )}
         </ul>
         <div className="callout callout-info">
           <Info aria-hidden="true" />
@@ -258,6 +296,11 @@ export default function PrivacyPage() {
           ) : null}
           . If you have only read status pages, we hold nothing about you to give back.
         </p>
+        {invoices && (
+          <p>
+            We cannot delete an issued invoice on request while the law requires us to keep it or while we need it to establish, exercise or defend a legal claim (Art. 17(3)(b) and (e) GDPR).
+          </p>
+        )}
         <p>
           You also have the right to complain to a supervisory authority. Ours is the <strong>{DPA.name}</strong>, {DPA.address}, <a href={DPA.url} rel="noreferrer">{DPA.url}</a>.
         </p>

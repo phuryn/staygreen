@@ -234,6 +234,10 @@
 }
 
 :root {
+  /* Clerk defines --accent internally. An alias resolved at the root avoids a cycle. */
+  --clerk-primary: var(--accent);
+  /* Clerk's own page title (17 px, weight 700, measured in 7.9.11). A page mounted in its profile matches it. */
+  --t-clerk-title: 17px;
   --f-sans: var(--font-switzer), "Switzer", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 
@@ -290,6 +294,8 @@
   --w-app: 1200px;
   --w-rail: 240px;
   --w-app-picker: 240px;
+  --w-field-column: 160px;
+  --w-table-actions: 160px;
 
   --d-1: 120ms;
   --d-2: 220ms;
