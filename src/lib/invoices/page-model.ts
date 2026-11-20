@@ -1,4 +1,4 @@
-import type { BillingDetails, Buyer, InvoiceDocument } from "./contract";
+import type { BillingDetails, BillingResponse, Buyer, InvoiceDocument } from "./contract";
 import { inCorrectionWindow } from "./calendar";
 type CorrectionBlock = "pending" | "closed" | "billing_details";
 export type InvoiceListItem = InvoiceDocument & { canCorrect: boolean; correctionBlock?: CorrectionBlock; corrections: InvoiceDocument[] };
@@ -34,12 +34,17 @@ export function changesPrintedTaxId(printed: Buyer | null, saved: Pick<BillingDe
   const normal = (value: string | null) => (value ?? "").replace(/[\s.-]/g, "").toUpperCase();
   return !!printed?.tax_id && !!saved && normal(saved.tax_id) !== normal(printed.tax_id);
 }
-/** A consumer's invoice, with no VAT ID printed or saved, corrected to another country. The issuer refuses it
- *  (`country_change`), because the VAT rate belongs to the buyer's country, and a person handles it instead; the
- *  service would accept the request and its pending row would later vanish with no reason shown. With a VAT ID on
- *  either side the issuer decides, so the request goes through. */
-export function movesConsumerCountry(printed: Buyer | null, saved: Pick<BillingDetails, "tax_id" | "country"> | null) {
-  return !!printed && !!saved && !printed.tax_id && !saved.tax_id?.trim() && printed.country !== saved.country;
+/** An invoice printed without a VAT ID, corrected to another country, when the corrected invoice would print none
+ *  either: no VAT ID saved, an individual's (an invoice to a person prints none), or one the tax ID check reports
+ *  `invalid`. The issuer refuses it (`country_change`; the last two since its release of 2026-11-20), because the
+ *  VAT rate belongs to the buyer's country, and a person handles it instead; the service would accept the request
+ *  and its pending row would later vanish with no reason shown. A company's VAT ID the check reports `valid` is
+ *  added by a reissue, and one it could not check, or does not apply to, is the issuer's to decide, so those go
+ *  through. */
+export function movesCountryWithoutTaxId(printed: Buyer | null, saved: Pick<BillingDetails, "type" | "tax_id" | "country"> | null,
+  check: NonNullable<BillingResponse["vies"]>["status"] | undefined) {
+  if (!printed || !saved || printed.tax_id || printed.country === saved.country) return false;
+  return !saved.tax_id?.trim() || saved.type === "person" || check === "invalid";
 }
 // v1.1.0: "other" is a correction the issuer made by hand, outside any app
 // (a cancelled VAT ID, for one).

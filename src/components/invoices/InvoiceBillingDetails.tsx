@@ -11,16 +11,29 @@ import { ProfileSection } from "../ui";
 
 const names = new Intl.DisplayNames(["en"], { type: "region" });
 const countries = BILLING_COUNTRIES.map(code => ({ code, name: names.of(code) ?? code })).sort((a, b) => a.name.localeCompare(b.name));
-const viesMessages = {
-  valid: { icon: BadgeCheck, tone: "up", text: "VAT ID confirmed in VIES." },
-  invalid: { icon: CircleX, tone: "down", text: "VIES did not confirm this VAT ID." },
-  unavailable: { icon: Clock, tone: "warn", text: "VIES was unavailable. The VAT ID could not be checked." },
-  not_applicable: { icon: Info, tone: "info", text: "VIES does not apply to these details." },
+const checkLooks = {
+  valid: { icon: BadgeCheck, tone: "up" }, invalid: { icon: CircleX, tone: "down" },
+  unavailable: { icon: Clock, tone: "warn" }, not_applicable: { icon: Info, tone: "info" },
+} as const;
+// The field is named `vies`, but contract 1.1.4 has the service check a billing country of PL in the Ministry of
+// Finance's VAT White List, where `valid` means an active or exempt VAT payer, and every other EU country in VIES.
+const checkMessages = {
+  vies: {
+    valid: "VAT ID confirmed in VIES.", invalid: "VIES did not confirm this VAT ID.",
+    unavailable: "VIES was unavailable. The VAT ID could not be checked.", not_applicable: "VIES does not apply to these details.",
+  },
+  whiteList: {
+    valid: "The Ministry of Finance's VAT White List lists this NIP as an active or exempt VAT payer.",
+    invalid: "The Ministry of Finance's VAT White List does not list this NIP as an active or exempt VAT payer.",
+    unavailable: "The Ministry of Finance's VAT White List was unavailable. The NIP could not be checked.",
+    not_applicable: "No VAT ID check applies to these details.",
+  },
 };
 
-export function ViesMessage({ vies }: { vies: BillingResponse["vies"] }) {
+export function ViesMessage({ vies, country }: { vies: BillingResponse["vies"]; country: string | undefined }) {
   if (!vies) return null;
-  const { icon: Icon, tone, text } = viesMessages[vies.status];
+  const { icon: Icon, tone } = checkLooks[vies.status];
+  const text = checkMessages[country === "PL" ? "whiteList" : "vies"][vies.status];
   return <p className={`callout callout-${tone}`}><Icon aria-hidden="true" /><span>{text}</span></p>;
 }
 
@@ -53,7 +66,7 @@ export function InvoiceBillingDetails({ billing, organization, canManage, editin
                 <dt>VAT ID</dt><dd>{details.tax_id ?? "None"}</dd>
               </dl>
             ) : <p className="t-2">No billing details saved yet.</p>}
-            <ViesMessage vies={billing.vies} />
+            <ViesMessage vies={billing.vies} country={details?.country} />
             {saved && <p className="t-2" role="status">Billing details saved.</p>}
             <p className="t-meta">Saved details apply to future invoices. Use Correct on an eligible invoice to update its buyer.</p>
             {canManage && <div><button type="button" className="btn" onClick={() => { setSaved(false); onEditing(true); }}>{details ? "Edit billing details" : "Add billing details"}</button></div>}
@@ -108,7 +121,7 @@ function BillingForm({ billing, organization, onCancel, onSaved, onReload }: {
           </select>
         </div>
         {field(draft.details.type === "company" ? "Company name" : "Full name", "name", 200, draft.details.type === "company" ? "organization" : "name")}
-        {field("VAT ID (optional)", "tax_id", 32, "off", false, "EU VAT IDs are checked in VIES when you save.")}
+        {field("VAT ID (optional)", "tax_id", 32, "off", false, "EU VAT IDs are checked when you save: a Polish NIP in the Ministry of Finance's VAT White List, any other in VIES.")}
         {field("Address", "address_line1", 200, "address-line1")}
         {field("Address line 2 (optional)", "address_line2", 200, "address-line2", false)}
         <div className="field-columns">

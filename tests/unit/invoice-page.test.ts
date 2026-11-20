@@ -75,11 +75,16 @@ describe("claims from the invoice service", () => {
   });
 
   it.each([
-    ["valid", "VAT ID confirmed in VIES."], ["invalid", "VIES did not confirm this VAT ID."],
-    ["unavailable", "VIES was unavailable."], ["not_applicable", "VIES does not apply"],
-  ] as const)("uses the returned VIES status %s", (status, message) => {
-    expect(renderToStaticMarkup(createElement(ViesMessage, { vies: { status, checked_at: null } }))).toContain(message);
-    expect(renderToStaticMarkup(createElement(ViesMessage, { vies: null }))).toBe("");
+    ["valid", "VAT ID confirmed in VIES.", "lists this NIP as an active or exempt VAT payer."],
+    ["invalid", "VIES did not confirm this VAT ID.", "does not list this NIP as an active or exempt VAT payer."],
+    ["unavailable", "VIES was unavailable.", "White List was unavailable. The NIP could not be checked."],
+    ["not_applicable", "VIES does not apply", "No VAT ID check applies to these details."],
+  ] as const)("names the registry that gave the status %s: the White List for Poland, VIES elsewhere", (status, vies, whiteList) => {
+    const render = (country: string | undefined) => renderToStaticMarkup(createElement(ViesMessage, { vies: { status, checked_at: null }, country }));
+    for (const country of ["DE", undefined]) { expect(render(country)).toContain(vies); expect(render(country)).not.toContain("White List"); }
+    expect(render("PL")).toContain(whiteList);
+    expect(render("PL")).not.toContain("VIES");
+    expect(renderToStaticMarkup(createElement(ViesMessage, { vies: null, country: "PL" }))).toBe("");
   });
 
   it("shows the paid date while pending, leaves an undated request undated and links only issued PDFs", () => {
@@ -144,6 +149,21 @@ describe("claims from the invoice service", () => {
     // The same country, or a VAT ID on either side, leaves the decision to the issuer.
     expect(renderDialog(consumer, saved(consumer.country, null))).toContain("Ask for correction");
     expect(renderDialog(consumer, saved(consumer.country === "DE" ? "FR" : "DE", "FR12345678901"))).toContain("Ask for correction");
+  });
+
+  it("also sends a move to another country to support when the corrected invoice would print no VAT ID either", () => {
+    // Since the issuer's release of 2026-11-20 it refuses these as country_change too: an individual's typed VAT ID,
+    // and one the tax ID check reports invalid. A company's VAT ID the check could not reach is still the issuer's call.
+    const consumer = { ...item.buyer!, tax_id: null };
+    const elsewhere = consumer.country === "DE" ? "FR" : "DE", taxId = elsewhere === "DE" ? "DE123456789" : "FR12345678901";
+    const saved = (type: "company" | "person", status: "valid" | "invalid" | "unavailable") =>
+      ({ ...billing, details: { ...billing.details!, type, country: elsewhere, tax_id: taxId }, vies: { status, checked_at: null } });
+    for (const [type, status] of [["person", "valid"], ["person", "unavailable"], ["company", "invalid"]] as const) {
+      const html = renderDialog(consumer, saved(type, status));
+      expect([type, status, html.includes("Ask for correction")]).toEqual([type, status, false]);
+      expect(html).toContain("Moving an invoice without a VAT ID to another country");
+    }
+    for (const status of ["valid", "unavailable"] as const) expect(renderDialog(consumer, saved("company", status))).toContain("Ask for correction");
   });
 });
 

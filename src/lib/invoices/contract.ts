@@ -3,9 +3,12 @@ import { z } from "zod";
 /** Runtime shapes for docs/contracts/invoice-service.v1.openapi.json (v1; the file carries the patch version).
  * No response is trusted before parsing; none of these objects carries an app/customer claim. */
 export const customerSchema = z.string().min(1).max(128).regex(/^[A-Za-z0-9_-]+$/);
-// v1 bounds no document id. Responses take any string; an id this app sends
-// back (PDF route, correction) only has to be non-empty to reach the service.
-export const documentIdSchema = z.string().min(1);
+// v1.1.3 caps document ids at 128 characters. An id this app sends back (PDF
+// route, correction) is held to it, as the service's path parameter is,
+// counted in characters as below. Responses still take any string: one id
+// past the cap would make the whole page unavailable (2026-11-17,
+// `tests/unit/invoice-contract-fidelity.test.ts`).
+export const documentIdSchema = z.string().min(1).refine(s => [...s].length <= 128, { message: "At most 128 characters" });
 const country = z.string().regex(/^[A-Z]{2}$/);
 // JSON Schema counts maxLength in characters (code points); zod's .max counts
 // UTF-16 units, so an emoji at the limit would refuse a response v1 allows.

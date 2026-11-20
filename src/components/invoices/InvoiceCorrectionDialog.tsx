@@ -4,7 +4,7 @@ import { useId, useState, useTransition } from "react";
 import { askForInvoiceCorrection, type CorrectionState } from "@/app/invoice-page-actions";
 import { attempt } from "@/lib/action-call";
 import type { BillingResponse, Buyer } from "@/lib/invoices/contract";
-import { buyerAddress, changesPrintedTaxId, invoiceDate, movesConsumerCountry, requestIdFor, settleRequestId, type InvoiceListItem } from "@/lib/invoices/page-model";
+import { buyerAddress, changesPrintedTaxId, invoiceDate, movesCountryWithoutTaxId, requestIdFor, settleRequestId, type InvoiceListItem } from "@/lib/invoices/page-model";
 import { Modal, ModalBody, ModalFoot } from "../ui";
 
 const refusedCodes = ["not_correctable", "correction_pending", "permission", "not_found", "nothing_to_correct", "organization_changed"];
@@ -17,7 +17,7 @@ export function InvoiceCorrectionDialog({ item, billing, organization, requests,
   const summary = useId();
   const details = billing.details;
   const changesTaxId = changesPrintedTaxId(item.buyer, details);
-  const movesCountry = movesConsumerCountry(item.buyer, details);
+  const movesCountry = movesCountryWithoutTaxId(item.buyer, details, billing.vies?.status);
   const refused = changesTaxId || movesCountry || !details || refusedCodes.includes(state.code ?? "");
   const requested = !!state.document;
   const close = () => onClose(requested);

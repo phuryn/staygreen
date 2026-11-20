@@ -69,7 +69,8 @@ test("an admin saves billing details, searches, downloads a PDF and sends invoic
   await profile.getByRole("textbox", { name: "Company name" }).fill("Example Studio browser test");
   await profile.getByRole("button", { name: "Save details" }).click();
   await expect(profile.getByRole("status").filter({ hasText: "Billing details saved." })).toBeVisible();
-  await expect(profile.getByText("VAT ID confirmed in VIES.")).toBeVisible();
+  // The sample buyer is in Poland, so contract 1.1.4 has the White List check its NIP.
+  await expect(profile.getByText("The Ministry of Finance's VAT White List lists this NIP as an active or exempt VAT payer.")).toBeVisible();
 
   // A `has` locator is matched inside each row, so it must not start from the profile or the table.
   const original = table.getByRole("row").filter({ has: page.getByRole("button", { name: /^Correct STG\// }) }).first();

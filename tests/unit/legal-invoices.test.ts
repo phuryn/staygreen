@@ -30,7 +30,7 @@ describe("with the invoice service connected", () => {
 
   it("names every party an invoice reaches, and only Fakturownia as a processor among the new ones", () => {
     const { privacy } = pages();
-    for (const party of ["Fakturownia", "VIES", "KSeF", "Stripe"]) expect(privacy).toContain(party);
+    for (const party of ["Fakturownia", "VIES", "VAT White List", "KSeF", "Stripe"]) expect(privacy).toContain(party);
     expect(privacy).toContain("Fakturownia: issues and stores invoices");
     expect(privacy).toContain("are not our processors");
   });
@@ -71,7 +71,7 @@ describe("without the invoice service", () => {
   it("promises no invoice page, names no invoicing party, and keeps the invoice-on-request answer", () => {
     vi.stubEnv("INVOICE_SERVICE_URL", "");
     const privacy = render(PrivacyPage), terms = render(TermsPage), pricing = render(PricingPage);
-    for (const party of ["Fakturownia", "VIES", "KSeF", "Invoices and billing details"]) expect(privacy).not.toContain(party);
+    for (const party of ["Fakturownia", "VIES", "White List", "KSeF", "Invoices and billing details"]) expect(privacy).not.toContain(party);
     expect(terms).not.toContain("We issue an invoice for every payment");
     expect(pricing).toContain("available on request");
     expect(pricing).not.toContain("Yes, for every payment");

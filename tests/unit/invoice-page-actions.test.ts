@@ -160,7 +160,8 @@ describe("invoice page actions", () => {
 
 describe("invoice PDF route", () => {
   it("makes one scoped service call for an opaque id and returns a safe attachment", async () => {
-    const id = `${"x".repeat(200)}.csv`;
+    // The longest id contract 1.1.3 allows, 128 characters, with a dot in it.
+    const id = `${"x".repeat(124)}.csv`;
     const original = await service.getDocumentPdf("org_a", issued.id);
     const read = vi.spyOn(service, "getDocumentPdf").mockResolvedValue({ ...original, filename: 'a/../bad"name.pdf' });
     const list = vi.spyOn(service, "listDocuments");
@@ -176,7 +177,7 @@ describe("invoice PDF route", () => {
   });
 
   it("uses the same plain response for empty, foreign, unknown, pending and denied PDFs", async () => {
-    const responses = await Promise.all(["", foreign.id, "doc_unknown", pending.id].map(pdf));
+    const responses = await Promise.all(["", "x".repeat(129), foreign.id, "doc_unknown", pending.id].map(pdf));
     doubles.member.mockResolvedValue(null);
     responses.push(await pdf(issued.id));
     for (const response of responses) {

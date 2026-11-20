@@ -133,7 +133,7 @@ export default function PrivacyPage() {
               We issue an invoice for every payment for Builder. A workspace&rsquo;s admins can save its billing details on its Invoices page, in the workspace settings: whether the buyer is a company or an individual, its name, address, postal code, city and country, and optionally a VAT ID. For an individual, those are your own name and address. The workspace&rsquo;s admins can read its billing details and download its invoices.
             </p>
             <p>
-              The billing details and the invoices are held by our invoice service, which we run ourselves in a separate database at Supabase; Staygreen&rsquo;s own database stores none of them. To issue an invoice, we read the payment from Stripe, matched to the workspace by its Clerk identifier, and issue the invoice in <strong>Fakturownia</strong>, our invoicing software. An EU VAT ID is checked in the European Commission&rsquo;s <strong>VIES</strong> system, and invoices to companies are issued through <strong>KSeF</strong>, the Polish National e-Invoicing System run by the Ministry of Finance, as Polish law requires.
+              The billing details and the invoices are held by our invoice service, which we run ourselves in a separate database at Supabase; Staygreen&rsquo;s own database stores none of them. To issue an invoice, we read the payment from Stripe, matched to the workspace by its Clerk identifier, and issue the invoice in <strong>Fakturownia</strong>, our invoicing software. A Polish VAT ID (NIP) is checked in the Ministry of Finance&rsquo;s <strong>VAT White List</strong> and any other EU VAT ID in the European Commission&rsquo;s <strong>VIES</strong> system, and invoices to companies are issued through <strong>KSeF</strong>, the Polish National e-Invoicing System run by the Ministry of Finance, as Polish law requires.
             </p>
             <p>
               <strong>Legal basis:</strong> compliance with a legal obligation (Art. 6(1)(c) GDPR) for issuing invoices, sending them to KSeF and keeping them for the period tax law sets; our legitimate interest (Art. 6(1)(f) GDPR) in checking VAT IDs, keeping the billing details ready for the next invoice, and keeping invoices after that period as our business records and to establish, exercise or defend legal claims. None of this relies on your consent.
@@ -224,7 +224,7 @@ export default function PrivacyPage() {
         </p>
         {invoices && (
           <p>
-            VIES (the European Commission with the EU member states&rsquo; tax administrations) and KSeF (the Polish Ministry of Finance) are not our processors: they receive a VAT ID or an invoice because the law requires or provides for it.
+            VIES (the European Commission with the EU member states&rsquo; tax administrations), the VAT White List and KSeF (both the Polish Ministry of Finance) are not our processors: they receive a VAT ID or an invoice because the law requires or provides for it.
           </p>
         )}
 
