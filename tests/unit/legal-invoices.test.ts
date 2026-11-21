@@ -55,14 +55,21 @@ describe("with the invoice service connected", () => {
     expect(terms).toContain("We issue an invoice for every payment");
     expect(terms).toContain("download it as a PDF");
     // The 90 days are a deadline to ask, not a promise: the service closes the window on a fully refunded
-    // invoice (`correctable_until` in the contract), and a printed VAT ID changes only through support.
+    // invoice (`correctable_until` in the contract). Since contract 1.2.0 the VAT ID and the country may change too, a
+    // replacement invoice keeps the first one's deadline, and the service refuses a 51st request in 12 months.
     for (const page of [terms, pricing]) {
-      expect(page).toContain("Within 90 days of an invoice's date, they can ask for its buyer details to be corrected");
+      expect(page).toContain("Within 90 days of an invoice's date (for a replacement invoice, the date of the first one), they can ask for its buyer details to be corrected");
+      expect(page).toContain("up to 50 such requests in any 12 months");
       expect(page).toContain("unless it has been fully refunded");
-      expect(page).toMatch(/printed VAT ID goes through support/);
+      expect(page).toContain("the VAT ID and the country included");
+      expect(page).not.toMatch(/goes through support/);
       expect(page).not.toMatch(/can be corrected to those details|have an invoice corrected/);
     }
     expect(pricing).toContain("Yes, for every payment");
+    // The issuer never reads an individual's tax ID, so the form asks only a company for one (`buyerTaxId`).
+    expect(pricing).toContain("save the company or personal details they are issued to, with a company's VAT ID.");
+    expect(pages().privacy).toContain("and, for a company, optionally a VAT ID. For an individual, those are your own name and address, and no VAT ID is asked for.");
+    expect(pages().privacy).not.toMatch(/no VAT ID is asked for or kept/);
     expect(pricing).not.toContain("available on request");
   });
 });

@@ -3,7 +3,7 @@ import { beforeAll, afterAll, afterEach, describe, expect, it, vi } from "vitest
 import type { z } from "zod";
 import * as schemas from "@/lib/invoices/contract";
 import { createHttpInvoiceService, invoiceService, InvoiceUnavailable, safePdfFilename } from "@/lib/invoices/service";
-import { createMockInvoiceService, mockVies } from "@/lib/invoices/mock";
+import { CORRECTION_LIMIT, createMockInvoiceService, mockVies } from "@/lib/invoices/mock";
 import { sampleCustomer, contractCustomer, emptyMockCustomer, samplePdf, MOCK_REFERENCE_TIME, MOCK_INVALID_VAT_ID, MOCK_UNAVAILABLE_VAT_ID } from "@/lib/invoices/sample";
 import { correctionDeadline, warsawDate } from "@/lib/invoices/calendar";
 import { allInvoiceDocuments } from "@/lib/invoices/documents";
@@ -81,6 +81,21 @@ describe("buyer-correction refusals follow v1.0.4's order", () => {
     const settled = { ...base, documents: base.documents.filter(d => !(d.kind === "correction" && d.status === "pending")) };
     const withoutPending = createMockInvoiceService({ customers: { c2: settled }, now: () => at });
     await expect(withoutPending.requestBuyerCorrection("c2", original.id, randomUUID())).rejects.toMatchObject({ status: 409, code: "nothing_to_correct" });
+  });
+});
+describe("the yearly cap on buyer-correction requests (v1.2.0)", () => {
+  it("refuses with correction_limit after 50 accepted requests in 12 months, last in the order, and counts no refusal", async () => {
+    // Invoices whose window stays open, so a year later the cap, not the window, decides.
+    const invoices = Array.from({ length: CORRECTION_LIMIT + 1 }, (_, i) => ({ ...issued, id: `doc_cap_${i}`, correctable_until: "2099-12-31" }));
+    let clock = at;
+    const service = createMockInvoiceService({ customers: { cap: { ...seed, documents: invoices } }, now: () => clock });
+    for (const invoice of invoices.slice(0, CORRECTION_LIMIT)) await service.requestBuyerCorrection("cap", invoice.id, randomUUID());
+    const last = invoices[CORRECTION_LIMIT].id;
+    for (let refused = 0; refused < 2; refused++)
+      await expect(service.requestBuyerCorrection("cap", last, randomUUID())).rejects.toMatchObject({ status: 409, code: "correction_limit" });
+    await expect(service.requestBuyerCorrection("cap", invoices[0].id, randomUUID())).rejects.toMatchObject({ status: 409, code: "correction_pending" });
+    clock = new Date(at.getTime() + 366 * 86_400_000);
+    await expect(service.requestBuyerCorrection("cap", last, randomUUID())).resolves.toMatchObject({ status: 202 });
   });
 });
 describe("HTTP consumer contract", () => {

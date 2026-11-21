@@ -74,6 +74,24 @@ describe("claims from the invoice service", () => {
     expect(html).toContain("Add billing details");
   });
 
+  it("asks only a company for a VAT ID, and shows an individual none, as the issuer never reads one", () => {
+    const render = (type: "company" | "person", editing: boolean) => renderToStaticMarkup(createElement(InvoiceBillingDetails, {
+      billing: { ...billing, details: { ...billing.details!, type, tax_id: "PL7011027727" }, vies: { status: "invalid", checked_at: null } },
+      organization, canManage: true, editing, onEditing: vi.fn(), onSaved: vi.fn(), onReload: vi.fn(),
+    }));
+    expect(render("company", true)).toContain("VAT ID (optional)");
+    expect(render("company", true)).not.toContain("invoiced as a consumer");
+    expect(render("person", true)).not.toContain("VAT ID (optional)");
+    expect(render("person", true)).toContain("An individual is invoiced as a consumer, without a VAT ID. Buying for a business, a sole proprietorship included? Choose Company.");
+    expect(render("company", false)).toContain("<dt>VAT ID</dt><dd>PL7011027727</dd>");
+    expect(render("company", false)).toContain("does not list this NIP");
+    expect(render("person", false)).not.toContain("PL7011027727");
+    expect(render("person", false)).not.toContain("does not list this NIP");
+    const dialog = renderDialog(item.buyer, { ...billing, details: { ...billing.details!, type: "person", tax_id: "PL7011027727" }, vies: { status: "valid", checked_at: null } });
+    expect(dialog.split("PL7011027727").length - 1).toBe(item.buyer!.tax_id === "PL7011027727" ? 1 : 0);
+    expect(dialog).toMatch(/Saved billing details<\/h3>[\s\S]*No VAT ID/);
+  });
+
   it.each([
     ["valid", "VAT ID confirmed in VIES.", "lists this NIP as an active or exempt VAT payer."],
     ["invalid", "VIES did not confirm this VAT ID.", "does not list this NIP as an active or exempt VAT payer."],
@@ -127,43 +145,33 @@ describe("claims from the invoice service", () => {
     expect(renderList(filtered)).not.toContain('aria-label="Correct ');
   });
 
-  it("lets a correction add a VAT ID or retain it, and directs changes or removal to support", () => {
-    for (const tax_id of [null, "PL5250001009", "pl 525-000.1009"]) {
-      expect(renderDialog({ ...item.buyer!, tax_id })).toContain("Ask for correction");
+  it("asks for any change since contract 1.2.0: a printed VAT ID changed or removed, and a move to another country", () => {
+    const company = { ...item.buyer!, tax_id: "PL5250001009" }, consumer = { ...item.buyer!, tax_id: null };
+    const elsewhere = item.buyer!.country === "DE" ? "FR" : "DE";
+    const saved = (type: "company" | "person", country: string, tax_id: string | null, status: "valid" | "invalid" | "unavailable" | "not_applicable" = "valid") =>
+      ({ ...billing, details: { ...billing.details!, type, country, tax_id }, vies: { status, checked_at: null } });
+    for (const [printed, details] of [
+      [company, saved("company", item.buyer!.country, "DE123456789")], [company, saved("company", item.buyer!.country, null)],
+      [company, saved("person", elsewhere, null)], [consumer, saved("person", elsewhere, null)],
+      [consumer, saved("person", elsewhere, "FR12345678901", "invalid")], [consumer, saved("company", elsewhere, "FR12345678901", "unavailable")],
+      [consumer, saved("company", elsewhere, "FR12345678901", "not_applicable")], [consumer, saved("company", elsewhere, "FR12345678901")],
+    ] as const) {
+      const html = renderDialog(printed, details);
+      expect(html).toContain("Ask for correction");
+      expect(html).not.toContain('href="/support"');
+      expect(html).toContain("cancels the invoice with a correction to zero instead and issues a new one for the same amount paid");
     }
-    for (const tax_id of [null, "DE123456789"]) {
-      const html = renderDialog({ ...item.buyer!, tax_id: "PL5250001009" }, { ...billing, details: { ...billing.details!, tax_id } });
+  });
+
+  it("stops a company whose saved VAT ID the check reports invalid, which the issuer would book as a consumer", () => {
+    // The issuer prints no VAT ID the check reports invalid, the opposite of what the company asked for.
+    const details = { ...billing, details: { ...billing.details!, type: "company" as const, tax_id: "PL5250001009" }, vies: { status: "invalid" as const, checked_at: null } };
+    for (const printed of [item.buyer!, { ...item.buyer!, tax_id: null }]) {
+      const html = renderDialog(printed, details);
       expect(html).not.toContain("Ask for correction");
-      expect(html).toContain("Changing or removing a printed VAT ID");
+      expect(html).toContain("The VAT check did not confirm the saved VAT ID, so the corrected invoice would be issued without it.");
       expect(html).toContain('href="/support"');
     }
-  });
-
-  it("sends a consumer's move to another country to support, which the issuer would reject as country_change", () => {
-    const consumer = { ...item.buyer!, tax_id: null };
-    const saved = (country: string, tax_id: string | null) => ({ ...billing, details: { ...billing.details!, country, tax_id } });
-    const moved = renderDialog(consumer, saved(consumer.country === "DE" ? "FR" : "DE", null));
-    expect(moved).not.toContain("Ask for correction");
-    expect(moved).toContain("Moving an invoice without a VAT ID to another country");
-    expect(moved).toContain('href="/support"');
-    // The same country, or a VAT ID on either side, leaves the decision to the issuer.
-    expect(renderDialog(consumer, saved(consumer.country, null))).toContain("Ask for correction");
-    expect(renderDialog(consumer, saved(consumer.country === "DE" ? "FR" : "DE", "FR12345678901"))).toContain("Ask for correction");
-  });
-
-  it("also sends a move to another country to support when the corrected invoice would print no VAT ID either", () => {
-    // Since the issuer's release of 2026-11-20 it refuses these as country_change too: an individual's typed VAT ID,
-    // and one the tax ID check reports invalid. A company's VAT ID the check could not reach is still the issuer's call.
-    const consumer = { ...item.buyer!, tax_id: null };
-    const elsewhere = consumer.country === "DE" ? "FR" : "DE", taxId = elsewhere === "DE" ? "DE123456789" : "FR12345678901";
-    const saved = (type: "company" | "person", status: "valid" | "invalid" | "unavailable") =>
-      ({ ...billing, details: { ...billing.details!, type, country: elsewhere, tax_id: taxId }, vies: { status, checked_at: null } });
-    for (const [type, status] of [["person", "valid"], ["person", "unavailable"], ["company", "invalid"]] as const) {
-      const html = renderDialog(consumer, saved(type, status));
-      expect([type, status, html.includes("Ask for correction")]).toEqual([type, status, false]);
-      expect(html).toContain("Moving an invoice without a VAT ID to another country");
-    }
-    for (const status of ["valid", "unavailable"] as const) expect(renderDialog(consumer, saved("company", status))).toContain("Ask for correction");
   });
 });
 

@@ -13,10 +13,12 @@ export function mockVies(details: BillingDetails, at: string): NonNullable<Billi
   if (!new RegExp(`^${prefix}[A-Z0-9]{8,12}$`).test(details.tax_id)) throw new InvoiceValidation("invalid_fields", { tax_id: "invalid_format" });
   return { status: details.tax_id === MOCK_INVALID_VAT_ID ? "invalid" : details.tax_id === MOCK_UNAVAILABLE_VAT_ID ? "unavailable" : "valid", checked_at: at };
 }
+/** Contract 1.2.0's yearly cap on buyer-correction requests per customer. */
+export const CORRECTION_LIMIT = 50;
 /** No timers or issuance. This sample state lives in memory and resets on restart.
  * Tests supply independent fixture customers, including issued states. */
 export function createMockInvoiceService(options: { customers?: Record<string, MockCustomer>; seed?: (customer: string) => MockCustomer; now?: () => Date } = {}): InvoiceService {
-  const customers = new Map<string, MockCustomer & { requests: Map<string, InvoiceReceipt>; expedited: Set<string> }>();
+  const customers = new Map<string, MockCustomer & { requests: Map<string, InvoiceReceipt>; expedited: Set<string>; corrections: number[] }>();
   const now = options.now ?? (() => new Date());
   function state(customer: string) {
     if (!customerSchema.safeParse(customer).success) throw new InvoiceNotFound();
@@ -26,7 +28,7 @@ export function createMockInvoiceService(options: { customers?: Record<string, M
         : (options.seed ?? emptyMockCustomer)(customer);
       const seed = structuredClone(initial);
       seed.documents.forEach(d => parseInvoiceResponse(documentSchema, d)); parseInvoiceResponse(billingResponseSchema, seed.billing);
-      customers.set(customer, { ...seed, requests: new Map(), expedited: new Set() });
+      customers.set(customer, { ...seed, requests: new Map(), expedited: new Set(), corrections: [] });
     }
     return customers.get(customer)!;
   }
@@ -69,13 +71,19 @@ export function createMockInvoiceService(options: { customers?: Record<string, M
       const original = s.documents.find(d => d.id === id); if (!original) throw new InvoiceNotFound();
       if (original.kind !== "invoice" || original.status !== "issued" || !inCorrectionWindow(original.correctable_until, now())) throw new InvoiceConflict("not_correctable");
       const details = s.billing.details;
-      // v1.0.4: when several apply, not_correctable, then correction_pending, then nothing_to_correct.
+      // v1.2.0: when several apply, not_correctable, then correction_pending, then nothing_to_correct, then
+      // correction_limit (50 accepted buyer-correction requests in the last 12 months; refusals and replays don't count).
       if (s.documents.some(d => d.corrects === id && d.status === "pending")) throw new InvoiceConflict("correction_pending");
       if (!details || original.buyer && ["name", "country", "tax_id"].every(key => original.buyer![key as keyof typeof original.buyer] === details[key as keyof BillingDetails])) throw new InvoiceConflict("nothing_to_correct");
+      // Counts only the requests this instance accepted, not a fixture's seeded corrections: no fixture holds anywhere
+      // near 50, and the cap's own test starts from none.
+      const yearAgo = new Date(now()); yearAgo.setUTCFullYear(yearAgo.getUTCFullYear() - 1);
+      if (s.corrections.filter(at => at > yearAgo.getTime()).length >= CORRECTION_LIMIT) throw new InvoiceConflict("correction_limit");
       const result = receipt({ ...original, id: `doc_${randomUUID()}`, kind: "correction", status: "pending", number: null,
         corrects: id, reason: "buyer", correctable_until: null, description: "Buyer details corrected", issue_date: null, payment_date: null,
         buyer: { name: details.name, country: details.country, tax_id: details.tax_id }, net: null, tax: null, gross: null });
-      s.documents.push(structuredClone(result.document)); s.requests.set(requestId, structuredClone(result)); return structuredClone(result);
+      s.documents.push(structuredClone(result.document)); s.requests.set(requestId, structuredClone(result)); s.corrections.push(now().getTime());
+      return structuredClone(result);
     },
     async requestInvoiceNow(customer, requestId, paymentRef) {
       const s = state(customer);

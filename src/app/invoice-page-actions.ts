@@ -5,7 +5,7 @@ import { env } from "@/lib/env";
 import { assertSameOrigin, CrossOrigin } from "@/lib/request";
 import { invoiceBillingCustomer } from "@/lib/invoices/access";
 import { allInvoiceDocuments } from "@/lib/invoices/documents";
-import { invoiceListItems, type InvoiceListItem } from "@/lib/invoices/page-model";
+import { buyerTaxId, invoiceListItems, type InvoiceListItem } from "@/lib/invoices/page-model";
 import { billingDetailsSchema, correctionRequestSchema, invoiceRequestSchema, filtersSchema, documentIdSchema, InvoiceConflict, InvoiceNotFound, InvoiceUnavailable, InvoiceValidation,
   invoiceService, type BillingResponse, type InvoiceDocument } from "@/lib/invoices/service";
 
@@ -47,6 +47,7 @@ function failure(error: unknown): InvoiceFailure {
     : error.code === "nothing_to_correct" ? "There are no saved buyer changes to apply. Reload the billing details."
     : error.code === "already_invoiced" ? "An invoice has already been issued for this payment. Reload the list."
     : error.code === "request_open" ? "An invoice request is already open. Reload the list."
+    : error.code === "correction_limit" ? "This workspace has reached the yearly limit for invoice corrections. Contact support."
     : "The request conflicts with a recent change. Reload Invoices and try again." };
   if (error instanceof z.ZodError) return { code: "validation", error: "Check the highlighted fields.",
     fields: Object.fromEntries(error.issues.map(i => { const field = i.path.at(-1)?.toString() ?? "details"; return [field, fieldMessage(field, "invalid_format")]; })) };
@@ -71,7 +72,9 @@ export async function saveInvoiceBillingDetails(input: unknown): Promise<Billing
   try {
     const customer = await requireBoundCustomer(input);
     const parsed = z.object({ details: billingDetailsSchema, version: z.string().nullable() }).parse(input);
-    return { saved: true, billing: await (await invoiceService()).saveBillingDetails(customer, parsed.details, parsed.version) };
+    // An individual's VAT ID is dropped here, not only hidden in the form, so a request that carries one stores none.
+    const details = { ...parsed.details, tax_id: buyerTaxId(parsed.details) };
+    return { saved: true, billing: await (await invoiceService()).saveBillingDetails(customer, details, parsed.version) };
   } catch (error) { return failure(error); }
 }
 export async function askForInvoiceCorrection(input: unknown): Promise<CorrectionState> {

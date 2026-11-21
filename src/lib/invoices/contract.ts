@@ -60,7 +60,7 @@ export const correctionRequestSchema = z.object({ request_id: z.uuid() });
 export const invoiceRequestSchema = correctionRequestSchema.extend({ payment_ref: text(128).optional() });
 export const filtersSchema = z.object({ number: text(64).optional(), from: z.iso.date().optional(), to: z.iso.date().optional(), kind: z.enum(["invoice", "correction"]).optional() });
 export const listQuerySchema = filtersSchema.extend({ cursor: z.string().optional() });
-export const conflictCodeSchema = z.enum(["version_conflict", "nothing_to_correct", "correction_pending", "not_correctable", "pending", "already_invoiced", "request_open"]);
+export const conflictCodeSchema = z.enum(["version_conflict", "nothing_to_correct", "correction_pending", "not_correctable", "pending", "already_invoiced", "request_open", "correction_limit"]);
 // Unknown future field codes deliberately retain the generic field message;
 // the three v1 codes are covered by contract tests rather than discarded.
 export const errorResponseSchema = response({ error: z.object({ code: z.string(), message: z.string(), fields: z.record(z.string(), z.string()).optional() }) });

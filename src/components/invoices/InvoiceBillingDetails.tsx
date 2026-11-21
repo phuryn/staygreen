@@ -6,7 +6,7 @@ import { saveInvoiceBillingDetails, type BillingState } from "@/app/invoice-page
 import { attempt } from "@/lib/action-call";
 import type { BillingDetails, BillingResponse } from "@/lib/invoices/contract";
 import { BILLING_COUNTRIES } from "@/lib/invoices/countries";
-import { buyerAddress } from "@/lib/invoices/page-model";
+import { buyerAddress, buyerTaxId } from "@/lib/invoices/page-model";
 import { ProfileSection } from "../ui";
 
 const names = new Intl.DisplayNames(["en"], { type: "region" });
@@ -63,10 +63,10 @@ export function InvoiceBillingDetails({ billing, organization, canManage, editin
                 <dt>Invoices go to</dt><dd>{details.name}</dd>
                 <dt>Buyer type</dt><dd>{details.type === "company" ? "Company" : "Individual"}</dd>
                 <dt>Address</dt><dd>{buyerAddress(details)}</dd>
-                <dt>VAT ID</dt><dd>{details.tax_id ?? "None"}</dd>
+                {details.type === "company" && <><dt>VAT ID</dt><dd>{details.tax_id ?? "None"}</dd></>}
               </dl>
             ) : <p className="t-2">No billing details saved yet.</p>}
-            <ViesMessage vies={billing.vies} country={details?.country} />
+            {details?.type !== "person" && <ViesMessage vies={billing.vies} country={details?.country} />}
             {saved && <p className="t-2" role="status">Billing details saved.</p>}
             <p className="t-meta">Saved details apply to future invoices. Use Correct on an eligible invoice to update its buyer.</p>
             {canManage && <div><button type="button" className="btn" onClick={() => { setSaved(false); onEditing(true); }}>{details ? "Edit billing details" : "Add billing details"}</button></div>}
@@ -108,7 +108,8 @@ function BillingForm({ billing, organization, onCancel, onSaved, onReload }: {
       event.preventDefault();
       if (busy || conflict || workspaceChanged) return;
       start(async () => {
-        const next: BillingState = await attempt(() => saveInvoiceBillingDetails(draft));
+        // The draft keeps a VAT ID typed before switching to Individual, so switching back restores it; none is sent.
+        const next: BillingState = await attempt(() => saveInvoiceBillingDetails({ ...draft, details: { ...draft.details, tax_id: buyerTaxId(draft.details) } }));
         setResult(next);
         if (next.saved && next.billing) onSaved(next.billing);
       });
@@ -116,12 +117,14 @@ function BillingForm({ billing, organization, onCancel, onSaved, onReload }: {
       <fieldset className="stack" disabled={busy}>
         <div className="field">
           <label className="label" htmlFor={`${formId}-type`}>Buyer type</label>
-          <select className="select" id={`${formId}-type`} value={draft.details.type} onChange={event => change("type", event.target.value)}>
+          <select className="select" id={`${formId}-type`} value={draft.details.type} onChange={event => change("type", event.target.value)}
+            aria-describedby={draft.details.type === "person" ? `${formId}-type-hint` : undefined}>
             <option value="company">Company</option><option value="person">Individual</option>
           </select>
+          {draft.details.type === "person" && <span id={`${formId}-type-hint`} className="hint">An individual is invoiced as a consumer, without a VAT ID. Buying for a business, a sole proprietorship included? Choose Company.</span>}
         </div>
         {field(draft.details.type === "company" ? "Company name" : "Full name", "name", 200, draft.details.type === "company" ? "organization" : "name")}
-        {field("VAT ID (optional)", "tax_id", 32, "off", false, "EU VAT IDs are checked when you save: a Polish NIP in the Ministry of Finance's VAT White List, any other in VIES.")}
+        {draft.details.type === "company" && field("VAT ID (optional)", "tax_id", 32, "off", false, "EU VAT IDs are checked when you save: a Polish NIP in the Ministry of Finance's VAT White List, any other in VIES.")}
         {field("Address", "address_line1", 200, "address-line1")}
         {field("Address line 2 (optional)", "address_line2", 200, "address-line2", false)}
         <div className="field-columns">

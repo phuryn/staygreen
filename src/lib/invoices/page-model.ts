@@ -1,4 +1,4 @@
-import type { BillingDetails, BillingResponse, Buyer, InvoiceDocument } from "./contract";
+import type { BillingDetails, BillingResponse, InvoiceDocument } from "./contract";
 import { inCorrectionWindow } from "./calendar";
 type CorrectionBlock = "pending" | "closed" | "billing_details";
 export type InvoiceListItem = InvoiceDocument & { canCorrect: boolean; correctionBlock?: CorrectionBlock; corrections: InvoiceDocument[] };
@@ -27,24 +27,21 @@ export function invoiceListItems(documents: InvoiceDocument[], canManage: boolea
     return { ...document, corrections, correctionBlock, canCorrect: canManage && !correctionBlock };
   });
 }
-/** A correction may add a VAT ID the invoice did not print, but never change or remove a printed
- *  one. The issuer rejects such a request and must cancel and reissue the invoice. Spelling (case,
- *  spaces, dots, dashes) is not a change. No saved details is the dialog's own refusal. */
-export function changesPrintedTaxId(printed: Buyer | null, saved: Pick<BillingDetails, "tax_id"> | null) {
-  const normal = (value: string | null) => (value ?? "").replace(/[\s.-]/g, "").toUpperCase();
-  return !!printed?.tax_id && !!saved && normal(saved.tax_id) !== normal(printed.tax_id);
+/** The VAT ID the issuer can print for these details. It never reads an individual's: an individual is invoiced as a
+ *  consumer of the saved country, whatever the field holds (the invoice service, 2026-11-21). So the form does not ask
+ *  an individual for one, the save action sends none, and no screen shows one as if it would be printed. */
+export function buyerTaxId(details: Pick<BillingDetails, "type" | "tax_id">) {
+  return details.type === "company" ? details.tax_id : null;
 }
-/** An invoice printed without a VAT ID, corrected to another country, when the corrected invoice would print none
- *  either: no VAT ID saved, an individual's (an invoice to a person prints none), or one the tax ID check reports
- *  `invalid`. The issuer refuses it (`country_change`; the last two since its release of 2026-11-20), because the
- *  VAT rate belongs to the buyer's country, and a person handles it instead; the service would accept the request
- *  and its pending row would later vanish with no reason shown. A company's VAT ID the check reports `valid` is
- *  added by a reissue, and one it could not check, or does not apply to, is the issuer's to decide, so those go
- *  through. */
-export function movesCountryWithoutTaxId(printed: Buyer | null, saved: Pick<BillingDetails, "type" | "tax_id" | "country"> | null,
+
+/** Since contract 1.2.0 a correction may change anything printed, the VAT ID and the country included, but the issuer
+ *  prints no VAT ID the check reports `invalid`: it books the buyer as a consumer of the saved country, the opposite of
+ *  what a company asking for a correction wants. So the dialog stops a company whose saved VAT ID the check reports
+ *  `invalid` and asks for the number to be fixed. A person's VAT ID is never printed, so an invalid one changes nothing
+ *  for them, and a check that could not run, or does not apply, is the issuer's to decide, so those go through. */
+export function savedTaxIdFailsCheck(saved: Pick<BillingDetails, "type" | "tax_id"> | null,
   check: NonNullable<BillingResponse["vies"]>["status"] | undefined) {
-  if (!printed || !saved || printed.tax_id || printed.country === saved.country) return false;
-  return !saved.tax_id?.trim() || saved.type === "person" || check === "invalid";
+  return !!saved && saved.type === "company" && !!saved.tax_id?.trim() && check === "invalid";
 }
 // v1.1.0: "other" is a correction the issuer made by hand, outside any app
 // (a cancelled VAT ID, for one).

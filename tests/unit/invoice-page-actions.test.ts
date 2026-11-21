@@ -51,6 +51,13 @@ afterEach(() => {
 });
 
 describe("invoice page actions", () => {
+  it("never sends an individual's VAT ID, which the issuer would not read", async () => {
+    const write = vi.spyOn(service, "saveBillingDetails");
+    const person = { ...details.details!, type: "person" as const, tax_id: "PL7011027727" };
+    expect(await saveInvoiceBillingDetails({ ...bound, ...details, details: person })).toMatchObject({ saved: true, billing: { details: { type: "person", tax_id: null } } });
+    expect(write).toHaveBeenCalledExactlyOnceWith("org_a", { ...person, tax_id: null }, details.version);
+  });
+
   it("uses only the authorized workspace customer on every service call", async () => {
     const read = vi.spyOn(service, "listDocuments"), getBilling = vi.spyOn(service, "getBillingDetails");
     const write = vi.spyOn(service, "saveBillingDetails"), ask = vi.spyOn(service, "requestBuyerCorrection"), expedite = vi.spyOn(service, "requestInvoiceNow");
@@ -142,7 +149,7 @@ describe("invoice page actions", () => {
 
   it("returns stable conflict codes and maps service fields to local messages", async () => {
     const ask = vi.spyOn(service, "requestInvoiceNow");
-    for (const code of ["version_conflict", "correction_pending", "pending", "already_invoiced", "request_open", "nothing_to_correct", "not_correctable"] as const) {
+    for (const code of ["version_conflict", "correction_pending", "pending", "already_invoiced", "request_open", "nothing_to_correct", "not_correctable", "correction_limit"] as const) {
       ask.mockRejectedValueOnce(new InvoiceConflict(code));
       expect(await requestInvoiceNow({ ...bound, request_id })).toMatchObject({ code, error: expect.any(String) });
     }

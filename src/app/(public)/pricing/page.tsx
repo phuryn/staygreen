@@ -83,7 +83,7 @@ export default function Pricing() {
             <dt>Do you send invoices?</dt>
             {invoices ? (
               <dd>
-                Yes, for every payment. Your workspace&rsquo;s admins find them under Invoices in the workspace settings, each with a PDF, and save the company or personal details and VAT ID they are issued to. Within 90 days of an invoice&rsquo;s date, they can ask for its buyer details to be corrected to the saved ones, unless it has been fully refunded; a change to a printed VAT ID goes through support. An invoice that hasn&rsquo;t appeared can be asked for on the same page. Prices are in US dollars.
+                Yes, for every payment. Your workspace&rsquo;s admins find them under Invoices in the workspace settings, each with a PDF, and save the company or personal details they are issued to, with a company&rsquo;s VAT ID. Within 90 days of an invoice&rsquo;s date (for a replacement invoice, the date of the first one), they can ask for its buyer details to be corrected to the saved ones, the VAT ID and the country included, unless it has been fully refunded; a workspace can make up to 50 such requests in any 12 months. An invoice that hasn&rsquo;t appeared can be asked for on the same page. Prices are in US dollars.
               </dd>
             ) : (
               <dd>
