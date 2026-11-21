@@ -68,7 +68,7 @@
   .cx { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
   .cx-tabs { position: static; flex-direction: row; overflow-x: auto; gap: var(--s-2); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px)); scrollbar-width: none; }
   .cx-tabs::-webkit-scrollbar { display: none; }
-  .cx-tab { flex: none; min-height: var(--target); border: var(--hair) solid var(--line-strong); border-radius: var(--r-pill); font-size: var(--t-2); }
+  .cx-tab { flex: none; min-height: var(--target); border: var(--hair) solid var(--edge); border-radius: var(--r-pill); font-size: var(--t-2); }
   .cx-tab[aria-selected="true"] { border-color: transparent; }
   .cx-soon { margin-left: 0; }
   .cx-panel { padding: var(--s-4); gap: var(--s-5); }

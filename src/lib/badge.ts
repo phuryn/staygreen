@@ -22,7 +22,7 @@ export const BADGE_COLOURS = {
   warn: "#c27a00",
   down: "#cc1f1f",
   paused: "#8a919d",
-  unchecked: "#8a919d",
+  unchecked: "#828995",
 } as const;
 
 const c = BADGE_COLOURS;

@@ -103,12 +103,24 @@ const NON_TEXT: [string, string][] = [
   ["down", "ground"],
   ["paused", "ground"],
   ["edge", "ground"],
+  // And on the greys a control sits on: a dialog's foot, a well, a callout (sunk), a table head or the rail (raised).
+  ["edge", "sunk"],
+  ["edge", "raised"],
   ["up", "wash-up"],
   ["warn", "wash-warn"],
   ["accent", "surface"],
   ["accent", "ground"],
   ["accent", "accent-wash"],
   ["chart-p50", "surface"],
+];
+
+// A control on a coloured callout: the heartbeat's Copy URL on its green one, a confirm on a red one. Only the
+// dashboard draws callouts, so these hold its two sets; a status page has none.
+const ON_CALLOUTS: [string, string][] = [
+  ["edge", "wash-up"],
+  ["edge", "wash-warn"],
+  ["edge", "wash-down"],
+  ["edge", "accent-wash"],
 ];
 
 const floor = (set: Tokens, pairs: [string, string][], min: number) =>
@@ -135,5 +147,11 @@ describe.each(Object.keys(sets))("%s", (name) => {
 
   it("gives icons and borders 3:1", () => {
     expect(floor(sets[name], NON_TEXT, 3)).toEqual([]);
+  });
+});
+
+describe.each(["light", "dark"])("the dashboard's %s", (name) => {
+  it("gives a control's edge 3:1 on every callout", () => {
+    expect(floor(sets[name], ON_CALLOUTS, 3)).toEqual([]);
   });
 });

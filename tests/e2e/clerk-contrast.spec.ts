@@ -7,8 +7,8 @@ import { BASE_URL } from "./web-server";
    Clerk draws its edges as a faint tint of one colour, which left the email field without a
    visible box and the Google button without an outline (1.02 to 1.04:1, 2026-11-21). Each edge
    must now read at least as well as the kit's own part does:
-   - the email field as the kit's input, `--edge`: 3:1, WCAG 2.2 SC 1.4.11;
-   - the Google button as the kit's `.btn`, `--line-strong`: 1.44:1 light, 1.61:1 dark;
+   - the email field and the Google button as the kit's `.input` and `.btn`, `--edge`: 3:1, WCAG 2.2
+     SC 1.4.11 and the method's floor for a control boundary;
    - the "or" divider as the kit's `.divider`, `--line`: 1.25:1 light, 1.28:1 dark.
    The floors sit just under those numbers so rounding in the browser's colour maths can't fail
    a run, and far above the 1.0x Clerk's tint gave. A state (hover, focus) is read only once the
@@ -16,8 +16,8 @@ import { BASE_URL } from "./web-server";
    on its way out. */
 
 const floors = {
-  light: { input: 3, button: 1.4, divider: 1.2 },
-  dark: { input: 3, button: 1.55, divider: 1.22 },
+  light: { input: 3, button: 3, divider: 1.2 },
+  dark: { input: 3, button: 3, divider: 1.22 },
 } as const;
 
 type Theme = keyof typeof floors;
@@ -25,6 +25,8 @@ type Theme = keyof typeof floors;
 async function open(page: Page, theme: Theme, path: string) {
   await page.context().addCookies([{ name: THEME_COOKIE, value: theme, url: BASE_URL }]);
   await page.goto(path);
+  // Both themes now share their control floors, so a page that rendered the other theme would pass: read it first.
+  await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 }
 
 /** The edge once `state` holds and the element has stopped animating. */
@@ -59,11 +61,12 @@ for (const theme of ["light", "dark"] as const) {
     }
 
     // Hover keeps the field's edge (Clerk's own hover ring is fainter than the resting edge set here) and darkens the
-    // button's to the field's, as the kit's `.btn` does.
+    // button's to `--ink-3`, as the kit's `.btn` does, so hovering it shows.
     await field.hover();
     expect(await edgeIn(field, ":hover"), `the email field's edge on hover in ${theme}`).toBeGreaterThanOrEqual(floors[theme].input);
+    const resting = (await edgeContrast(google)).edge;
     await google.hover();
-    expect(await edgeIn(google, ":hover"), `the Google button's edge on hover in ${theme}`).toBeGreaterThanOrEqual(floors[theme].input);
+    expect(await edgeIn(google, ":hover"), `the Google button's edge on hover in ${theme}`).toBeGreaterThanOrEqual(resting + 1.5);
   });
 
   test(`Clerk's sign-up shows where the keyboard is, on its consent box, in ${theme}`, async ({ page }) => {

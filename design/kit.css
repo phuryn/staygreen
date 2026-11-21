@@ -137,13 +137,13 @@ pre.snippet.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
   min-height: var(--control); padding: 0 var(--s-4);
-  border-radius: var(--btn-r, var(--r-pill)); border: var(--hair) solid var(--line-strong);
+  border-radius: var(--btn-r, var(--r-pill)); border: var(--hair) solid var(--edge);
   background: var(--surface); color: var(--ink);
   font-size: var(--t-2); font-weight: var(--w-medium); line-height: 1.2;
   text-decoration: none; white-space: nowrap; cursor: pointer;
   transition: background var(--d-1) var(--ease), border-color var(--d-1) var(--ease), transform var(--d-1) var(--ease);
 }
-.btn:hover { background: var(--sunk); border-color: var(--edge); }
+.btn:hover { background: var(--sunk); border-color: var(--ink-3); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; transform: none; }
 .btn svg { width: 18px; height: 18px; flex: none; }

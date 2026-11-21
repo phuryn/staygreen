@@ -7,8 +7,8 @@
 // with Google" button with no outline, profile sections with no line between them. So the elements below set the
 // edges outright, each to the token the kit uses for the same part, never to a Clerk variable, which would refer
 // to itself:
-//   - an input's edge is the kit input's, `--edge` (3.17:1 light, 3.81:1 dark on a surface: WCAG 2.2 SC 1.4.11);
-//   - an outlined button's edge is the kit button's, `--line-strong`, and `--edge` on hover, as `.btn` does;
+//   - an input's and an outlined button's edge is the kit's control edge, `--edge` (3.52:1 light, 3.81:1 dark on a
+//     surface: WCAG 2.2 SC 1.4.11, and the method's 3:1 for every control boundary), as `.input` and `.btn` are;
 //   - a divider, a section line and a layer's edge are the kit's `--line`, as `.divider` and `.panel` are, and
 //     `--line-strong` on Clerk's grey footers and plan-card bands, where `--line` reads fainter than a divider;
 //   - text Clerk paints in `colorPrimary` is the kit's `--accent-text`: in dark the accent fill (#3d5cff) reads
@@ -44,10 +44,10 @@ const input = {
     { boxShadow: important("0 0 0 2px var(--down)") },
 };
 
-// An outlined button, as `.btn`: a `--line-strong` edge, `--edge` and the sunk fill on hover.
+// An outlined button, as `.btn`: an `--edge` edge, and on hover `--ink-3` and the sunk fill.
 const outlined = {
-  boxShadow: ring(LINE_STRONG),
-  "&:hover": { boxShadow: ring(EDGE), backgroundColor: important("var(--sunk)") },
+  boxShadow: ring(EDGE),
+  "&:hover": { boxShadow: ring("var(--ink-3)"), backgroundColor: important("var(--sunk)") },
   "&:focus-visible": { boxShadow: FOCUS },
 };
 

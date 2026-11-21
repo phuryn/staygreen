@@ -105,3 +105,32 @@ describe("quiet buttons", () => {
     expect(isIcon(unnamed)).toBe(false);
   });
 });
+
+// A secondary button is a control, so its edge is the kit's control edge, `--edge`, held at 3:1 on every surface
+// and grey by `tokens-contrast.test.ts`: the method's floor for a control boundary. The kit's lighter
+// `--line-strong` read 1.41 to 1.71:1 on the rendered pages (2026-11-21), and the owner found the Google button
+// beside it washed out on his phone. The landing page's comparison tabs, outlined pills on a phone, are held the same.
+describe("a secondary button's edge", () => {
+  /** The declarations of every rule whose whole selector is `selector`, in source order. */
+  const rules = (path: string, selector: string) => {
+    const css = readFileSync(join(ROOT, path), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const bodies: string[] = [];
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (m[1].trim() === selector) bodies.push(m[2]);
+    return bodies;
+  };
+  const edgeLine = /border:\s*var\(--hair\)\s+solid\s+var\(--edge\)/;
+
+  it("is --edge on the kit's .btn, and hover darkens it to --ink-3 with the sunk fill", () => {
+    const [btn] = rules("design/kit.css", ".btn");
+    expect(btn).toMatch(edgeLine);
+    const hover = rules("design/kit.css", ".btn:hover").join("");
+    expect(hover).toMatch(/border-color:\s*var\(--ink-3\)/);
+    expect(hover).toMatch(/background:\s*var\(--sunk\)/);
+  });
+
+  it("is --edge on the landing page's comparison tabs, where a phone draws them as outlined pills", () => {
+    const drawn = rules("src/styles/landing.css", ".cx-tab").filter((body) => /border:\s*var/.test(body));
+    expect(drawn).toHaveLength(1);
+    expect(drawn[0]).toMatch(edgeLine);
+  });
+});
