@@ -70,17 +70,20 @@ describe("workspace profile registration", () => {
   });
 });
 
-it("resolves every Clerk appearance variable in both palettes", () => {
+it("resolves every token Clerk's appearance names, variables and elements, in both palettes", () => {
   const css = read("design/tokens.css");
   const light = css.slice(css.indexOf(":root"), css.indexOf("@media (prefers-color-scheme: dark)"));
   const dark = css.match(/:root\[data-theme="dark"\],\s*\.theme-dark\s*\{([^}]+)\}/)?.[1] ?? "";
   const shared = css.match(/\n:root \{([^}]+)\}/)?.[1] ?? "";
-  const appearance = read("src/app/layout.tsx").match(/const appearance = \{\s*variables: \{([^}]+)\}/)?.[1] ?? "";
-  const options = [...appearance.matchAll(/:\s*"([^"]+)"/g)];
+  const source = read("src/lib/clerk-appearance.ts");
+  const variables = source.match(/variables: \{([^}]+)\}/)?.[1] ?? "";
+  const options = [...variables.matchAll(/:\s*"([^"]+)"/g)];
   expect(options.length).toBeGreaterThan(10);
-  for (const [, option] of options) {
-    expect(option).toMatch(/^var\(--[a-z0-9-]+\)$/);
-    const token = option.slice(4, -1);
+  for (const [, option] of options) expect(option).toMatch(/^var\(--[a-z0-9-]+\)$/);
+  // The element styles name tokens inside longer values (a ring, a lift); each must exist in both palettes too.
+  const tokens = new Set([...source.replace(/^\s*\/\/.*$/gm, "").matchAll(/var\((--[a-z0-9-]+)\)/g)].map((m) => m[1]));
+  expect(tokens.size).toBeGreaterThan(15);
+  for (const token of tokens) {
     const alias = shared.match(new RegExp(`${token}: var\\((--[a-z0-9-]+)\\);`))?.[1];
     if (!alias && shared.includes(`${token}:`)) continue;
     expect(light).toContain(`${alias ?? token}:`);

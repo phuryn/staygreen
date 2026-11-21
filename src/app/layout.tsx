@@ -6,6 +6,7 @@ import { THEME_COOKIE } from "@/lib/theme-cookie";
 import { metadataBase } from "@/lib/public-metadata";
 import { selfHostedPlanEnabled } from "@/lib/self-hosted-plan";
 import { SelfHostedPlanProvider } from "@/components/SelfHostedPlan";
+import { clerkAppearance } from "@/lib/clerk-appearance";
 import "@fontsource-variable/jetbrains-mono";
 import "../../design/tokens.css";
 import "../../design/kit.css";
@@ -39,29 +40,9 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// Clerk's components wear the kit's tokens, so they follow the theme with the rest of the page.
-const appearance = {
-  variables: {
-    colorPrimary: "var(--clerk-primary)",
-    // Clerk can't read a contrast from a variable, and guessed dark text on dark mode's lighter accent.
-    colorPrimaryForeground: "var(--on-accent)",
-    colorBackground: "var(--surface)",
-    colorForeground: "var(--ink)",
-    colorMuted: "var(--sunk)",
-    colorMutedForeground: "var(--ink-3)",
-    colorInput: "var(--surface)",
-    colorInputForeground: "var(--ink)",
-    colorBorder: "var(--line-strong)",
-    colorRing: "var(--clerk-primary)",
-    colorDanger: "var(--down)",
-    colorSuccess: "var(--up)",
-    colorWarning: "var(--warn)",
-    colorNeutral: "var(--ink)",
-    fontFamily: "var(--f-sans)",
-    fontFamilyButtons: "var(--f-sans)",
-    borderRadius: "var(--r-2)",
-  },
-};
+// Clerk's components wear the kit's tokens, so they follow the theme with the rest of the page
+// (`clerk-appearance.ts`, which also says why the edges are set element by element).
+const appearance = clerkAppearance;
 
 // The sign-up card's first words say what's being made: a workspace, on Free.
 const localization = {

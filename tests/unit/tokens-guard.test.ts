@@ -23,7 +23,7 @@ function walk(dir: string): string[] {
 function withoutComments(text: string, file: string): string {
   const blank = (m: string) => m.replace(/[^\n]/g, " ");
   let out = text.replace(/\/\*[\s\S]*?\*\//g, blank);
-  if (file.endsWith(".tsx")) out = out.replace(/^\s*\/\/.*$/gm, blank);
+  if (/\.tsx?$/.test(file)) out = out.replace(/^\s*\/\/.*$/gm, blank);
   return out;
 }
 
@@ -32,7 +32,9 @@ function literalsIn(file: string): string[] {
   return lines.flatMap((line, i) => [...line.matchAll(LITERAL)].map((m) => `${relative(ROOT, file).replace(/\\/g, "/")}:${i + 1}: ${m[0]}`));
 }
 
-const scanned = [...walk(join(ROOT, "src")).filter((f) => f.endsWith(".css") || f.endsWith(".tsx")), ...walk(join(ROOT, "design")).filter((f) => f.endsWith(".css") && f !== TOKENS)];
+// Clerk's appearance is a .ts module of styles (`src/lib/clerk-appearance.ts`), so it is scanned by name.
+const CLERK_APPEARANCE = join(ROOT, "src", "lib", "clerk-appearance.ts");
+const scanned = [...walk(join(ROOT, "src")).filter((f) => f.endsWith(".css") || f.endsWith(".tsx")), CLERK_APPEARANCE, ...walk(join(ROOT, "design")).filter((f) => f.endsWith(".css") && f !== TOKENS)];
 
 describe("colour literals", () => {
   it("are seen where they belong (the scanner can see one at all)", () => {
@@ -41,7 +43,7 @@ describe("colour literals", () => {
 
   it("scans the kit, the stylesheets and the components", () => {
     const names = scanned.map((f) => relative(ROOT, f).replace(/\\/g, "/"));
-    expect(names).toEqual(expect.arrayContaining(["design/kit.css", "src/styles/app.css", "src/styles/status.css", "src/app/layout.tsx", "src/components/ui.tsx"]));
+    expect(names).toEqual(expect.arrayContaining(["design/kit.css", "src/styles/app.css", "src/styles/status.css", "src/app/layout.tsx", "src/lib/clerk-appearance.ts", "src/components/ui.tsx"]));
   });
 
   it("live only in design/tokens.css", () => {
